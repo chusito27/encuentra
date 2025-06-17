@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Directorio de Comercios</title>
+    <link rel="manifest" href="./manifest.json"> 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Estilos Generales */
@@ -515,6 +516,24 @@
 
             // Renderizar todos los comercios al cargar la página por primera vez
             renderComercios(comerciosData);
+
+            // PWA REGISTRATION (NEW CODE)
+            // **********************************************
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    // Usamos la ruta base de la URL de la página actual
+                    // El scope debe coincidir con la base URL del Service Worker
+                    const swPath = './service-worker.js'; 
+                    navigator.serviceWorker.register(swPath, { scope: './' }) 
+                        .then(registration => {
+                            console.log('ServiceWorker registrado con éxito:', registration.scope);
+                        })
+                        .catch(error => {
+                            console.log('Fallo el registro de ServiceWorker:', error);
+                        });
+                });
+            }
+            // **********************************************
         });
     </script>
 </body>
