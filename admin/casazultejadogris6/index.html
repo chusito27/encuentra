@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador de Menú</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary-color: #66bb6a; /* Un verde más claro para contraste */
+            --secondary-color: #64b5f6; /* Un azul más claro */
+            --danger-color: #ef5350; /* Un rojo más claro */
+            --text-color: #eee;
+            --bg-color: #303030; /* Fondo oscuro */
+            --card-bg: #424242; /* Fondo de las tarjetas oscuro */
+            --border-color: #555;
+            --tab-active-bg: #555;
+            --tab-inactive-bg: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h1, h2, h3 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Tabs Styles */
+        .tabs {
+            display: flex;
+            background-color: var(--tab-inactive-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-button {
+            flex-grow: 1;
+            padding: 10px 15px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab-button.active {
+            background-color: var(--tab-active-bg);
+        }
+
+        .tab-button:hover {
+            background-color: #616161;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 25px;
+            background-color: var(--card-bg);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #558b2f;
+        }
+
+        button.edit {
+            background-color: var(--secondary-color);
+        }
+        button.edit:hover {
+            background-color: #42a5f5;
+        }
+        button.delete {
+            background-color: var(--danger-color);
+        }
+        button.delete:hover {
+            background-color: #e53935;
+        }
+        button.cancel {
+            background-color: #757575;
+        }
+        button.cancel:hover {
+            background-color: #616161;
+        }
+        button.copy {
+            background-color: #7B1FA2; /* A purple color for copy button */
+        }
+        button.copy:hover {
+            background-color: #6A1B9A;
+        }
+
+        /* Action Buttons Container Style (for products/categories) */
+        .action-buttons-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .action-buttons-container button {
+            background-color: var(--primary-color);
+            margin-left: 10px;
+        }
+
+        /* Comercio Selector/Info */
+        #comercioSelector {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        #comercioSelector select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: #212121;
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+        #comercioSelector h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        #currentComercioInfo {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+        #currentComercioInfo strong {
+            color: var(--text-color);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+
+        .form-group input,
+        .form-group input::placeholder,
+        .form-group textarea,
+        .form-group textarea::placeholder,
+        .form-group select {
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Include padding in width */
+            background-color: #212121;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .checkbox-group input {
+            margin-right: 10px;
+            transform: scale(1.2);
+            background-color: #212121;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-content {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .card-content h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            text-align: left;
+        }
+
+        .card-content p {
+            font-size: 0.9rem;
+            color: #ddd;
+            margin-bottom: 8px;
+        }
+
+        .card-content .price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        .card-content .old-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+
+        .card-tags span {
+            display: inline-block;
+            background-color: #555;
+            color: #eee;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .card-actions {
+            padding: 10px 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: #333;
+        }
+
+        .card-actions button {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        /* Category List Styling */
+        #categoriesList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+        }
+
+        #categoriesList .category-item {
+            background-color: #424242;
+            border: 1px solid #616161;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #80cbc4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #categoriesList .category-item button {
+            background: none;
+            border: none;
+            color: #f48fb1;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+        #categoriesList .category-item button:hover {
+            color: #e91e63;
+        }
+
+        /* Comercio List Styling */
+        #comerciosList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+        }
+        #comerciosList .comercio-item {
+            background-color: #424242;
+            border: 1px solid #616161;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #80cbc4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #comerciosList .comercio-item button {
+            background: none;
+            border: none;
+            color: #f48fb1;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+        #comerciosList .comercio-item button:hover {
+            color: #e91e63;
+        }
+
+
+        /* JSON Display Specific Styles */
+        .json-display-section { /* Common class for both JSON sections */
+            background-color: #212121; /* Fondo más oscuro para el código */
+            color: #e0e0e0; /* Color de texto claro */
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-height: 600px; /* Limita la altura para evitar que ocupe toda la pantalla */
+            overflow: auto; /* Scroll en ambas direcciones si es necesario */
+            position: relative; /* Needed for positioning the copy button */
+            margin-top: 20px; /* Add some space if there are other elements above */
+        }
+        .json-display-section pre {
+            margin: 0; /* Elimina el margen por defecto de <pre> */
+            white-space: pre; /* NO WRAP! Mantiene el formato tal cual, con scroll horizontal */
+            word-break: normal; /* Evita que las palabras se corten */
+            word-wrap: normal; /* No rompe las palabras */
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; /* Fuente monoespaciada */
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        .json-display-section code {
+            display: block; /* Asegura que el código tome el ancho completo del pre */
+            padding: 0; /* Asegura que no haya padding extra en el code */
+        }
+        .json-copy-button { /* Common class for both copy buttons */
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+
+
+        /* Modal Specific Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: auto;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+        }
+
+        /* Add Animation */
+        @keyframes animatetop {
+            from {top: -300px; opacity: 0}
+            to {top: 0; opacity: 1}
+        }
+
+        .modal-header {
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            text-align: left;
+            color: var(--text-color);
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .list-grid {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+            .tab-button {
+                border-bottom: 1px solid var(--border-color);
+            }
+            .tab-button:last-child {
+                border-bottom: none;
+            }
+            .json-copy-button {
+                position: static; /* Adjust for smaller screens */
+                margin-top: 10px;
+                display: block;
+                width: fit-content;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Administrador de Menú</h1>
+    </header>
+
+    <div id="comercioSelector">
+        <h3>Seleccionar Comercio:</h3>
+        <select id="selectComercio">
+            <option value="">-- Seleccione un Comercio --</option>
+        </select>
+        <div id="currentComercioInfo"></div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('comercio-gestion')">Gestión de Comercios</button>
+            <button class="tab-button" onclick="openTab('products')">Gestión de Productos</button>
+            <button class="tab-button" onclick="openTab('categories')">Gestión de Categorías</button>
+            <button class="tab-button" onclick="openTab('json-categories')">Ver JSON Categorías</button>
+            <button class="tab-button" onclick="openTab('json-products')">Ver JSON Productos</button>
+        </div>
+
+        <div id="comercio-gestion" class="tab-content active">
+            <div class="form-section">
+                <h2>Añadir/Editar Comercio</h2>
+                <form id="comercioForm">
+                    <input type="hidden" id="comercioId">
+                    <div class="form-group">
+                        <label for="comercioName">Nombre del Comercio</label>
+                        <input type="text" id="comercioName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="comercioLogoUrl">URL del Logo</label>
+                        <input type="text" id="comercioLogoUrl">
+                    </div>
+                    <div class="form-group">
+                        <label for="comercioPhone">Número de Teléfono</label>
+                        <input type="text" id="comercioPhone">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit">Guardar Comercio</button>
+                        <button type="button" class="cancel" id="cancelComercioEdit">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+            <h3>Comercios Existentes:</h3>
+            <div id="comerciosList">
+                </div>
+        </div>
+
+
+        <div id="products" class="tab-content">
+            <div class="action-buttons-container">
+                <button id="openAddProductModal">Añadir Nuevo Producto</button>
+                <button id="openAddCategoryFromProductTabModal">Añadir Nueva Categoría</button>
+            </div>
+            <div class="list-section">
+                <h2>Lista de Productos</h2>
+                <div id="productsList" class="list-grid">
+                    </div>
+            </div>
+        </div>
+
+        <div id="categories" class="tab-content">
+            <div class="form-section">
+                <h2>Añadir/Editar Categoría</h2>
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId">
+                    <div class="form-group">
+                        <label for="categoryName">Nombre de la Categoría</label>
+                        <input type="text" id="categoryName" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit">Guardar Categoría</button>
+                        <button type="button" class="cancel" id="cancelCategoryEdit">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+            <h3>Categorías Existentes:</h3>
+            <div id="categoriesList">
+                </div>
+        </div>
+
+        <div id="json-categories" class="tab-content">
+            <div class="form-section">
+                <h2>JSON de Categorías</h2>
+                <div id="jsonCategoriesSection" class="json-display-section">
+                    <button id="copyCategoriesJsonButton" class="copy json-copy-button">Copiar JSON</button>
+                    <pre><code id="categoriesJsonDisplay"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="json-products" class="tab-content">
+            <div class="form-section">
+                <h2>JSON de Productos</h2>
+                <div id="jsonProductsSection" class="json-display-section">
+                    <button id="copyProductsJsonButton" class="copy json-copy-button">Copiar JSON</button>
+                    <pre><code id="jsonDisplay"></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Añadir Nuevo Producto</h2>
+                <span class="close-button" data-modal="addProductModal">&times;</span>
+            </div>
+            <form id="addProductForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="newProductName">Nombre del Producto</label>
+                        <input type="text" id="newProductName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductPrice">Precio</label>
+                        <input type="number" id="newProductPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductOldPrice">Precio Anterior (opcional)</label>
+                        <input type="number" id="newProductOldPrice" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductImage">URL de la Imagen</label>
+                        <input type="text" id="newProductImage">
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductDetails">Detalles del Producto</label>
+                        <textarea id="newProductDetails"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductDietaryInfo">Información Dietética</label>
+                        <input type="text" id="newProductDietaryInfo">
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductOrder">Orden (para mostrar)</label>
+                        <input type="number" id="newProductOrder" value="999">
+                    </div>
+                    <div class="form-group">
+                        <label>Categorías</label>
+                        <select id="newProductCategories" multiple size="5"></select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="newIsVegan">
+                        <label for="newIsVegan">Vegano</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="newIsVegetarian">
+                        <label for="newIsVegetarian">Vegetariano</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="newIsGlutenFree">
+                        <label for="newIsGlutenFree">Sin Gluten</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Guardar Producto</button>
+                    <button type="button" class="cancel" data-modal="addProductModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Producto</h2>
+                <span class="close-button" data-modal="editProductModal">&times;</span>
+            </div>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId"> <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editProductName">Nombre del Producto</label>
+                        <input type="text" id="editProductName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductPrice">Precio</label>
+                        <input type="number" id="editProductPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductOldPrice">Precio Anterior (opcional)</label>
+                        <input type="number" id="editProductOldPrice" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductImage">URL de la Imagen</label>
+                        <input type="text" id="editProductImage">
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductDetails">Detalles del Producto</label>
+                        <textarea id="editProductDetails"></textarea>
+                    <div class="form-group">
+                        <label for="editProductDietaryInfo">Información Dietética</label>
+                        <input type="text" id="editProductDietaryInfo">
+                    </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProductOrder">Orden (para mostrar)</label>
+                        <input type="number" id="editProductOrder" value="999">
+                    </div>
+                    <div class="form-group">
+                        <label>Categorías</label>
+                        <select id="editProductCategories" multiple size="5"></select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="editIsVegan">
+                        <label for="editIsVegan">Vegano</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="editIsVegetarian">
+                        <label for="editIsVegetarian">Vegetariano</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="editIsGlutenFree">
+                        <label for="editIsGlutenFree">Sin Gluten</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Guardar Cambios</button>
+                    <button type="button" class="cancel" data-modal="editProductModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Añadir Nueva Categoría</h2>
+                <span class="close-button" data-modal="addCategoryModal">&times;</span>
+            </div>
+            <form id="addCategoryForm">
+                <div class="form-group">
+                    <label for="newCategoryName">Nombre de la Categoría</label>
+                    <input type="text" id="newCategoryName" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Guardar Categoría</button>
+                    <button type="button" class="cancel" data-modal="addCategoryModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHr8NSBkLN_Jt062C4RtYFiulFC13tOLA",
+            authDomain: "web2727.firebaseapp.com",
+            projectId: "web2727",
+            storageBucket: "web2727.firebasestorage.app",
+            messagingSenderId: "899729264501",
+            appId: "1:899729264501:web:e81099f4c1e7ba52ef4d3c",
+            measurementId: "G-VE3F22HX79"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ** Global Variable for Current Comercio **
+        let currentComercioId = null;
+        let currentComercioName = null;
+        let allComercios = []; // To store all fetched comercios
+
+        // ** Firebase Collections (Dynamic based on currentComercioId) **
+        const comerciosCollection = db.collection('comercios');
+
+        // Functions to get dynamic subcollection references
+        function getProductsCollection() {
+            if (!currentComercioId) {
+                console.error("No hay comercio seleccionado.");
+                return null;
+            }
+            return comerciosCollection.doc(currentComercioId).collection('products');
+        }
+
+        function getCategoriesCollection() {
+            if (!currentComercioId) {
+                console.error("No hay comercio seleccionado.");
+                return null;
+            }
+            return comerciosCollection.doc(currentComercioId).collection('categories');
+        }
+
+
+        // DOM Elements for Modals and Forms
+        const openAddProductModalButton = document.getElementById('openAddProductModal');
+        const addProductModal = document.getElementById('addProductModal');
+        const addProductForm = document.getElementById('addProductForm');
+        const newProductNameInput = document.getElementById('newProductName');
+        const newProductPriceInput = document.getElementById('newProductPrice');
+        const newProductOldPriceInput = document.getElementById('newProductOldPrice');
+        const newProductImageInput = document.getElementById('newProductImage');
+        const newProductDetailsInput = document.getElementById('newProductDetails');
+        const newIsVeganInput = document.getElementById('newIsVegan');
+        const newIsVegetarianInput = document.getElementById('newIsVegetarian');
+        const newIsGlutenFreeInput = document.getElementById('newIsGlutenFree');
+        const newProductDietaryInfoInput = document.getElementById('newProductDietaryInfo');
+        const newProductCategoriesSelect = document.getElementById('newProductCategories');
+        const newProductOrderInput = document.getElementById('newProductOrder');
+
+
+        const editProductModal = document.getElementById('editProductModal');
+        const editProductForm = document.getElementById('editProductForm');
+        const editProductIdInput = document.getElementById('editProductId'); // Hidden field for Firebase Doc ID
+        const editProductNameInput = document.getElementById('editProductName');
+        const editProductPriceInput = document.getElementById('editProductPrice');
+        const editProductOldPriceInput = document.getElementById('editProductOldPrice');
+        const editProductImageInput = document.getElementById('editProductImage');
+        const editProductDetailsInput = document.getElementById('editProductDetails');
+        const editIsVeganInput = document.getElementById('editIsVegan');
+        const editIsVegetarianInput = document.getElementById('editIsVegetarian');
+        const editIsGlutenFreeInput = document.getElementById('editIsGlutenFree');
+        const editProductDietaryInfoInput = document.getElementById('editProductDietaryInfo');
+        const editProductCategoriesSelect = document.getElementById('editProductCategories');
+        const editProductOrderInput = document.getElementById('editProductOrder');
+
+
+        const productsListDiv = document.getElementById('productsList');
+        const jsonProductsDisplayCode = document.getElementById('jsonDisplay');
+        const copyProductsJsonButton = document.getElementById('copyProductsJsonButton');
+
+        // Category Management elements
+        const categoryForm = document.getElementById('categoryForm');
+        const categoryIdInput = document.getElementById('categoryId');
+        const categoryNameInput = document.getElementById('categoryName');
+        const cancelCategoryEditButton = document.getElementById('cancelCategoryEdit');
+        const categoriesListDiv = document.getElementById('categoriesList');
+
+        // New Category Modal elements
+        const openAddCategoryFromProductTabModalButton = document.getElementById('openAddCategoryFromProductTabModal');
+        const addCategoryModal = document.getElementById('addCategoryModal');
+        const addCategoryForm = document.getElementById('addCategoryForm');
+        const newCategoryNameInput = document.getElementById('newCategoryName');
+
+        // Categories JSON section elements (now in its own tab)
+        const categoriesJsonDisplayCode = document.getElementById('categoriesJsonDisplay');
+        const copyCategoriesJsonButton = document.getElementById('copyCategoriesJsonButton');
+
+        // ** Comercio DOM Elements **
+        const comercioForm = document.getElementById('comercioForm');
+        const comercioIdInput = document.getElementById('comercioId');
+        const comercioNameInput = document.getElementById('comercioName');
+        const comercioLogoUrlInput = document.getElementById('comercioLogoUrl');
+        const comercioPhoneInput = document.getElementById('comercioPhone');
+        const cancelComercioEditButton = document.getElementById('cancelComercioEdit');
+        const comerciosListDiv = document.getElementById('comerciosList');
+
+        const selectComercio = document.getElementById('selectComercio');
+        const currentComercioInfoDiv = document.getElementById('currentComercioInfo');
+
+
+        let allCategories = []; // To store categories for the product form select
+
+        // --- MODAL UTILITY FUNCTIONS ---
+        function openModal(modalElement) {
+            modalElement.style.display = 'flex';
+        }
+
+        function closeModal(modalElement) {
+            modalElement.style.display = 'none';
+        }
+
+        // Close modal if clicked outside of content
+        window.addEventListener('click', (event) => {
+            if (event.target === addProductModal) {
+                closeModal(addProductModal);
+            }
+            if (event.target === editProductModal) {
+                closeModal(editProductModal);
+            }
+            if (event.target === addCategoryModal) {
+                closeModal(addCategoryModal);
+            }
+        });
+
+        // Close buttons for modals
+        document.querySelectorAll('.close-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const modalId = e.target.dataset.modal;
+                closeModal(document.getElementById(modalId));
+            });
+        });
+
+        document.querySelectorAll('.modal .cancel').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const modalId = e.target.dataset.modal;
+                closeModal(document.getElementById(modalId));
+                // Optionally reset the form on cancel
+                if (modalId === 'addProductModal') addProductForm.reset();
+                if (modalId === 'editProductModal') editProductForm.reset();
+                if (modalId === 'addCategoryModal') addCategoryForm.reset();
+            });
+        });
+
+
+        // --- TAB FUNCTIONALITY ---
+        async function openTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => button.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`).classList.add('active');
+
+            // Specific logic for each tab
+            if (tabId === 'comercio-gestion') {
+                await fetchComercios(); // Fetch comercios when this tab is opened
+            } else if (tabId === 'products') {
+                if (currentComercioId) {
+                    await fetchProducts();
+                    await fetchCategories(); // Also fetch categories for product form
+                } else {
+                    productsListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus productos.</p>';
+                    // Clear product categories in modals if no comercio is selected
+                    newProductCategoriesSelect.innerHTML = '';
+                    editProductCategoriesSelect.innerHTML = '';
+                }
+            } else if (tabId === 'categories') {
+                if (currentComercioId) {
+                    await fetchCategories();
+                } else {
+                    categoriesListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus categorías.</p>';
+                }
+            } else if (tabId === 'json-products') {
+                if (currentComercioId) {
+                    await displayProductsAsJson();
+                } else {
+                    jsonProductsDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de productos.';
+                }
+            } else if (tabId === 'json-categories') {
+                if (currentComercioId) {
+                    await displayCategoriesAsJson();
+                } else {
+                    categoriesJsonDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de categorías.';
+                }
+            }
+        }
+
+        // --- FETCH AND RENDER FUNCTIONS (Comercios) ---
+
+        async function fetchComercios() {
+            try {
+                const snapshot = await comerciosCollection.orderBy('name', 'asc').get();
+                allComercios = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderComerciosList(allComercios);
+                populateComercioSelect(allComercios);
+                
+                // Set the current selected comercio based on previous selection or first available
+                if (currentComercioId && allComercios.some(c => c.id === currentComercioId)) {
+                    selectComercio.value = currentComercioId;
+                    const selectedComercio = allComercios.find(c => c.id === currentComercioId);
+                    currentComercioName = selectedComercio ? selectedComercio.name : null;
+                    updateCurrentComercioInfo(currentComercioId);
+                } else if (allComercios.length > 0) {
+                    currentComercioId = allComercios[0].id;
+                    currentComercioName = allComercios[0].name;
+                    selectComercio.value = currentComercioId;
+                    updateCurrentComercioInfo(currentComercioId);
+                } else {
+                    currentComercioId = null;
+                    currentComercioName = null;
+                    updateCurrentComercioInfo(null);
+                }
+
+                // Re-fetch data for the active tab AFTER the currentComercioId is set
+                const activeTab = document.querySelector('.tab-content.active');
+                if (activeTab && activeTab.id !== 'comercio-gestion') { // Only if not on the comercio management tab itself
+                    await openTab(activeTab.id); 
+                } else if (activeTab && activeTab.id === 'comercio-gestion' && !currentComercioId) {
+                    // If on comercio-gestion tab and no comercios exist, clear products/categories lists.
+                    productsListDiv.innerHTML = '<p>No hay productos disponibles. Añada un comercio primero.</p>';
+                    categoriesListDiv.innerHTML = '<p>No hay categorías disponibles. Añada un comercio primero.</p>';
+                    newProductCategoriesSelect.innerHTML = '';
+                    editProductCategoriesSelect.innerHTML = '';
+                }
+
+            } catch (error) {
+                console.error("Error fetching comercios: ", error);
+                alert('Error al cargar los comercios. Asegúrese de que las reglas de seguridad de Firestore permitan leer la colección "comercios".');
+            }
+        }
+
+
+        function renderComerciosList(comercios) {
+            comerciosListDiv.innerHTML = '';
+            if (comercios.length === 0) {
+                comerciosListDiv.innerHTML = '<p>No hay comercios disponibles.</p>';
+                return;
+            }
+            comercios.forEach(comercio => {
+                const comercioItem = document.createElement('div');
+                comercioItem.className = 'comercio-item card'; // Use card style for consistency
+                comercioItem.innerHTML = `
+                    <div class="card-content">
+                        <h3>${comercio.name}</h3>
+                        <p>Logo: <a href="${comercio.logoUrl}" target="_blank">${comercio.logoUrl || 'N/A'}</a></p>
+                        <p>Teléfono: ${comercio.phone || 'N/A'}</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="edit" data-id="${comercio.id}">Editar</button>
+                        <button class="delete" data-id="${comercio.id}">Eliminar</button>
+                    </div>
+                `;
+                comerciosListDiv.appendChild(comercioItem);
+            });
+
+            document.querySelectorAll('#comerciosList .edit').forEach(button => {
+                button.addEventListener('click', (e) => editComercio(e.target.dataset.id));
+            });
+            document.querySelectorAll('#comerciosList .delete').forEach(button => {
+                button.addEventListener('click', (e) => deleteComercio(e.target.dataset.id));
+            });
+        }
+
+        function populateComercioSelect(comercios) {
+            selectComercio.innerHTML = '<option value="">-- Seleccione un Comercio --</option>';
+            comercios.forEach(comercio => {
+                const option = document.createElement('option');
+                option.value = comercio.id;
+                option.textContent = comercio.name;
+                selectComercio.appendChild(option);
+            });
+        }
+
+        selectComercio.addEventListener('change', async (e) => {
+            currentComercioId = e.target.value;
+            const selectedComercio = allComercios.find(c => c.id === currentComercioId);
+            currentComercioName = selectedComercio ? selectedComercio.name : null;
+            updateCurrentComercioInfo(currentComercioId);
+
+            // Re-fetch data for the currently active tab
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab) {
+                await openTab(activeTab.id); // Re-trigger tab logic to load data for new comercio
+            }
+        });
+
+        function updateCurrentComercioInfo(comercioId) {
+            if (comercioId) {
+                const comercio = allComercios.find(c => c.id === comercioId);
+                if (comercio) {
+                    currentComercioInfoDiv.innerHTML = `
+                        <strong>Comercio Activo:</strong> ${comercio.name}<br>
+                        <strong>Logo:</strong> <a href="${comercio.logoUrl}" target="_blank">${comercio.logoUrl || 'N/A'}</a><br>
+                        <strong>Teléfono:</strong> ${comercio.phone || 'N/A'}
+                    `;
+                }
+            } else {
+                currentComercioInfoDiv.innerHTML = 'No hay comercio seleccionado.';
+            }
+        }
+
+
+        // --- CRUD Operations for Comercios ---
+
+        comercioForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = comercioIdInput.value;
+            const name = comercioNameInput.value.trim();
+            const logoUrl = comercioLogoUrlInput.value.trim();
+            const phone = comercioPhoneInput.value.trim();
+
+            if (!name) {
+                alert('El nombre del comercio no puede estar vacío.');
+                return;
+            }
+
+            const comercioData = { name, logoUrl, phone };
+
+            try {
+                if (id) {
+                    await comerciosCollection.doc(id).update(comercioData);
+                    console.log('Comercio actualizado con éxito!');
+                } else {
+                    await comerciosCollection.add(comercioData);
+                    console.log('Comercio añadido con éxito!');
+                }
+                comercioForm.reset();
+                comercioIdInput.value = '';
+                await fetchComercios(); // Re-fetch comercios to update lists and select
+            } catch (error) {
+                console.error("Error saving comercio: ", error);
+                alert('Error al guardar el comercio.');
+            }
+        });
+
+        async function editComercio(id) {
+            try {
+                const doc = await comerciosCollection.doc(id).get();
+                if (doc.exists) {
+                    const comercio = doc.data();
+                    comercioIdInput.value = doc.id;
+                    comercioNameInput.value = comercio.name;
+                    comercioLogoUrlInput.value = comercio.logoUrl || '';
+                    comercioPhoneInput.value = comercio.phone || '';
+                }
+            } catch (error) {
+                console.error("Error fetching comercio for edit: ", error);
+                alert("Error al cargar el comercio para editar.");
+            }
+        }
+
+        async function deleteComercio(id) {
+            if (window.confirm('¿Estás seguro de que quieres eliminar este comercio? Esto también eliminará todos sus productos y categorías asociadas.')) {
+                try {
+                    // Start a batch to delete subcollections (products and categories)
+                    const batch = db.batch();
+
+                    // Delete products subcollection
+                    const productsSnapshot = await comerciosCollection.doc(id).collection('products').get();
+                    productsSnapshot.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+
+                    // Delete categories subcollection
+                    const categoriesSnapshot = await comerciosCollection.doc(id).collection('categories').get();
+                    categoriesSnapshot.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+
+                    // Commit the batch deletion of subcollections
+                    await batch.commit();
+
+                    // Finally, delete the comercio document itself
+                    await comerciosCollection.doc(id).delete();
+                    console.log('Comercio y sus datos asociados eliminados con éxito!');
+                    
+                    // Reset current selected comercio if the deleted one was active
+                    if (currentComercioId === id) {
+                        currentComercioId = null;
+                        currentComercioName = null;
+                    }
+                    await fetchComercios(); // Re-fetch comercios
+                    // Clear product/category lists if no comercio is selected
+                    productsListDiv.innerHTML = '<p>No hay productos disponibles. Seleccione o añada un comercio.</p>';
+                    categoriesListDiv.innerHTML = '<p>No hay categorías disponibles. Seleccione o añada un comercio.</p>';
+                    newProductCategoriesSelect.innerHTML = '';
+                    editProductCategoriesSelect.innerHTML = '';
+
+                } catch (error) {
+                    console.error("Error deleting comercio: ", error);
+                    alert('Error al eliminar el comercio y sus datos.');
+                }
+            }
+        }
+
+        cancelComercioEditButton.addEventListener('click', () => {
+            comercioForm.reset();
+            comercioIdInput.value = '';
+        });
+
+
+        // --- FETCH AND RENDER FUNCTIONS (Products) ---
+
+        async function fetchProducts() {
+            const productsColRef = getProductsCollection();
+            if (!productsColRef) {
+                productsListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus productos.</p>';
+                return;
+            }
+
+            try {
+                const snapshot = await productsColRef.orderBy('order', 'asc').get();
+                const products = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
+                renderProducts(products);
+                // Also update the JSON display if that tab is active
+                if (document.getElementById('json-products').classList.contains('active')) {
+                    await displayProductsAsJson();
+                }
+            } catch (error) {
+                console.error("Error fetching products: ", error);
+                productsListDiv.innerHTML = '<p>Error al cargar los productos de este comercio.</p>';
+            }
+        }
+
+        async function fetchCategories() {
+            const categoriesColRef = getCategoriesCollection();
+            if (!categoriesColRef) {
+                categoriesListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus categorías.</p>';
+                // Clear categories in product modals if no comercio is selected
+                newProductCategoriesSelect.innerHTML = '';
+                editProductCategoriesSelect.innerHTML = '';
+                return;
+            }
+
+            try {
+                const snapshot = await categoriesColRef.get();
+                allCategories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+                // Populate categories for product forms (both add and edit)
+                renderCategoriesForProductForm(allCategories, newProductCategoriesSelect);
+                renderCategoriesForProductForm(allCategories, editProductCategoriesSelect);
+
+                // Populate categories for the management tab
+                renderCategoriesForManagement(allCategories);
+
+                // Update categories JSON if category tab is active (now in new tab)
+                if (document.getElementById('json-categories').classList.contains('active')) {
+                    await displayCategoriesAsJson();
+                }
+            }
+            catch (error) {
+                console.error("Error fetching categories: ", error);
+                categoriesListDiv.innerHTML = '<p>Error al cargar las categorías de este comercio.</p>';
+                newProductCategoriesSelect.innerHTML = '';
+                editProductCategoriesSelect.innerHTML = '';
+            }
+        }
+
+        function renderProducts(products) {
+            productsListDiv.innerHTML = '';
+            if (products.length === 0) {
+                productsListDiv.innerHTML = '<p>No hay productos disponibles para este comercio.</p>';
+                return;
+            }
+            products.forEach(product => {
+                // Use the default image if product.image is empty or null
+                const imageUrl = product.image || 'https://i.postimg.cc/vZQnpBpT/logo.png';
+                const productCard = document.createElement('div');
+                productCard.className = 'card';
+                productCard.innerHTML = `
+                    <img src="${imageUrl}" alt="${product.name}" class="card-image">
+                    <div class="card-content">
+                        <h3>${product.name}</h3>
+                        <p class="price">₡${product.price ? product.price.toFixed(2) : '0.00'}
+                            ${product.oldPrice ? `<span class="old-price">₡${product.oldPrice.toFixed(2)}</span>` : ''}
+                        </p>
+                        <p>${product.productDetails}</p>
+                        <p><strong>Info dietética:</strong> ${product.dietaryInfo || 'N/A'}</p>
+                        <div class="card-tags">
+                            ${product.isVegan ? '<span>Vegano 🌱</span>' : ''}
+                            ${product.isVegetarian ? '<span>Vegetariano 🥗</span>' : ''}
+                            ${product.isGlutenFree ? '<span>Sin Gluten 🌾</span>' : ''}
+                            ${product.categories && product.categories.length > 0 ? product.categories.map(cat => `<span>${cat}</span>`).join('') : ''}
+                        </div>
+                        <p>Orden: ${product.order || 999}</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="edit" data-firebase-id="${product.firebaseId}">Editar</button>
+                        <button class="delete" data-firebase-id="${product.firebaseId}">Eliminar</button>
+                    </div>
+                `;
+                productsListDiv.appendChild(productCard);
+            });
+
+            document.querySelectorAll('.card-actions .edit').forEach(button => {
+                button.addEventListener('click', (e) => editProduct(e.target.dataset.firebaseId));
+            });
+            document.querySelectorAll('.card-actions .delete').forEach(button => {
+                button.addEventListener('click', (e) => deleteProduct(e.target.dataset.firebaseId));
+            });
+        }
+
+        function renderCategoriesForProductForm(categories, selectElement) {
+            selectElement.innerHTML = '';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name; // Use name as value for display purposes
+                option.textContent = category.name;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function renderCategoriesForManagement(categories) {
+            categoriesListDiv.innerHTML = '';
+            if (categories.length === 0) {
+                categoriesListDiv.innerHTML = '<p>No hay categorías disponibles para este comercio.</p>';
+                return;
+            }
+            categories.forEach(category => {
+                const categoryItem = document.createElement('span');
+                categoryItem.className = 'category-item';
+                categoryItem.innerHTML = `
+                    ${category.name}
+                    <button class="delete-category" data-id="${category.id}">x</button>
+                `;
+                categoriesListDiv.appendChild(categoryItem);
+            });
+
+            document.querySelectorAll('.delete-category').forEach(button => {
+                button.addEventListener('click', (e) => deleteCategory(e.target.dataset.id));
+            });
+        }
+
+        // Function to format product data for the desired JSON output
+        function formatProductForJSON(product, customId) {
+            const formattedProduct = {};
+            formattedProduct.id = customId; // Use the passed custom auto-incrementing ID
+            formattedProduct.name = product.name;
+            formattedProduct.price = parseFloat(product.price);
+            formattedProduct.image = product.image; // Use actual image URL from product, not the default
+            formattedProduct.productDetails = product.productDetails;
+            formattedProduct.isVegan = product.isVegan;
+            formattedProduct.isVegetarian = product.isVegetarian;
+            formattedProduct.isGlutenFree = product.isGlutenFree;
+            formattedProduct.dietaryInfo = product.dietaryInfo;
+            formattedProduct.categories = product.categories;
+            formattedProduct.order = parseInt(product.order);
+            formattedProduct.comercioId = currentComercioId; // Add comercioId to product JSON
+            formattedProduct.comercioName = currentComercioName; // Add comercioName to product JSON for convenience
+
+            if (product.oldPrice !== null && product.oldPrice !== undefined) {
+                formattedProduct.oldPrice = parseFloat(product.oldPrice);
+            }
+            return formattedProduct;
+        }
+
+        async function displayProductsAsJson() {
+            const productsColRef = getProductsCollection();
+            if (!productsColRef) {
+                jsonProductsDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de productos.';
+                return;
+            }
+
+            try {
+                const snapshot = await productsColRef.orderBy('order', 'asc').get();
+                let productsData = snapshot.docs.map(doc => doc.data());
+
+                let count = 1; // Initialize the auto-incrementing counter
+                const formattedProducts = productsData.map(product => {
+                    return formatProductForJSON(product, count++);
+                });
+
+                let jsonString = "[\n";
+                formattedProducts.forEach((product, index) => {
+                    jsonString += "    {\n";
+                    const keys = Object.keys(product);
+                    keys.forEach((key, i) => {
+                        let value = product[key];
+                        let formattedValue;
+
+                        if (Array.isArray(value)) {
+                            formattedValue = `[${value.map(item => `"${item}"`).join(', ')}]`;
+                        } else if (typeof value === 'string') {
+                            formattedValue = `"${value}"`;
+                        } else if (value === null) {
+                            formattedValue = 'null';
+                        } else if (typeof value === 'boolean' || typeof value === 'number') {
+                            formattedValue = value;
+                        } else {
+                            formattedValue = JSON.stringify(value);
+                        }
+                        jsonString += `        ${key}: ${formattedValue}`;
+                        if (i < keys.length - 1) {
+                            jsonString += ",\n";
+                        } else {
+                            jsonString += "\n";
+                        }
+                    });
+                    jsonString += "    }";
+                    if (index < formattedProducts.length - 1) {
+                        jsonString += ",\n";
+                    } else {
+                        jsonString += "\n";
+                    }
+                });
+                jsonString += "]";
+
+                jsonProductsDisplayCode.textContent = `const products = ${jsonString};`;
+            } catch (error) {
+                console.error("Error displaying JSON: ", error);
+                jsonProductsDisplayCode.textContent = `Error al cargar el JSON: ${error.message}`;
+            }
+        }
+
+        // Function to display categories as a specific JSON format
+        async function displayCategoriesAsJson() {
+            const categoriesColRef = getCategoriesCollection();
+            if (!categoriesColRef) {
+                categoriesJsonDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de categorías.';
+                return;
+            }
+
+            try {
+                const snapshot = await categoriesColRef.orderBy('name', 'asc').get();
+                const firebaseCategories = snapshot.docs.map(doc => ({ id: doc.data().name, name: doc.data().name }));
+
+                // Fixed categories to always be at the start
+                const defaultFixedCategories = [
+                    { id: "all", name: "Todas las Categorías" }
+                ];
+
+                // Combine fixed categories with fetched categories, avoiding duplicates by 'id'
+                const combinedCategoriesMap = new Map();
+                
+                // Add fixed categories first
+                defaultFixedCategories.forEach(cat => combinedCategoriesMap.set(cat.id, cat));
+                
+                // Add fetched categories, only if their ID doesn't already exist from fixed categories
+                firebaseCategories.forEach(cat => {
+                    if (!combinedCategoriesMap.has(cat.id)) {
+                        combinedCategoriesMap.set(cat.id, cat);
+                    }
+                });
+
+                const finalCategories = Array.from(combinedCategoriesMap.values());
+
+                // Sort the final list. Keep the fixed category at the very beginning
+                // and then sort the rest alphabetically by name.
+                finalCategories.sort((a, b) => {
+                    const aIsFixed = defaultFixedCategories.some(fc => fc.id === a.id);
+                    const bIsFixed = defaultFixedCategories.some(fc => fc.id === b.id);
+
+                    if (aIsFixed && !bIsFixed) return -1; // a comes before b if a is fixed and b is not
+                    if (!aIsFixed && bIsFixed) return 1;  // b comes before a if b is fixed and a is not
+
+                    // If both are fixed, maintain their original order (based on defaultFixedCategories array)
+                    if (aIsFixed && bIsFixed) {
+                        return defaultFixedCategories.indexOf(defaultFixedCategories.find(fc => fc.id === a.id)) -
+                               defaultFixedCategories.indexOf(defaultFixedCategories.find(fc => fc.id === b.id));
+                    }
+                    
+                    // If neither is fixed (both are from Firebase), sort alphabetically by name
+                    return a.name.localeCompare(b.name);
+                });
+
+
+                // Manually construct the JavaScript array string
+                let jsArrayString = "[\n";
+                finalCategories.forEach((cat, index) => {
+                    // Escape single quotes within the name for the 'name' value
+                    const escapedName = cat.name.replace(/'/g, "\\'");
+                    jsArrayString += `            { id: "${cat.id}", name: '${escapedName}' }`;
+                    if (index < finalCategories.length - 1) {
+                        jsArrayString += ",\n";
+                    } else {
+                        jsArrayString += "\n";
+                    }
+                });
+                jsArrayString += "        ];";
+
+                categoriesJsonDisplayCode.textContent = `const categories = ${jsArrayString}`;
+            } catch (error) {
+                console.error("Error displaying categories JSON: ", error);
+                categoriesJsonDisplayCode.textContent = `Error al cargar el JSON de categorías: ${error.message}`;
+            }
+        }
+
+
+        // --- PRODUCT CRUD OPERATIONS (Using Modals) ---
+
+        // Open Add Product Modal
+        openAddProductModalButton.addEventListener('click', () => {
+            if (!currentComercioId) {
+                alert('Por favor, seleccione un comercio primero.');
+                return;
+            }
+            addProductForm.reset(); // Clear the form when opening
+            newProductOrderInput.value = '999'; // Reset default order
+            // Deselect all categories
+            Array.from(newProductCategoriesSelect.options).forEach(option => option.selected = false);
+            openModal(addProductModal);
+        });
+
+        // Add Product Form Submission
+        addProductForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productsColRef = getProductsCollection();
+            if (!productsColRef) return; // Should not happen due to button check, but good for safety
+
+            const productData = {
+                name: newProductNameInput.value,
+                price: parseFloat(newProductPriceInput.value),
+                oldPrice: newProductOldPriceInput.value ? parseFloat(newProductOldPriceInput.value) : null,
+                image: newProductImageInput.value, // Use the provided image URL
+                productDetails: newProductDetailsInput.value,
+                isVegan: newIsVeganInput.checked,
+                isVegetarian: newIsVegetarianInput.checked,
+                isGlutenFree: newIsGlutenFreeInput.checked,
+                dietaryInfo: newProductDietaryInfoInput.value,
+                categories: Array.from(newProductCategoriesSelect.selectedOptions).map(option => option.value),
+                order: parseInt(newProductOrderInput.value),
+                comercioId: currentComercioId // Associate product with current comercio
+            };
+
+            try {
+                await productsColRef.add(productData);
+                console.log('Producto añadido con éxito!');
+                closeModal(addProductModal); // Close modal on success
+                addProductForm.reset();
+                newProductOrderInput.value = '999';
+                Array.from(newProductCategoriesSelect.options).forEach(option => option.selected = false);
+                fetchProducts();
+            } catch (error) {
+                console.error("Error saving product: ", error);
+                alert('Error al guardar el producto.');
+            }
+        });
+
+
+        // Edit Product Function (opens modal and populates form)
+        async function editProduct(firebaseDocId) {
+            const productsColRef = getProductsCollection();
+            if (!productsColRef) return;
+
+            try {
+                const doc = await productsColRef.doc(firebaseDocId).get();
+                if (doc.exists) {
+                    const product = doc.data();
+                    editProductIdInput.value = doc.id; // Store Firebase doc ID for update operation
+                    editProductNameInput.value = product.name;
+                    editProductPriceInput.value = product.price;
+                    editProductOldPriceInput.value = product.oldPrice || '';
+                    editProductImageInput.value = product.image;
+                    editProductDetailsInput.value = product.productDetails;
+                    editIsVeganInput.checked = product.isVegan;
+                    editIsVegetarianInput.checked = product.isVegetarian;
+                    editIsGlutenFreeInput.checked = product.isGlutenFree;
+                    editProductDietaryInfoInput.value = product.dietaryInfo;
+                    editProductOrderInput.value = product.order || 999;
+
+                    Array.from(editProductCategoriesSelect.options).forEach(option => {
+                        option.selected = product.categories && product.categories.includes(option.value);
+                    });
+                    openModal(editProductModal); // Open the edit modal
+                }
+            } catch (error) {
+                    console.error("Error al obtener el producto para editar: ", error);
+                    alert("Error al cargar el producto para editar.");
+            }
+        }
+
+        // Edit Product Form Submission
+        editProductForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productsColRef = getProductsCollection();
+            if (!productsColRef) return;
+
+            const firebaseDocId = editProductIdInput.value;
+
+            const productData = {
+                name: editProductNameInput.value,
+                price: parseFloat(editProductPriceInput.value),
+                oldPrice: editProductOldPriceInput.value ? parseFloat(editProductOldPriceInput.value) : null,
+                image: editProductImageInput.value, // Use the provided image URL
+                productDetails: editProductDetailsInput.value,
+                isVegan: editIsVeganInput.checked,
+                isVegetarian: editIsVegetarianInput.checked,
+                isGlutenFree: editIsGlutenFreeInput.checked,
+                dietaryInfo: editProductDietaryInfoInput.value,
+                categories: Array.from(editProductCategoriesSelect.selectedOptions).map(option => option.value),
+                order: parseInt(editProductOrderInput.value),
+                comercioId: currentComercioId // Ensure comercioId is preserved/added during edit
+            };
+
+            try {
+                await productsColRef.doc(firebaseDocId).update(productData);
+                console.log('Producto actualizado con éxito!');
+                closeModal(editProductModal); // Close modal on success
+                editProductForm.reset();
+                editProductOrderInput.value = '999';
+                Array.from(editProductCategoriesSelect.options).forEach(option => option.selected = false);
+                fetchProducts();
+            } catch (error) {
+                console.error("Error updating product: ", error);
+                alert('Error al actualizar el producto.');
+            }
+        });
+
+
+        async function deleteProduct(firebaseDocId) {
+            const productsColRef = getProductsCollection();
+            if (!productsColRef) return;
+
+            if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                try {
+                    await productsColRef.doc(firebaseDocId).delete();
+                    console.log('Producto eliminado con éxito!');
+                    fetchProducts();
+                } catch (error) {
+                    console.error("Error deleting product: ", error);
+                    alert('Error al eliminar el producto.');
+                }
+            }
+        }
+
+        // --- CATEGORY CRUD OPERATIONS --- (Mainly for Category Tab)
+
+        // Open Add Category Modal from Product Tab
+        openAddCategoryFromProductTabModalButton.addEventListener('click', () => {
+            if (!currentComercioId) {
+                alert('Por favor, seleccione un comercio primero.');
+                return;
+            }
+            addCategoryForm.reset();
+            openModal(addCategoryModal);
+        });
+
+        // Add Category Form Submission (from new modal)
+        addCategoryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const categoriesColRef = getCategoriesCollection();
+            if (!categoriesColRef) return;
+
+            const name = newCategoryNameInput.value.trim();
+
+            if (!name) {
+                alert('El nombre de la categoría no puede estar vacío.');
+                return;
+            }
+
+            const exists = allCategories.some(cat => cat.name.toLowerCase() === name.toLowerCase());
+            if (exists) {
+                alert('Ya existe una categoría con ese nombre. Por favor, elige otro.');
+                return;
+            }
+
+            const categoryData = { name, comercioId: currentComercioId }; // Associate category with current comercio
+
+            try {
+                await categoriesColRef.add(categoryData);
+                console.log('Categoría añadida con éxito!');
+                closeModal(addCategoryModal); // Close the modal
+                addCategoryForm.reset(); // Reset the form
+                fetchCategories(); // Re-fetch categories to update dropdowns and category list
+                fetchProducts(); // Re-fetch products to ensure category tags are updated, and JSON
+            } catch (error) {
+                console.error("Error saving category: ", error);
+                alert('Error al guardar la categoría.');
+            }
+        });
+
+        // Edit/Save Category from Category Tab (original form)
+        categoryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const categoriesColRef = getCategoriesCollection();
+            if (!categoriesColRef) return;
+
+            const id = categoryIdInput.value;
+            const name = categoryNameInput.value.trim();
+
+            if (!name) {
+                alert('El nombre de la categoría no puede estar vacío.');
+                return;
+            }
+
+            const exists = allCategories.some(cat => cat.name.toLowerCase() === name.toLowerCase() && cat.id !== id);
+            if (exists) {
+                alert('Ya existe una categoría con ese nombre. Por favor, elige otro.');
+                return;
+            }
+
+            const categoryData = { name, comercioId: currentComercioId }; // Ensure comercioId is preserved/added during edit
+
+            try {
+                if (id) {
+                    const oldCategoryName = allCategories.find(cat => cat.id === id).name;
+                    await categoriesColRef.doc(id).update(categoryData);
+
+                    // Update products that have this category (only within this comercio)
+                    const productsColForUpdate = getProductsCollection();
+                    if (productsColForUpdate) {
+                        const productsWithOldCategory = await productsColForUpdate.where('categories', 'array-contains', oldCategoryName).get();
+                        const batch = db.batch();
+                        productsWithOldCategory.docs.forEach(doc => {
+                            const product = doc.data();
+                            const updatedCategories = product.categories.map(cat => cat === oldCategoryName ? name : cat);
+                            batch.update(doc.ref, { categories: updatedCategories });
+                        });
+                        await batch.commit();
+                    }
+
+                    console.log('Categoría actualizada con éxito!');
+                } else {
+                    // This part is for adding from the original form, but should primarily be handled by modal now.
+                    await categoriesColRef.add(categoryData);
+                    console.log('Categoría añadida con éxito!');
+                }
+                categoryForm.reset();
+                categoryIdInput.value = '';
+                fetchCategories();
+                fetchProducts(); // Re-fetch products to reflect category changes and update JSON
+            } catch (error) {
+                console.error("Error saving category: ", error);
+                alert('Error al guardar la categoría.');
+            }
+        });
+
+        async function deleteCategory(id) {
+            const categoriesColRef = getCategoriesCollection();
+            if (!categoriesColRef) return;
+
+            if (window.confirm('¿Estás seguro de que quieres eliminar esta categoría? Esto también la eliminará de los productos asociados en este comercio.')) {
+                try {
+                    const categoryToDelete = allCategories.find(cat => cat.id === id);
+                    if (!categoryToDelete) {
+                        console.error("Category not found for deletion.");
+                        return;
+                    }
+                    const categoryName = categoryToDelete.name;
+
+                    // Remove category from products (only within this comercio)
+                    const productsColForUpdate = getProductsCollection();
+                    if (productsColForUpdate) {
+                        const productsWithCategory = await productsColForUpdate.where('categories', 'array-contains', categoryName).get();
+                        const batch = db.batch();
+                        productsWithCategory.docs.forEach(doc => {
+                            const product = doc.data();
+                            const updatedCategories = product.categories.filter(cat => cat !== categoryName);
+                            batch.update(doc.ref, { categories: updatedCategories });
+                        });
+                        await batch.commit();
+                    }
+
+                    // Delete the category itself
+                    await categoriesColRef.doc(id).delete();
+
+                    console.log('Categoría eliminada con éxito!');
+                    fetchCategories();
+                    fetchProducts();
+                } catch (error) {
+                    console.error("Error deleting category: ", error);
+                    alert('Error al eliminar la categoría.');
+                }
+            }
+        }
+
+        cancelCategoryEditButton.addEventListener('click', () => {
+            categoryForm.reset();
+            categoryIdInput.value = '';
+        });
+
+        // --- COPY JSON FUNCTIONALITY ---
+        copyProductsJsonButton.addEventListener('click', () => {
+            const textToCopy = jsonProductsDisplayCode.textContent;
+            if (textToCopy) {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    console.log('JSON de productos copiado al portapapeles!');
+                    copyProductsJsonButton.textContent = "¡Copiado!";
+                    setTimeout(() => {
+                        copyProductsJsonButton.textContent = "Copiar JSON";
+                    }, 2000);
+                } catch (err) {
+                    console.error('No se pudo copiar el JSON de productos: ', err);
+                    copyProductsJsonButton.textContent = "Error al copiar";
+                    setTimeout(() => {
+                        copyProductsJsonButton.textContent = "Copiar JSON";
+                    }, 2000);
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+
+        copyCategoriesJsonButton.addEventListener('click', () => {
+            const textToCopy = categoriesJsonDisplayCode.textContent;
+            if (textToCopy) {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    console.log('JSON de categorías copiado al portapapeles!');
+                    copyCategoriesJsonButton.textContent = "¡Copiado!";
+                    setTimeout(() => {
+                        copyCategoriesJsonButton.textContent = "Copiar JSON";
+                    }, 2000);
+                } catch (err) {
+                    console.error('No se pudo copiar el JSON de categorías: ', err);
+                    copyCategoriesJsonButton.textContent = "Error al copiar";
+                    setTimeout(() => {
+                        copyCategoriesJsonButton.textContent = "Copiar JSON";
+                    }, 2000);
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+
+
+        // --- INITIAL LOAD ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchComercios(); // Start by fetching comercios
+            openTab('comercio-gestion'); // Open the comercio management tab by default
+        });
+    </script>
+</body>
+</html>
