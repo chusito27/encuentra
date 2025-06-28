@@ -6,7 +6,7 @@
     <title>Administrador de Menú</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script> <style>
         :root {
             --primary-color: #66bb6a; /* Un verde más claro para contraste */
             --secondary-color: #64b5f6; /* Un azul más claro */
@@ -40,7 +40,41 @@
             padding: 20px 0;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative; /* Para posicionar el botón de autenticación */
         }
+
+        header .auth-buttons-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex; /* Para alinear los botones */
+            gap: 10px; /* Espacio entre los botones */
+        }
+
+        header .auth-buttons-container button {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        header .auth-buttons-container #openAuthModalButton {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        header .auth-buttons-container #openAuthModalButton:hover {
+            background-color: #42a5f5;
+        }
+
+        header .auth-buttons-container #signOutButton {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        header .auth-buttons-container #signOutButton:hover {
+            background-color: #e53935;
+        }
+
 
         h1, h2, h3 {
             color: var(--text-color);
@@ -518,12 +552,21 @@
                 width: 95%;
                 padding: 15px;
             }
+            header .auth-buttons-container {
+                position: static;
+                margin-top: 10px;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Administrador de Menú</h1>
+        <div class="auth-buttons-container">
+            <button id="openAuthModalButton">Iniciar Sesión</button>
+            <button id="signOutButton" style="display: none;">Cerrar Sesión</button>
+        </div>
     </header>
 
     <div id="comercioSelector">
@@ -770,6 +813,31 @@
         </div>
     </div>
 
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="authModalTitle">Iniciar Sesión / Registrarse</h2>
+                <span class="close-button" data-modal="authModal">&times;</span>
+            </div>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="authEmail">Correo Electrónico</label>
+                    <input type="email" id="authEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="authPassword">Contraseña</label>
+                    <input type="password" id="authPassword" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="signInButton">Iniciar Sesión</button>
+                    <button type="button" id="signUpButton">Registrarse</button>
+                    <button type="button" class="cancel" data-modal="authModal">Cancelar</button>
+                </div>
+                <p id="authError" style="color: var(--danger-color); text-align: center; margin-top: 10px; display: none;"></p>
+            </form>
+        </div>
+    </div>
+
 
     <script>
         const firebaseConfig = {
@@ -784,19 +852,22 @@
 
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth(); // Inicializa Firebase Auth
 
         // ** Global Variable for Current Comercio **
         let currentComercioId = null;
         let currentComercioName = null;
         let allComercios = []; // To store all fetched comercios
+        let currentUser = null; // Variable para almacenar el usuario autenticado
 
         // ** Firebase Collections (Dynamic based on currentComercioId) **
         const comerciosCollection = db.collection('comercios');
+        const allowedUsersCollection = db.collection('allowedUsers'); // Nueva: Colección para usuarios permitidos
 
         // Functions to get dynamic subcollection references
         function getProductsCollection() {
             if (!currentComercioId) {
-                console.error("No hay comercio seleccionado.");
+                console.error("Error: No hay comercio seleccionado.");
                 return null;
             }
             return comerciosCollection.doc(currentComercioId).collection('products');
@@ -804,7 +875,7 @@
 
         function getCategoriesCollection() {
             if (!currentComercioId) {
-                console.error("No hay comercio seleccionado.");
+                console.error("Error: No hay comercio seleccionado.");
                 return null;
             }
             return comerciosCollection.doc(currentComercioId).collection('categories');
@@ -877,6 +948,18 @@
         const selectComercio = document.getElementById('selectComercio');
         const currentComercioInfoDiv = document.getElementById('currentComercioInfo');
 
+        // ** Auth DOM Elements **
+        const authModal = document.getElementById('authModal');
+        const authModalTitle = document.getElementById('authModalTitle');
+        const authForm = document.getElementById('authForm');
+        const authEmailInput = document.getElementById('authEmail');
+        const authPasswordInput = document.getElementById('authPassword');
+        const signInButton = document.getElementById('signInButton');
+        const signUpButton = document.getElementById('signUpButton');
+        const authErrorDisplay = document.getElementById('authError');
+        const openAuthModalButton = document.getElementById('openAuthModalButton');
+        const signOutButton = document.getElementById('signOutButton');
+
 
         let allCategories = []; // To store categories for the product form select
 
@@ -900,6 +983,9 @@
             if (event.target === addCategoryModal) {
                 closeModal(addCategoryModal);
             }
+            if (event.target === authModal) { // Close auth modal
+                closeModal(authModal);
+            }
         });
 
         // Close buttons for modals
@@ -918,6 +1004,7 @@
                 if (modalId === 'addProductModal') addProductForm.reset();
                 if (modalId === 'editProductModal') editProductForm.reset();
                 if (modalId === 'addCategoryModal') addCategoryForm.reset();
+                if (modalId === 'authModal') authForm.reset(); // Reset auth form
             });
         });
 
@@ -933,6 +1020,14 @@
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`).classList.add('active');
 
+            // Logic based on authentication state and user authorization
+            if (!currentUser && tabId !== 'comercio-gestion') {
+                // Si no está autenticado y tratando de acceder a una pestaña restringida, redirigir a comercio-gestion
+                alert('Necesita iniciar sesión para acceder a esta sección.');
+                openTab('comercio-gestion'); // Redirigir a una pestaña "segura"
+                return; // Salir de la función para evitar cargar datos para la pestaña restringida
+            }
+
             // Specific logic for each tab
             if (tabId === 'comercio-gestion') {
                 await fetchComercios(); // Fetch comercios when this tab is opened
@@ -942,7 +1037,6 @@
                     await fetchCategories(); // Also fetch categories for product form
                 } else {
                     productsListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus productos.</p>';
-                    // Clear product categories in modals if no comercio is selected
                     newProductCategoriesSelect.innerHTML = '';
                     editProductCategoriesSelect.innerHTML = '';
                 }
@@ -1087,6 +1181,18 @@
         comercioForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Check if authenticated and authorized
+            if (!currentUser) {
+                alert('Necesita iniciar sesión para guardar un comercio.');
+                openModal(authModal); // Abre el modal de autenticación
+                return;
+            }
+            const isAuthorized = await allowedUsersCollection.doc(currentUser.uid).get();
+            if (!isAuthorized.exists) {
+                alert('Su cuenta no está autorizada para realizar esta acción.');
+                return;
+            }
+
             const id = comercioIdInput.value;
             const name = comercioNameInput.value.trim();
             const logoUrl = comercioLogoUrlInput.value.trim();
@@ -1112,11 +1218,23 @@
                 await fetchComercios(); // Re-fetch comercios to update lists and select
             } catch (error) {
                 console.error("Error saving comercio: ", error);
-                alert('Error al guardar el comercio.');
+                alert('Error al guardar el comercio. Asegúrese de tener permisos de escritura y autorización.');
             }
         });
 
         async function editComercio(id) {
+            // Check if authenticated and authorized
+            if (!currentUser) {
+                alert('Necesita iniciar sesión para editar un comercio.');
+                openModal(authModal);
+                return;
+            }
+            const isAuthorized = await allowedUsersCollection.doc(currentUser.uid).get();
+            if (!isAuthorized.exists) {
+                alert('Su cuenta no está autorizada para realizar esta acción.');
+                return;
+            }
+
             try {
                 const doc = await comerciosCollection.doc(id).get();
                 if (doc.exists) {
@@ -1128,11 +1246,23 @@
                 }
             } catch (error) {
                 console.error("Error fetching comercio for edit: ", error);
-                alert("Error al cargar el comercio para editar.");
+                alert("Error al cargar el comercio para editar. Asegúrese de tener permisos de lectura y autorización.");
             }
-        }
+        };
 
         async function deleteComercio(id) {
+            // Check if authenticated and authorized
+            if (!currentUser) {
+                alert('Necesita iniciar sesión para eliminar un comercio.');
+                openModal(authModal);
+                return;
+            }
+            const isAuthorized = await allowedUsersCollection.doc(currentUser.uid).get();
+            if (!isAuthorized.exists) {
+                alert('Su cuenta no está autorizada para realizar esta acción.');
+                return;
+            }
+
             if (window.confirm('¿Estás seguro de que quieres eliminar este comercio? Esto también eliminará todos sus productos y categorías asociadas.')) {
                 try {
                     // Start a batch to delete subcollections (products and categories)
@@ -1171,7 +1301,7 @@
 
                 } catch (error) {
                     console.error("Error deleting comercio: ", error);
-                    alert('Error al eliminar el comercio y sus datos.');
+                    alert('Error al eliminar el comercio y sus datos. Asegúrese de tener permisos de escritura y autorización.');
                 }
             }
         }
@@ -1185,6 +1315,12 @@
         // --- FETCH AND RENDER FUNCTIONS (Products) ---
 
         async function fetchProducts() {
+            // Check if authenticated (rules will also enforce this)
+            if (!currentUser) { 
+                productsListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar productos.</p>';
+                return;
+            }
+
             const productsColRef = getProductsCollection();
             if (!productsColRef) {
                 productsListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus productos.</p>';
@@ -1201,11 +1337,19 @@
                 }
             } catch (error) {
                 console.error("Error fetching products: ", error);
-                productsListDiv.innerHTML = '<p>Error al cargar los productos de este comercio.</p>';
+                productsListDiv.innerHTML = '<p>Error al cargar los productos de este comercio. Asegúrese de que sus reglas de seguridad permitan leer los productos.</p>';
             }
         }
 
         async function fetchCategories() {
+            // Check if authenticated (rules will also enforce this)
+            if (!currentUser) {
+                categoriesListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar categorías.</p>';
+                newProductCategoriesSelect.innerHTML = '';
+                editProductCategoriesSelect.innerHTML = '';
+                return;
+            }
+
             const categoriesColRef = getCategoriesCollection();
             if (!categoriesColRef) {
                 categoriesListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus categorías.</p>';
@@ -1232,7 +1376,7 @@
             }
             catch (error) {
                 console.error("Error fetching categories: ", error);
-                categoriesListDiv.innerHTML = '<p>Error al cargar las categorías de este comercio.</p>';
+                categoriesListDiv.innerHTML = '<p>Error al cargar las categorías de este comercio. Asegúrese de que sus reglas de seguridad permitan leer las categorías.</p>';
                 newProductCategoriesSelect.innerHTML = '';
                 editProductCategoriesSelect.innerHTML = '';
             }
@@ -1337,6 +1481,12 @@
         }
 
         async function displayProductsAsJson() {
+            // Check if authenticated (rules will also enforce this)
+            if (!currentUser) { 
+                jsonProductsDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de productos.';
+                return;
+            }
+
             const productsColRef = getProductsCollection();
             if (!productsColRef) {
                 jsonProductsDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de productos.';
@@ -1396,6 +1546,12 @@
 
         // Function to display categories as a specific JSON format
         async function displayCategoriesAsJson() {
+            // Check if authenticated (rules will also enforce this)
+            if (!currentUser) { 
+                categoriesJsonDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de categorías.';
+                return;
+            }
+
             const categoriesColRef = getCategoriesCollection();
             if (!categoriesColRef) {
                 categoriesJsonDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de categorías.';
@@ -1472,6 +1628,11 @@
 
         // Open Add Product Modal
         openAddProductModalButton.addEventListener('click', () => {
+            if (!currentUser) { // Check authentication
+                alert('Necesita iniciar sesión para añadir un producto.');
+                openModal(authModal); // Prompt login
+                return;
+            }
             if (!currentComercioId) {
                 alert('Por favor, seleccione un comercio primero.');
                 return;
@@ -1486,6 +1647,11 @@
         // Add Product Form Submission
         addProductForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!currentUser) { // Double check authentication
+                alert('Necesita iniciar sesión para guardar un producto.');
+                return;
+            }
 
             const productsColRef = getProductsCollection();
             if (!productsColRef) return; // Should not happen due to button check, but good for safety
@@ -1522,6 +1688,11 @@
 
         // Edit Product Function (opens modal and populates form)
         async function editProduct(firebaseDocId) {
+            if (!currentUser) { // Check authentication
+                alert('Necesita iniciar sesión para editar un producto.');
+                openModal(authModal);
+                return;
+            }
             const productsColRef = getProductsCollection();
             if (!productsColRef) return;
 
@@ -1555,6 +1726,11 @@
         // Edit Product Form Submission
         editProductForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!currentUser) { // Double check authentication
+                alert('Necesita iniciar sesión para guardar cambios en el producto.');
+                return;
+            }
 
             const productsColRef = getProductsCollection();
             if (!productsColRef) return;
@@ -1592,6 +1768,11 @@
 
 
         async function deleteProduct(firebaseDocId) {
+            if (!currentUser) { // Check authentication
+                alert('Necesita iniciar sesión para eliminar un producto.');
+                openModal(authModal);
+                return;
+            }
             const productsColRef = getProductsCollection();
             if (!productsColRef) return;
 
@@ -1611,6 +1792,11 @@
 
         // Open Add Category Modal from Product Tab
         openAddCategoryFromProductTabModalButton.addEventListener('click', () => {
+            if (!currentUser) { // Check authentication
+                alert('Necesita iniciar sesión para añadir una categoría.');
+                openModal(authModal);
+                return;
+            }
             if (!currentComercioId) {
                 alert('Por favor, seleccione un comercio primero.');
                 return;
@@ -1622,6 +1808,11 @@
         // Add Category Form Submission (from new modal)
         addCategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!currentUser) { // Double check authentication
+                alert('Necesita iniciar sesión para guardar una categoría.');
+                return;
+            }
 
             const categoriesColRef = getCategoriesCollection();
             if (!categoriesColRef) return;
@@ -1657,6 +1848,11 @@
         // Edit/Save Category from Category Tab (original form)
         categoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!currentUser) { // Double check authentication
+                alert('Necesita iniciar sesión para guardar cambios en la categoría.');
+                return;
+            }
 
             const categoriesColRef = getCategoriesCollection();
             if (!categoriesColRef) return;
@@ -1712,6 +1908,11 @@
         });
 
         async function deleteCategory(id) {
+            if (!currentUser) { // Check authentication
+                alert('Necesita iniciar sesión para eliminar una categoría.');
+                openModal(authModal);
+                return;
+            }
             const categoriesColRef = getCategoriesCollection();
             if (!categoriesColRef) return;
 
@@ -1757,6 +1958,11 @@
 
         // --- COPY JSON FUNCTIONALITY ---
         copyProductsJsonButton.addEventListener('click', () => {
+            if (!currentUser) { // Check authentication
+                alert('Necesita iniciar sesión para copiar el JSON de productos.');
+                openModal(authModal);
+                return;
+            }
             const textToCopy = jsonProductsDisplayCode.textContent;
             if (textToCopy) {
                 const textArea = document.createElement("textarea");
@@ -1782,6 +1988,11 @@
         });
 
         copyCategoriesJsonButton.addEventListener('click', () => {
+            if (!currentUser) { // Check authentication
+                alert('Necesita iniciar sesión para copiar el JSON de categorías.');
+                openModal(authModal);
+                return;
+            }
             const textToCopy = categoriesJsonDisplayCode.textContent;
             if (textToCopy) {
                 const textArea = document.createElement("textarea");
@@ -1807,10 +2018,175 @@
         });
 
 
+        // --- AUTHENTICATION LOGIC ---
+
+        // Función para mostrar errores de autenticación
+        function displayAuthError(message) {
+            authErrorDisplay.textContent = message;
+            authErrorDisplay.style.display = 'block';
+        }
+
+        function clearAuthError() {
+            authErrorDisplay.textContent = '';
+            authErrorDisplay.style.display = 'none';
+        }
+
+        // Abrir el modal de autenticación
+        openAuthModalButton.addEventListener('click', () => {
+            authForm.reset();
+            clearAuthError();
+            authModalTitle.textContent = 'Iniciar Sesión / Registrarse';
+            openModal(authModal);
+        });
+
+        // Cerrar sesión
+        signOutButton.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                // onAuthStateChanged se encargará de actualizar la UI
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                alert('Error al cerrar sesión: ' + error.message);
+            }
+        });
+
+
+        // Manejar inicio de sesión
+        signInButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            clearAuthError();
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                // La función onAuthStateChanged manejará la UI y la autorización
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error);
+                let errorMessage = 'Error al iniciar sesión.';
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'No hay ningún usuario con ese correo electrónico.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Contraseña incorrecta.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'El formato del correo electrónico es inválido.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'El usuario ha sido deshabilitado.';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                displayAuthError(errorMessage);
+            }
+        });
+
+        // Manejar registro
+        signUpButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            clearAuthError();
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+
+            if (password.length < 6) {
+                displayAuthError('La contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                alert('¡Registro exitoso! Su cuenta necesita ser autorizada por el administrador. Por favor, espere.');
+                closeModal(authModal);
+                // onAuthStateChanged se encargará de la UI y la autorización después del registro
+            } catch (error) {
+                console.error('Error al registrarse:', error);
+                let errorMessage = 'Error al registrarse.';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'El correo electrónico ya está en uso.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'El formato del correo electrónico es inválido.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'La contraseña es demasiado débil.';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                displayAuthError(errorMessage);
+            }
+        });
+
+        // Observar el estado de autenticación (cuando el usuario inicia/cierra sesión)
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                // Usuario autenticado, ahora verifica si está permitido
+                currentUser = user;
+                console.log('Usuario autenticado:', user.email, 'UID:', user.uid);
+
+                try {
+                    // Intenta leer el documento del usuario en la colección allowedUsers
+                    const allowedUserDoc = await allowedUsersCollection.doc(user.uid).get();
+console.log('Documento de allowedUsers existe para este UID:', allowedUserDoc.exists);
+
+                    if (allowedUserDoc.exists) {
+                        // El usuario está en la lista de permitidos
+                        console.log('Usuario autorizado para acceder a funciones de administración.');
+                        openAuthModalButton.style.display = 'none'; // Ocultar botón de iniciar sesión
+                        signOutButton.style.display = 'block'; // Mostrar botón de cerrar sesión
+                        alert('Bienvenido, ' + user.email + '!'); // Muestra un mensaje de bienvenida
+                        closeModal(authModal); // Cierra el modal de autenticación si está abierto
+
+                        // Cargar datos y mostrar la pestaña de gestión de comercios (o la que corresponda)
+                        const activeTab = document.querySelector('.tab-content.active');
+                        if (activeTab) {
+                            openTab(activeTab.id); 
+                        } else {
+                            openTab('comercio-gestion'); // Si no hay pestaña activa, ve a gestión de comercios
+                        }
+
+                    } else {
+                        // El usuario NO está en la lista de permitidos
+                        console.warn('Usuario autenticado pero NO autorizado:', user.email);
+                        alert('Su cuenta está registrada, pero aún no ha sido autorizada por el administrador. Por favor, contacte al soporte.');
+                        await auth.signOut(); // Forzar el cierre de sesión para usuarios no autorizados
+                        // onAuthStateChanged se disparará de nuevo y mostrará el estado de no autenticado
+                    }
+                } catch (error) {
+                    console.error("Error al verificar autorización del usuario:", error);
+                    alert("Error al verificar su autorización. Intente nuevamente. " + error.message);
+                    await auth.signOut(); // Cierre de sesión si hay un error al verificar
+                }
+
+            } else {
+                // No hay usuario autenticado
+                currentUser = null;
+                console.log('No hay usuario autenticado.');
+                openAuthModalButton.style.display = 'block'; // Mostrar botón de iniciar sesión
+                signOutButton.style.display = 'none'; // Ocultar botón de cerrar sesión
+                alert('Por favor, inicie sesión para gestionar el menú.'); // Muestra un mensaje para iniciar sesión
+
+                // Limpiar contenido de las pestañas sensibles y redirigir
+                productsListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar productos.</p>';
+                categoriesListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar categorías.</p>';
+                jsonProductsDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de productos.';
+                categoriesJsonDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de categorías.';
+                
+                // Redirigir a la pestaña de gestión de comercios (donde está el botón de inicio de sesión)
+                openTab('comercio-gestion'); 
+            }
+        });
+
         // --- INITIAL LOAD ---
         document.addEventListener('DOMContentLoaded', () => {
-            fetchComercios(); // Start by fetching comercios
-            openTab('comercio-gestion'); // Open the comercio management tab by default
+            // La lógica de carga inicial ahora es manejada por auth.onAuthStateChanged.
+            // Una vez que Firebase determine si hay un usuario logueado o no,
+            // onAuthStateChanged se disparará y llamará a openTab() con la lógica adecuada.
+            // No necesitamos llamar a fetchComercios() o openTab() directamente aquí.
         });
     </script>
 </body>
