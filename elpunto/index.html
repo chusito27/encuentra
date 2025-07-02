@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Encuentra</title>
-    <link rel="manifest" href="./manifest.json"> 
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </noscript>
     <style>
         /* Nueva Paleta de Colores Pastel:
            Morado Pastel (Lavanda): #D8BFD8
@@ -1037,7 +1040,8 @@
 
             <div class="modal-order-notes">
                 <label for="modal-order-changes">Notas o consideraciones especiales para tu pedido:</label>
-                <textarea id="modal-order-changes" placeholder="Ej: Sin cebolla, extra picante, alérgico a los cacahuates, etc."></textarea>
+                <textarea id="modal-order-changes"
+                    placeholder="Ej: Sin cebolla, extra picante, alérgico a los cacahuates, etc."></textarea>
             </div>
 
             <button class="modal-whatsapp-button" id="send-whatsapp-order-button">Enviar Pedido por WhatsApp</button>
@@ -1059,153 +1063,439 @@
         const products = [
             {
                 id: 1,
-                name: "Hamburguesa Clásica",
-                price: 5000.00,
-                image: "https://plus.unsplash.com/premium_photo-1683619761492-639240d29bb5?w=250&auto=format&fit=crop&q=80&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8SGFm",
-                productDetails: "Nuestra hamburguesa clásica con carne 100% de res, lechuga fresca, tomate, cebolla, pepinillos y nuestra salsa especial. ¡Una delicia que no puedes perderte!",
+                name: "Alitas",
+                price: 3000,
+                image: "",
+                productDetails: "Acompañado con salsa",
                 isVegan: false,
                 isVegetarian: false,
                 isGlutenFree: false,
-                dietaryInfo: "Contiene carne y gluten.",
-                categories: ["Comidas Rápidas", "Más Vendidos", "Almuerzo", "Cena"],
-                order: 2 // Added order property
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
             },
             {
                 id: 2,
-                name: "Pizza Pepperoni",
-                price: 6000.00, // Nuevo precio
-                oldPrice: 7500.00, // Precio anterior
-                image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=250&auto=format&fit=crop&q=80&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "La pizza favorita de todos con una generosa capa de queso mozzarella derretido y rebanadas de pepperoni crujiente sobre nuestra masa artesanal.",
+                name: "Ceviche",
+                price: 3000,
+                image: "",
+                productDetails: "",
                 isVegan: false,
                 isVegetarian: false,
-                isGlutenFree: false,
-                dietaryInfo: "Contiene carne, lácteos y gluten.",
-                categories: ["Comidas Rápidas", "Más Vendidos", "Cena", "Promociones"],
-                order: 1 // Added order property
+                isGlutenFree: true,
+                dietaryInfo: "",
+                categories: [],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
             },
             {
                 id: 3,
-                name: "Ensalada César",
-                price: 4200.00,
-                image: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=250&auto=format&fit=crop&q=80&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Fresca ensalada César con lechuga romana, crutones caseros, queso parmesano y aderezo César cremoso. ¡Perfecta para un almuerzo ligero!",
+                name: "Patanachos",
+                price: 3000,
+                image: "",
+                productDetails: "",
                 isVegan: false,
-                isVegetarian: true,
+                isVegetarian: false,
                 isGlutenFree: false,
-                dietaryInfo: "Vegetariana. Contiene lácteos y gluten en los crutones.",
-                categories: ["Vegetarianos", "Almuerzo", "Saludable"],
-                order: 5 // Added order property
+                dietaryInfo: "",
+                categories: ["Pollo", "Carne"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
             },
             {
                 id: 4,
-                name: "Tacos de Carnitas",
-                price: 6000.00,
-                image: "https://plus.unsplash.com/premium_photo-1661780118337-454fbc6232a4?w=250&auto=format&fit=crop&q=80&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Auténticos tacos de carnitas estilo Michoacán, con carne de cerdo cocida a fuego lento hasta quedar tierna y jugosa. Servidos con cebolla, cilantro y salsa picante.",
+                name: "Hamburguesa clásica ",
+                price: 3000,
+                image: "",
+                productDetails: "Acompañada con papas fritas",
                 isVegan: false,
                 isVegetarian: false,
-                isGlutenFree: true,
-                dietaryInfo: "Sin gluten. Contiene carne.",
-                categories: ["Comidas Rápidas", "Cena", "Sin Gluten"],
-                order: 4 // Added order property
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
             },
             {
                 id: 5,
-                name: "Sushi Variado",
-                price: 9500.00,
-                image: "https://plus.unsplash.com/premium_photo-1723921344875-8f2a7a5343eb?w=250&auto=format&fit=crop&q=80&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Variedad de nigiri y rollos de sushi frescos, preparados con los ingredientes más selectos. Incluye salmón, atún, aguacate y pepino.",
+                name: "Salchipapas",
+                price: 2500,
+                image: "",
+                productDetails: "",
                 isVegan: false,
                 isVegetarian: false,
                 isGlutenFree: false,
-                dietaryInfo: "Contiene pescado y gluten (salsa de soya). Opción sin gluten disponible bajo pedido.",
-                categories: ["Más Vendidos", "Almuerzo", "Cena"],
-                order: 8 // Added order property
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
             },
             {
                 id: 6,
-                name: "Pasta Alfredo",
-                price: 6800.00,
-                image: "https://images.unsplash.com/photo-1686565510178-52c69af8be37?w=250&auto=format&fit=crop&q=80&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Deliciosa pasta fettuccine bañada en una rica y cremosa salsa Alfredo con queso parmesano y un toque de ajo. ¡Simplemente irresistible!",
+                name: "Arroz cantones ",
+                price: 2500,
+                image: "",
+                productDetails: "Especialidad de los martes hasta agotar existencia",
                 isVegan: false,
-                isVegetarian: true,
-                isGlutenFree: false,
-                dietaryInfo: "Vegetariana. Contiene lácteos y gluten.",
-                categories: ["Vegetarianos", "Cena"],
-                order: 7 // Added order property
+                isVegetarian: false,
+                isGlutenFree: true,
+                dietaryInfo: "",
+                categories: ["Martes"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
             },
             {
                 id: 7,
-                name: "Curry de Verduras",
-                price: 5500.00, // Nuevo precio
-                oldPrice: 7000.00, // Precio anterior
-                image: "https://images.unsplash.com/photo-1596797038530-2c107229654b?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Un aromático curry de verduras con leche de coco, especias exóticas y una mezcla de vegetales frescos de temporada. Servido con arroz jazmín.",
-                isVegan: true,
-                isVegetarian: true,
-                isGlutenFree: true,
-                dietaryInfo: "¡Vegano, Vegetariano y Sin Gluten! Un plato saludable y lleno de sabor.",
-                categories: ["Veganos", "Vegetarianos", "Sin Gluten", "Almuerzo", "Cena", "Saludable", "Promociones"],
-                order: 0 // Added order property, setting it to 0 for promotions to appear first
-            },
-            {
-                id: 8,
-                name: "Avena con Frutas y Nueces",
-                price: 3500.00,
-                image: "https://images.unsplash.com/photo-1517430090884-6330456107b3?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Avena caliente preparada con leche vegetal, cubierta con frutas frescas de temporada, nueces y un toque de miel. Ideal para empezar el día con energía.",
-                isVegan: true,
-                isVegetarian: true,
-                isGlutenFree: false,
-                dietaryInfo: "Vegano, Vegetariano. Contiene gluten (avena).",
-                categories: ["Veganos", "Vegetarianos", "Desayuno", "Saludable"],
-                order: 9 // Added order property
-            },
-            {
-                id: 9,
-                name: "Smoothie Verde Detox",
-                price: 4000.00,
-                image: "https://images.unsplash.com/photo-1505252585461-0428cd1a6bb8?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Refrescante smoothie hecho con espinacas, plátano, manzana verde, jengibre y agua de coco. Perfecto para desintoxicar y energizar.",
-                isVegan: true,
-                isVegetarian: true,
-                isGlutenFree: true,
-                dietaryInfo: "¡Vegano, Vegetariano y Sin Gluten! Una bebida saludable y nutritiva.",
-                categories: ["Veganos", "Vegetarianos", "Desayuno", "Saludable"],
-                order: 10 // Added order property
-            },
-            {
-                id: 10,
-                name: "Sandwich de Pollo al Grill",
-                price: 5500.00,
-                image: "https://images.unsplash.com/photo-1525997235282-3714217112c3?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                productDetails: "Pechuga de pollo a la parrilla, lechuga, tomate y mayonesa ligera en pan integral tostado. Una opción saludable y deliciosa para cualquier momento.",
+                name: "Olla de carne ",
+                price: 2500,
+                image: "",
+                productDetails: "Especialidad de los miércoles hasta agotar existencia",
                 isVegan: false,
                 isVegetarian: false,
                 isGlutenFree: false,
-                dietaryInfo: "Contiene carne y gluten.",
-                categories: ["Almuerzo", "Saludable", "Comidas Rápidas"],
-                order: 6 // Added order property
+                dietaryInfo: "",
+                categories: ["Miercoles"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 8,
+                name: "Quesadilla",
+                price: 3000,
+                image: "",
+                productDetails: "Acompañado con papas fritas",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida", "Pollo", "Carne"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 9,
+                name: "Choripan",
+                price: 3000,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 10,
+                name: "Tacos de birria",
+                price: 5000,
+                image: "",
+                productDetails: "3 tacos acompañado de su salsa birria",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida", "Carne"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 11,
+                name: "Sandwich ",
+                price: 3000,
+                image: "",
+                productDetails: "Acompañado de papas fritas",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida", "Pollo", "Carne"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 12,
+                name: "Hamburguesa Angus",
+                price: 600,
+                image: "",
+                productDetails: "Acompañado con papas fritas",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 13,
+                name: "Sushi",
+                price: 6000,
+                image: "",
+                productDetails: "Sujeto al rollo que elijas",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Jueves"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 14,
+                name: "Carlota Melocotón ",
+                price: 3000,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Postres"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 15,
+                name: "Aros de cebolla",
+                price: 2500,
+                image: "",
+                productDetails: "Acompañado con salsa",
+                isVegan: false,
+                isVegetarian: true,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 16,
+                name: "Chicharrones",
+                price: 3000,
+                image: "",
+                productDetails: "Acompañado con yuca y picó de gallo",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 17,
+                name: "Papanachos",
+                price: 3000,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida", "Pollo", "Carne"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 18,
+                name: "Tres leches ",
+                price: 2500,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Postres"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 19,
+                name: "Patacones ",
+                price: 2500,
+                image: "",
+                productDetails: "Acompañado con frijoles molidos y picó de gallo",
+                isVegan: true,
+                isVegetarian: true,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: [],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 20,
+                name: "Taquitos de la casa ",
+                price: 2000,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 21,
+                name: "Nachos",
+                price: 300,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida", "Pollo", "Carne"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 22,
+                name: "Papas birria",
+                price: 4000,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 23,
+                name: "Tacos casero",
+                price: 3000,
+                image: "",
+                productDetails: "Acompañado con papas fritas",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Comida Rápida", "Pollo", "Carne"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 24,
+                name: "Punta solomo",
+                price: 4000,
+                image: "",
+                productDetails: "Especialidad de los viernes hasta agotar existencia",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: true,
+                dietaryInfo: "",
+                categories: ["Viernes"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 25,
+                name: "Chifrijo",
+                price: 3000,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: true,
+                dietaryInfo: "",
+                categories: [],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 26,
+                name: "Frijoles blancos con cerdo",
+                price: 2500,
+                image: "",
+                productDetails: "Especialidad de los lunes hasta agotar existencia ",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: true,
+                dietaryInfo: "",
+                categories: ["Lunes"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 27,
+                name: "Gelatina de frutas ",
+                price: 1500,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Postres"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
+            },
+            {
+                id: 28,
+                name: "Pie de limón ",
+                price: 2500,
+                image: "",
+                productDetails: "",
+                isVegan: false,
+                isVegetarian: false,
+                isGlutenFree: false,
+                dietaryInfo: "",
+                categories: ["Postres"],
+                order: 999,
+                comercioId: "jm9ZZD68HpNtxPavQWaj",
+                comercioName: "El Punto"
             }
         ];
-
         const categories = [
-            { id: "all", name: "Todas las Categorías" },
-            { id: "Promociones", name: '🔥 Promociones 🔥' },
-            { id: "Más Vendidos", name: "Más Vendidos" },
-            { id: "Comidas Rápidas", name: "Comidas Rápidas" },
-            { id: "Bebidas", name: "Bebidas" },
-            { id: "Veganos", name: "Veganos" },
-            { id: "Vegetarianos", name: "Vegetarianos" },
-            { id: "Almuerzo", name: "Almuerzo" },
-            { id: "Desayuno", name: "Desayuno" },
-            { id: "Cena", name: "Cena" },
-            { id: "Saludable", name: "Saludable" },
-            { id: "Sin Gluten", name: "Sin Gluten" }
+            { id: "all", name: 'Todas las Categorías' },
+            { id: "Carne", name: 'Carne' },
+            { id: "Comida Rápida", name: 'Comida Rápida' },
+            { id: "Jueves", name: 'Jueves' },
+            { id: "Lunes", name: 'Lunes' },
+            { id: "Martes", name: 'Martes' },
+            { id: "Miercoles", name: 'Miercoles' },
+            { id: "Pizza", name: 'Pizza' },
+            { id: "Pollo", name: 'Pollo' },
+            { id: "Postres", name: 'Postres' },
+            { id: "Rapidas", name: 'Rapidas' },
+            { id: "Viernes", name: 'Viernes' }
         ];
-
 
         let cart = [];
         let currentFilter = "all";
@@ -1601,8 +1891,8 @@
                 window.addEventListener('load', () => {
                     // Usamos la ruta base de la URL de la página actual
                     // El scope debe coincidir con la base URL del Service Worker
-                    const swPath = './service-worker.js'; 
-                    navigator.serviceWorker.register(swPath, { scope: './' }) 
+                    const swPath = './service-worker.js';
+                    navigator.serviceWorker.register(swPath, { scope: './' })
                         .then(registration => {
                             console.log('ServiceWorker registrado con éxito:', registration.scope);
                         })
