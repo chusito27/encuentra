@@ -837,6 +837,10 @@
                 font-size: 0.9em;
             }
 
+            .category-button.active {
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
             .products {
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
                 gap: 15px;
@@ -1484,6 +1488,7 @@
         ];
         const categories = [
             { id: "all", name: 'Todas las Categorías' },
+            { id: "Promociones", name: 'Promociones' },
             { id: "Carne", name: 'Carne' },
             { id: "Comida Rápida", name: 'Comida Rápida' },
             { id: "Jueves", name: 'Jueves' },
@@ -1588,10 +1593,13 @@
                     `<span class="old-price">${formatColones(product.oldPrice)}</span><span class="new-price">${formatColones(product.price)}</span>` :
                     `<span class="new-price">${formatColones(product.price)}</span>`;
 
+                // Determine the image source: use product.image if available, otherwise the default link
+                const imageUrl = product.image || 'https://i.postimg.cc/vZQnpBpT/logo.png';
+
                 productCard.innerHTML = `
                     ${tagsHtml}
                     <div class="price-tag">${priceHtml}</div>
-                    <img src="${product.image}" alt="${product.name}" loading="lazy">
+                    <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://i.postimg.cc/vZQnpBpT/logo.png';">
                     <h3>${product.name}</h3>
                     <p>${product.productDetails}</p>
                     <button class="add-to-cart-button" data-product-id="${product.id}">Añadir al Carrito</button>
@@ -1686,9 +1694,11 @@
                     itemCount += item.quantity;
                     total += item.price * item.quantity;
                     const li = document.createElement('li');
+                    // Use the same image fallback logic for cart items
+                    const itemImageUrl = item.image || 'https://i.postimg.cc/vZQnpBpT/logo.png';
                     li.innerHTML = `
                         <div class="item-details">
-                            <img src="${item.image}" alt="${item.name}" loading="lazy">
+                            <img src="${itemImageUrl}" alt="${item.name}" loading="lazy" onerror="this.onerror=null;this.src='https://i.postimg.cc/vZQnpBpT/logo.png';">
                             <span>${item.name}</span>
                         </div>
                         <div class="quantity-controls">
@@ -1725,7 +1735,13 @@
         const openProductDetailModal = (productId) => {
             const product = products.find(p => p.id === productId);
             if (product) {
-                DOMElements.detailImage.src = product.image;
+                // Use the same image fallback logic for the detail modal
+                DOMElements.detailImage.src = product.image || 'https://i.postimg.cc/vZQnpBpT/logo.png';
+                // Add onerror for robustness in detail modal
+                DOMElements.detailImage.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'https://i.postimg.cc/vZQnpBpT/logo.png';
+                };
                 DOMElements.detailImage.alt = product.name;
                 DOMElements.detailName.textContent = product.name;
 
@@ -1753,7 +1769,8 @@
 
         const sendWhatsAppOrder = () => {
             if (cart.length === 0) {
-                alert("Tu carrito está vacío. Por favor, añade algunos productos antes de enviar el pedido.");
+                // Instead of alert, you might want to show a custom modal or message in the UI
+                console.log("Tu carrito está vacío. Por favor, añade algunos productos antes de enviar el pedido.");
                 return;
             }
 
