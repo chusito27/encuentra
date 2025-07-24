@@ -2,7 +2,7 @@
 export const products = [
     {
         id: 1,
-        name: "Queso ",
+        name: "Queso Frito",
         price: 500,
         image: "https://i.postimg.cc/4dq9XMN9/queso.jpg",
         productDetails: "",
