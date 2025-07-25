@@ -1116,7 +1116,9 @@
                 // Extract the array from the exported module content
                 const categoriesMatch = text.match(/export const categories = (\[[\s\S]*?\]);/);
                 if (categoriesMatch && categoriesMatch[1]) {
-                    categories = JSON.parse(categoriesMatch[1]);
+                    // Use new Function to safely evaluate the JavaScript array literal string
+                    // This is necessary because the content is a JS array literal, not strict JSON.
+                    categories = new Function('return ' + categoriesMatch[1])();
                 } else {
                     console.error("Could not parse categories from categories.js");
                     categories = []; // Fallback to empty array
@@ -1145,7 +1147,8 @@
                     { id: "Desayunos", name: 'Desayunos' },
                     { id: "Gallos", name: 'Gallos' }
                 ];
-                loadCategories(); // Retry loading with fallback
+                // No need to call loadCategories() again here, as it would cause an infinite loop if the fetch continues to fail.
+                // The current categories array (fallback) will be used.
             }
         };
 
@@ -1158,7 +1161,9 @@
                 // Extract the array from the exported module content
                 const productsMatch = text.match(/export const products = (\[[\s\S]*?\]);/);
                 if (productsMatch && productsMatch[1]) {
-                    products = JSON.parse(productsMatch[1]);
+                    // Use new Function to safely evaluate the JavaScript array literal string
+                    // This is necessary because the content is a JS array literal, not strict JSON.
+                    products = new Function('return ' + productsMatch[1])();
                 } else {
                     console.error("Could not parse products from products.js");
                     products = []; // Fallback to empty array
