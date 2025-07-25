@@ -386,7 +386,7 @@
 
         .products {
             display: grid;
-            grid-template-columns: 1fr; /* Default: 1 column for smallest screens */
+            grid-template-columns: repeat(2, 1fr); /* Default: 2 columns for all mobile screens */
             gap: 10px; /* Smallest gap */
             margin-bottom: 30px;
         }
@@ -983,7 +983,8 @@
         }
 
         /* Nuevas reglas para el diseño de productos y altura de imagen */
-        @media (min-width: 480px) {
+        /* Para pantallas de 480px y más, incluyendo las más pequeñas, se mostrarán en 2 columnas */
+        @media (min-width: 0px) { /* Esto asegura que se aplique desde el ancho más pequeño */
             .products {
                 grid-template-columns: repeat(2, 1fr); /* 2 columnas para 480px y más */
                 gap: 15px; /* Espacio ligeramente mayor */
