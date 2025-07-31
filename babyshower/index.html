@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de Baby Shower</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* Light blue background */
+        }
+        .container {
+            max-width: 90%;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+            }
+        }
+        /* Styles for guest cards */
+        #guestList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Responsive grid of cards */
+            gap: 1rem;
+            list-style: none; /* Remove default list styling */
+            padding: 0;
+        }
+        .guest-item {
+            position: relative; /* For absolute positioning of delete button */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: #f8fafc; /* Lighter background for items */
+            border-radius: 0.75rem; /* More rounded corners for cards */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            min-height: 100px; /* Minimum height for cards */
+            text-align: center;
+        }
+        .guest-item.confirmed {
+            background-color: #dcfce7; /* Light green for confirmed */
+            border: 2px solid #22c55e; /* Green border for confirmed */
+        }
+        .guest-item:hover {
+            transform: translateY(-3px); /* Slight lift on hover */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        .guest-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            word-break: break-word; /* Break long names */
+        }
+        .guest-number {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            font-size: 0.75rem; /* Smaller font for number */
+            font-weight: bold;
+            color: #64748b; /* Gray color for number */
+        }
+        .guest-actions {
+            display: flex;
+            flex-direction: column; /* Stack checkbox below name if needed */
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-left: 1.75rem; /* Space for custom checkbox */
+            font-size: 0.875rem; /* Smaller text for checkbox label */
+            color: #475569;
+        }
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 1.25rem;
+            width: 1.25rem;
+            background-color: #e2e8f0;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: #22c55e; /* Green for checked */
+        }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+        .checkbox-container .checkmark:after {
+            left: 0.45rem;
+            top: 0.2rem;
+            width: 0.35rem;
+            height: 0.7rem;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+        .delete-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #ef4444; /* Red */
+            color: white;
+            border-radius: 50%; /* Circular button */
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            line-height: 1; /* Adjust line height for perfect centering of 'x' */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            opacity: 0.7; /* Slightly transparent when not hovered */
+        }
+        .delete-btn:hover {
+            background-color: #dc2626;
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        .add-guest-form {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem; /* Added margin for separation */
+        }
+        .add-guest-form input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .add-guest-form input:focus {
+            border-color: #3b82f6; /* Blue focus */
+        }
+        .add-guest-form button {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .add-guest-form button:hover {
+            background-color: #2563eb;
+        }
+        .message-box {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex; /* Make it flex by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        /* Custom modal for confirmation */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            /* Removed display: none; from here, using .hidden class instead */
+        }
+        .custom-modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .custom-modal-buttons {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .custom-modal-buttons button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .custom-modal-buttons .confirm-btn {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        .custom-modal-buttons .confirm-btn:hover {
+            background-color: #dc2626;
+        }
+        .custom-modal-buttons .cancel-btn {
+            background-color: #e2e8f0; /* Light gray */
+            color: #334155;
+        }
+        .custom-modal-buttons .cancel-btn:hover {
+            background-color: #cbd5e1;
+        }
+
+        /* Login Form Specific Styles */
+        #loginContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 400px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        #loginContainer input {
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: border-color 0.2s ease-in-out;
+        }
+        #loginContainer input:focus {
+            border-color: #3b82f6;
+        }
+        #loginContainer button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+        #loginContainer button:hover {
+            background-color: #2563eb;
+        }
+        #loginContainer h2 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        .logout-btn {
+            background-color: #64748b; /* Gray */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            margin-top: 1rem;
+            float: right; /* Align to right */
+        }
+        .logout-btn:hover {
+            background-color: #475569;
+        }
+        /* Styles for filter buttons */
+        .filter-buttons button {
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .filter-buttons button.active {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        /* Ensure .hidden always works */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Tab Navigation Styles */
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .tab-buttons button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background-color: transparent;
+            color: #64748b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s ease-in-out, border-bottom 0.2s ease-in-out;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-buttons button.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .tab-buttons button:hover:not(.active) {
+            color: #1e293b;
+        }
+
+        /* Table Card Styles */
+        .table-card {
+            background-color: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .table-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+        .table-card .assigned-guests-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 0.5rem;
+            width: 100%; /* Take full width of card */
+        }
+        .table-card .assigned-guest-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.3rem 0;
+            border-bottom: 1px dashed #cbd5e1;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .table-card .assigned-guest-item:last-child {
+            border-bottom: none;
+        }
+        .table-card .unassign-btn {
+            background-color: #f97316; /* Orange */
+            color: white;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .table-card .unassign-btn:hover {
+            background-color: #ea580c;
+        }
+        .table-card .add-guest-to-table-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            width: 100%; /* Take full width of card */
+        }
+        .table-card .add-guest-to-table-form select,
+        .table-card .add-guest-to-table-form button {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e1;
+        }
+        .table-card .add-guest-to-table-form select {
+            flex-grow: 1; /* Allow select to take available space */
+        }
+        .table-card .add-guest-to-table-form button {
+            background-color: #10b981; /* Emerald green */
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .table-card .add-guest-to-table-form button:hover {
+            background-color: #059669;
+        }
+        .table-card .delete-table-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #ef4444; /* Red */
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            opacity: 0.7;
+        }
+        .table-card .delete-table-btn:hover {
+            background-color: #dc2626;
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        .guest-table-actions-container { /* Renamed from guest-table-info */
+            margin-top: 0.5rem; /* Space below checkbox */
+            display: flex; /* Ensure flex behavior */
+            flex-direction: column; /* Stack items */
+            align-items: center; /* Center items horizontally */
+        }
+        .guest-table-actions-container span { /* For the table name span */
+            cursor: pointer;
+            text-decoration: underline;
+            color: #3b82f6;
+            font-size: 0.85rem; /* Keep original font size */
+        }
+        .guest-table-actions-container span:hover {
+            color: #2563eb;
+        }
+        .assign-table-icon-btn {
+            /* Tailwind classes already define much of this */
+            /* p-1 rounded-full bg-blue-500 hover:bg-blue-600 text-white */
+            display: flex; /* To center SVG */
+            justify-content: center;
+            align-items: center;
+            border: none; /* Remove default button border */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            width: 24px; /* Fixed width for small button */
+            height: 24px; /* Fixed height for small button */
+            padding: 0; /* Remove padding to make it truly 24x24 */
+        }
+        .assign-table-icon-btn svg {
+            /* Ensure SVG takes full size of button and is centered */
+            width: 20px; /* Slightly smaller than button to give some internal spacing */
+            height: 20px;
+            stroke-width: 3; /* Adjusted stroke width for better visibility at smaller size */
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay (Starts visible by default, hidden by JS when content is ready) -->
+    <div id="loadingOverlay" class="loading-overlay">Cargando...</div>
+
+    <!-- Login Container (Starts hidden by default, shown by JS if not logged in) -->
+    <div id="loginContainer" class="hidden">
+        <h2>Iniciar Sesión</h2>
+        <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
+        <input type="password" id="loginPassword" placeholder="Contraseña" required>
+        <button id="loginBtn">Iniciar Sesión</button>
+        <button id="registerBtn" class="bg-emerald-500 hover:bg-emerald-600">Registrarse</button>
+    </div>
+
+    <!-- Main Application Container (Starts hidden by default, shown by JS if logged in) -->
+    <div class="container hidden" id="appContainer">
+        <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">¡James Baby Shower!</h1>
+        <div class="bg-blue-100 p-4 rounded-lg text-center mb-6 shadow-md">
+            <p class="text-xl font-semibold text-blue-800">Invitados confirmados: <span id="confirmedCount" class="text-3xl font-bold">0</span></p>
+            <p class="text-lg text-blue-700">Total de invitados: <span id="totalGuests" class="text-2xl font-bold">0</span></p>
+            <p id="userIdDisplay" class="text-sm text-blue-600 mt-2">Cargando ID de usuario...</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-buttons">
+            <button id="tabGuests" class="active">Lista de Invitados</button>
+            <button id="tabTables">Mesas</button>
+        </div>
+
+        <!-- Guests List Tab Content -->
+        <div id="guestsContent">
+            <!-- Filter Buttons -->
+            <div class="filter-buttons flex justify-center gap-4 mb-6">
+                <button id="filterAll" class="py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 active">Todos</button>
+                <button id="filterConfirmed" class="py-2 px-4 rounded-lg bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Confirmados</button>
+                <button id="filterUnconfirmed" class="py-2 px-4 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">No Confirmados</button>
+            </div>
+
+            <!-- Moved Add Guest Form here -->
+            <div class="add-guest-form">
+                <input type="text" id="newGuestName" placeholder="Nombre del nuevo invitado" class="w-full">
+                <button id="addGuestBtn">Agregar Invitado</button>
+            </div>
+
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Lista de Invitados</h2>
+            <ul id="guestList">
+                <!-- Los invitados se cargarán aquí -->
+            </ul>
+        </div>
+
+        <!-- Tables Tab Content (Hidden by default) -->
+        <div id="tablesContent" class="hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Gestión de Mesas</h2>
+            <div class="add-table-form flex gap-3 mb-6">
+                <input type="text" id="newTableName" placeholder="Nombre de la nueva mesa" class="flex-grow p-2 border rounded-md">
+                <button id="addTableBtn" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600">Añadir Mesa</button>
+            </div>
+            <div id="tablesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Las mesas se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <div id="messageBox" class="message-box"></div>
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmationModal" class="custom-modal-overlay hidden">
+        <div class="custom-modal-content">
+            <p class="text-lg font-semibold mb-4">¿Estás seguro de que quieres eliminar a este invitado?</p>
+            <div class="custom-modal-buttons">
+                <button id="confirmDeleteBtn" class="confirm-btn">Eliminar</button>
+                <button id="cancelDeleteBtn" class="cancel-btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Table Deletion -->
+    <div id="confirmTableDeleteModal" class="custom-modal-overlay hidden">
+        <div class="custom-modal-content">
+            <p class="text-lg font-semibold mb-4">¿Estás seguro de que quieres eliminar esta mesa? Los invitados asignados a esta mesa serán desasignados.</p>
+            <div class="custom-modal-buttons">
+                <button id="confirmDeleteTableBtn" class="confirm-btn">Eliminar Mesa</button>
+                <button id="cancelDeleteTableBtn" class="cancel-btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Table Modal -->
+    <div id="assignTableModal" class="custom-modal-overlay hidden">
+        <div class="custom-modal-content">
+            <h3 class="text-xl font-semibold mb-4">Asignar/Cambiar Mesa a <span id="assignGuestName" class="font-bold text-blue-700"></span></h3>
+            <select id="assignTableSelect" class="w-full p-2 border rounded-md mb-4">
+                <!-- Options populated by JS -->
+            </select>
+            <div class="custom-modal-buttons">
+                <button id="confirmAssignTableBtn" class="bg-blue-500 text-white hover:bg-blue-600">Guardar Asignación</button>
+                <button id="cancelAssignTableBtn" class="cancel-btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script type="module">
+        // Importa los módulos necesarios de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variables globales para Firebase y el ID de usuario
+        let app;
+        let db;
+        let auth;
+        let userId;
+        let allGuestsData = []; // Almacena la lista completa de invitados sin filtrar
+        let allTablesData = []; // Almacena la lista completa de mesas
+        let currentFilter = 'all'; // Estado del filtro de invitados: 'all', 'confirmed', 'unconfirmed'
+        let currentTab = 'guests'; // Estado de la pestaña activa: 'guests', 'tables'
+
+
+        // Variables globales proporcionadas por el entorno de Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyA5ZFmmabh-PI3-gccoRlz1WS6Et7lTeNU",
+            authDomain: "personalall.firebaseapp.com",
+            projectId: "personalall",
+            storageBucket: "personalall.firebasestorage.app",
+            messagingSenderId: "551703694288",
+            appId: "1:551703694288:web:e1acd64c09dbc0aa9e07d5",
+            measurementId: "G-B2TD2JZ0LS"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Referencias a elementos del DOM (Generales y de Invitados)
+        const guestList = document.getElementById('guestList');
+        const newGuestNameInput = document.getElementById('newGuestName');
+        const addGuestBtn = document.getElementById('addGuestBtn');
+        const confirmedCountSpan = document.getElementById('confirmedCount');
+        const totalGuestsSpan = document.getElementById('totalGuests');
+        const messageBox = document.getElementById('messageBox');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+
+        // Referencias para el modal de confirmación de invitado
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        let guestIdToDelete = null; // Para almacenar el ID del invitado a eliminar
+
+        // Referencias para los elementos de login
+        const loginContainer = document.getElementById('loginContainer');
+        const appContainer = document.getElementById('appContainer');
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Referencias para los botones de filtro de invitados
+        const filterAllBtn = document.getElementById('filterAll');
+        const filterConfirmedBtn = document.getElementById('filterConfirmed');
+        const filterUnconfirmedBtn = document.getElementById('filterUnconfirmed');
+
+        // Referencias para los elementos de pestañas
+        const tabGuestsBtn = document.getElementById('tabGuests');
+        const tabTablesBtn = document.getElementById('tabTables');
+        const guestsContent = document.getElementById('guestsContent');
+        const tablesContent = document.getElementById('tablesContent');
+
+        // Referencias para la gestión de mesas
+        const newTableNameInput = document.getElementById('newTableName');
+        const addTableBtn = document.getElementById('addTableBtn');
+        const tablesList = document.getElementById('tablesList');
+
+        // Referencias para el modal de confirmación de eliminación de mesa
+        const confirmTableDeleteModal = document.getElementById('confirmTableDeleteModal');
+        const confirmDeleteTableBtn = document.getElementById('confirmDeleteTableBtn');
+        const cancelDeleteTableBtn = document.getElementById('cancelDeleteTableBtn');
+        let tableIdToDelete = null; // Para almacenar el ID de la mesa a eliminar
+
+        // Referencias para el modal de asignación de mesa
+        const assignTableModal = document.getElementById('assignTableModal');
+        const assignGuestNameSpan = document.getElementById('assignGuestName');
+        const assignTableSelect = document.getElementById('assignTableSelect');
+        const confirmAssignTableBtn = document.getElementById('confirmAssignTableBtn');
+        const cancelAssignTableBtn = document.getElementById('cancelAssignTableBtn');
+        let guestIdToAssignTable = null; // Para almacenar el ID del invitado a asignar/cambiar mesa
+
+
+        // Lista inicial de nombres (se usará solo si la tabla está vacía)
+        const initialGuestNames = [
+            "Yessenia", "Pitico", "Marco", "Yuli", "Berlinton", "Joss", "Manfred", "Victor", "Tefy",
+            "Ale novio Tefy", "Jessica", "Gio", "Mami", "Papi", "Luis", "Tia", "Gato", "Vane", "Ash",
+            "Rafa", "Nia", "Olidieth", "Santi", "Daniela", "Ana", "Novio Ana", "Daniria", "Hijo",
+            "Hija", "Marido Daniria", "Felix",
+            "Cecilia", "Julia", "Dani", "Tati", "La bebe Tati",
+            "Esposo Tati", "Hannia", "Erick", "Valentina", "Yenny", "Marido Yenny", "Kendall",
+            "Kevin", "Angie", "Shirley", "Amarilis", "Paula", "Ronny", "Balin", "Randall", "Jose E",
+            "Andrea", "Ari", "Bella", "Tio Ramon", "Dinia", "Kevin", "Nicole", "Amanda", "Jose",
+            "Rubaldo", "Marujita", "Rosi", "Luis", "Noi", "Maikol", "Steven", "Nadia", "Tavo",
+            "Edwin", "Meli", "Meli", "Leslie", "Denisse", "Marco", "Luca", "Ruth", "Noah", "Brian",
+            "Ash", "Kris", "Anita", "Hermana Kris", "Yanory", "Diana", "Naza", "Kim", "Cesar",
+            "Sara", "Eve", "Novio Eve", "Gaudy", "Hijo 1", "Hijo 2", "Randald", "Rolo", "Paulina",
+            "Hija", "Hija", "Marta", "Karla", "Deivid", "Steven", "Sebas", "Karina", "Sofia"
+        ];
+
+        // --- Funciones de utilidad ---
+
+        // Muestra un mensaje temporal al usuario
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.className = 'message-box show';
+            if (type === 'error') {
+                messageBox.style.backgroundColor = '#ef4444'; // Rojo para error
+            } else {
+                messageBox.style.backgroundColor = '#4CAF50'; // Verde para éxito
+            }
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // Muestra u oculta el overlay de carga
+        function showLoading(show) {
+            if (show) {
+                loadingOverlay.classList.remove('hidden'); // Remover hidden para mostrar
+            } else {
+                loadingOverlay.classList.add('hidden'); // Añadir hidden para ocultar
+            }
+        }
+
+        // Muestra el modal de confirmación de invitado
+        function showGuestConfirmationModal(guestId) {
+            guestIdToDelete = guestId;
+            confirmationModal.classList.remove('hidden'); // Usar hidden class
+        }
+
+        // Oculta el modal de confirmación de invitado
+        function hideGuestConfirmationModal() {
+            confirmationModal.classList.add('hidden'); // Usar hidden class
+            guestIdToDelete = null;
+        }
+
+        // Muestra el modal de confirmación de eliminación de mesa
+        function showTableConfirmationModal(tableId) {
+            tableIdToDelete = tableId;
+            confirmTableDeleteModal.classList.remove('hidden'); // Usar hidden class
+        }
+
+        // Oculta el modal de confirmación de eliminación de mesa
+        function hideTableConfirmationModal() {
+            confirmTableDeleteModal.classList.add('hidden'); // Usar hidden class
+            tableIdToDelete = null;
+        }
+
+        // Muestra el modal de asignación de mesa
+        function showAssignTableModal(guestId, guestName) {
+            guestIdToAssignTable = guestId;
+            assignGuestNameSpan.textContent = guestName;
+            assignTableSelect.innerHTML = '<option value="">Seleccionar mesa...</option>'; // Opción por defecto
+
+            // Opción para desasignar
+            assignTableSelect.innerHTML += '<option value="unassign">Desasignar de mesa</option>';
+
+            // Obtener el invitado actual para preseleccionar la mesa
+            const currentGuest = allGuestsData.find(g => g.id === guestId);
+
+            // Poblar select con mesas disponibles y la mesa actual del invitado
+            allTablesData.forEach(table => {
+                const option = document.createElement('option');
+                option.value = table.id;
+                option.textContent = table.name;
+                assignTableSelect.appendChild(option);
+            });
+
+            // Preseleccionar la mesa actual del invitado si está asignado
+            if (currentGuest && currentGuest.assignedTableId) {
+                assignTableSelect.value = currentGuest.assignedTableId;
+            } else {
+                assignTableSelect.value = ''; // Asegurarse de que no haya nada seleccionado por defecto
+            }
+
+            assignTableModal.classList.remove('hidden'); // Make sure modal is visible
+        }
+
+        // Oculta el modal de asignación de mesa
+        function hideAssignTableModal() {
+            assignTableModal.classList.add('hidden'); // Hide modal
+            guestIdToAssignTable = null;
+        }
+
+
+        // --- Funciones de Firebase y Lógica de la Aplicación ---
+
+        // Carga los invitados desde Firestore y los renderiza en tiempo real
+        async function fetchGuests() {
+            if (!userId) {
+                console.log("Usuario no autenticado, no se pueden cargar los invitados.");
+                allGuestsData = []; // Limpiar datos si no hay usuario
+                applyFilter();
+                return;
+            }
+
+            const guestCollectionPath = `/artifacts/${appId}/users/${userId}/guests`;
+            const guestsRef = collection(db, guestCollectionPath);
+
+            onSnapshot(guestsRef, (querySnapshot) => {
+                const guests = [];
+                querySnapshot.forEach((doc) => {
+                    guests.push({ id: doc.id, ...doc.data() });
+                });
+                allGuestsData = guests; // Almacena la lista completa
+                applyFilter(); // Aplica el filtro actual y renderiza la lista de invitados
+                renderTables(); // Vuelve a renderizar las mesas para actualizar los desplegables y listas
+                showLoading(false); // Oculta el loading después de la primera carga exitosa
+            }, (error) => {
+                console.error('Error al escuchar invitados:', error.message);
+                showMessage('Error al cargar invitados: ' + error.message, 'error');
+                showLoading(false); // Oculta el loading en caso de error
+            });
+        }
+
+        // Carga las mesas desde Firestore y las renderiza en tiempo real
+        async function fetchTables() {
+            if (!userId) {
+                console.log("Usuario no autenticado, no se pueden cargar las mesas.");
+                allTablesData = []; // Limpiar datos si no hay usuario
+                renderTables();
+                return;
+            }
+
+            const tableCollectionPath = `/artifacts/${appId}/users/${userId}/tables`;
+            const tablesRef = collection(db, tableCollectionPath);
+
+            onSnapshot(tablesRef, (querySnapshot) => {
+                const tables = [];
+                querySnapshot.forEach((doc) => {
+                    tables.push({ id: doc.id, ...doc.data() });
+                });
+                allTablesData = tables; // Almacena la lista completa de mesas
+                renderTables(); // Renderiza las mesas
+                showLoading(false); // Oculta el loading después de la primera carga exitosa
+            }, (error) => {
+                console.error('Error al escuchar mesas:', error.message);
+                showMessage('Error al cargar mesas: ' + error.message, 'error');
+                showLoading(false); // Oculta el loading en caso de error
+            });
+        }
+
+        // Aplica el filtro actual y renderiza los invitados
+        function applyFilter() {
+            let filteredGuests = [];
+            if (currentFilter === 'all') {
+                filteredGuests = [...allGuestsData];
+            } else if (currentFilter === 'confirmed') {
+                filteredGuests = allGuestsData.filter(guest => guest.confirmed);
+            } else if (currentFilter === 'unconfirmed') {
+                filteredGuests = allGuestsData.filter(guest => !guest.confirmed);
+            }
+            renderGuests(filteredGuests);
+            updateFilterButtons();
+        }
+
+        // Actualiza la clase 'active' de los botones de filtro
+        function updateFilterButtons() {
+            filterAllBtn.classList.remove('active');
+            filterConfirmedBtn.classList.remove('active');
+            filterUnconfirmedBtn.classList.remove('active');
+
+            if (currentFilter === 'all') {
+                filterAllBtn.classList.add('active');
+            } else if (currentFilter === 'confirmed') {
+                filterConfirmedBtn.classList.add('active');
+            } else if (currentFilter === 'unconfirmed') {
+                filterUnconfirmedBtn.classList.add('active');
+            }
+        }
+
+        // Renderiza la lista de invitados en el HTML
+        function renderGuests(guests) {
+            guestList.innerHTML = '';
+            let confirmedCount = 0;
+
+            if (guests && guests.length > 0) {
+                guests.sort((a, b) => a.name.localeCompare(b.name));
+
+                guests.forEach((guest, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.id = `guest-${guest.id}`;
+                    listItem.className = `guest-item ${guest.confirmed ? 'confirmed' : ''}`;
+
+                    const guestNumber = document.createElement('span');
+                    guestNumber.className = 'guest-number';
+                    guestNumber.textContent = index + 1;
+
+                    const guestName = document.createElement('span');
+                    guestName.className = 'guest-name';
+                    guestName.textContent = guest.name;
+
+                    // Checkbox for confirmation
+                    const checkboxLabel = document.createElement('label');
+                    checkboxLabel.className = 'checkbox-container text-sm text-gray-600';
+                    checkboxLabel.textContent = 'Confirmado';
+
+                    const checkboxInput = document.createElement('input');
+                    checkboxInput.type = 'checkbox';
+                    checkboxInput.checked = guest.confirmed;
+                    checkboxInput.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        toggleConfirmation(guest.id, !guest.confirmed);
+                    });
+
+                    const checkmarkSpan = document.createElement('span');
+                    checkmarkSpan.className = 'checkmark';
+
+                    checkboxLabel.appendChild(checkboxInput);
+                    checkboxLabel.appendChild(checkmarkSpan);
+
+                    // Table info/assign button container
+                    const guestTableActionsContainer = document.createElement('div');
+                    guestTableActionsContainer.className = 'guest-table-actions-container mt-2'; // Added margin-top for spacing below checkbox
+
+                    if (guest.assignedTableName) {
+                        const tableNameSpan = document.createElement('span');
+                        tableNameSpan.textContent = `Mesa: ${guest.assignedTableName}`;
+                        tableNameSpan.classList.add('cursor-pointer', 'text-blue-700', 'underline', 'text-sm'); // Added text-sm for smaller text
+                        tableNameSpan.addEventListener('click', () => showAssignTableModal(guest.id, guest.name));
+                        guestTableActionsContainer.appendChild(tableNameSpan);
+                    } else {
+                        const assignTableIconButton = document.createElement('button');
+                        assignTableIconButton.className = 'assign-table-icon-btn w-6 h-6 rounded-full bg-blue-500 hover:bg-blue-600 text-white'; // Tailwind classes for styling
+                        assignTableIconButton.innerHTML = `
+                            <svg class="w-5 h-5" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="3">
+                                <ellipse cx="50" cy="50" rx="30" ry="20" />
+                                <rect x="40" y="15" width="20" height="10" rx="2" ry="2" />
+                                <rect x="40" y="75" width="20" height="10" rx="2" ry="2" />
+                                <rect x="15" y="40" width="10" height="20" rx="2" ry="2" />
+                                <rect x="75" y="40" width="10" height="20" rx="2" ry="2" />
+                            </svg>
+                        `;
+                        assignTableIconButton.title = 'Asignar Mesa'; // Add a title for accessibility
+                        assignTableIconButton.addEventListener('click', () => showAssignTableModal(guest.id, guest.name));
+                        guestTableActionsContainer.appendChild(assignTableIconButton);
+                    }
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'delete-btn';
+                    deleteButton.innerHTML = '&times;';
+                    deleteButton.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        showGuestConfirmationModal(guest.id);
+                    });
+
+                    listItem.appendChild(guestNumber);
+                    listItem.appendChild(guestName);
+                    listItem.appendChild(checkboxLabel); // Checkbox first
+                    listItem.appendChild(guestTableActionsContainer); // Then table actions
+                    listItem.appendChild(deleteButton);
+                    guestList.appendChild(listItem);
+
+                    if (guest.confirmed) {
+                        confirmedCount++;
+                    }
+                });
+            } else {
+                const noGuestsMessage = document.createElement('li');
+                noGuestsMessage.className = 'text-center text-gray-500 py-4 col-span-full';
+                noGuestsMessage.textContent = 'No hay invitados en la lista. ¡Agrega algunos!';
+                guestList.appendChild(noGuestsMessage);
+            }
+
+            confirmedCountSpan.textContent = confirmedCount;
+            totalGuestsSpan.textContent = allGuestsData.length;
+        }
+
+        // Renderiza la lista de mesas en el HTML
+        function renderTables() {
+            tablesList.innerHTML = '';
+            if (allTablesData && allTablesData.length > 0) {
+                allTablesData.sort((a, b) => a.name.localeCompare(b.name)); // Ordenar mesas por nombre
+
+                allTablesData.forEach(table => {
+                    const tableCard = document.createElement('div');
+                    tableCard.className = 'table-card';
+
+                    // SVG de la mesa con sillas
+                    const tableSvg = `
+                        <svg class="w-16 h-16 mx-auto mb-2 text-blue-600" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Table top (oval) -->
+                            <ellipse cx="50" cy="50" rx="30" ry="20" stroke="currentColor" stroke-width="3" fill="none"/>
+                            <!-- Chairs (simple rectangles) -->
+                            <!-- Top chair -->
+                            <rect x="40" y="15" width="20" height="10" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <!-- Bottom chair -->
+                            <rect x="40" y="75" width="20" height="10" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <!-- Left chair -->
+                            <rect x="15" y="40" width="10" height="20" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <!-- Right chair -->
+                            <rect x="75" y="40" width="10" height="20" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    `;
+                    tableCard.innerHTML += tableSvg; // Add SVG to the card
+
+                    const tableNameHeader = document.createElement('h3');
+                    tableNameHeader.textContent = table.name;
+                    tableCard.appendChild(tableNameHeader);
+
+                    // Delete table button
+                    const deleteTableBtn = document.createElement('button');
+                    deleteTableBtn.className = 'delete-table-btn';
+                    deleteTableBtn.innerHTML = '&times;';
+                    deleteTableBtn.addEventListener('click', () => {
+                        console.log('Attempting to delete table:', table.id); // Log for debugging
+                        showTableConfirmationModal(table.id);
+                    });
+                    tableCard.appendChild(deleteTableBtn);
+
+                    const assignedGuestsList = document.createElement('ul');
+                    assignedGuestsList.className = 'assigned-guests-list';
+                    tableCard.appendChild(assignedGuestsList);
+
+                    // Filter guests assigned to this table
+                    const guestsAssignedToThisTable = allGuestsData.filter(guest => guest.assignedTableId === table.id);
+                    if (guestsAssignedToThisTable.length > 0) {
+                        guestsAssignedToThisTable.forEach(guest => {
+                            const guestItem = document.createElement('li');
+                            guestItem.className = 'assigned-guest-item';
+                            guestItem.innerHTML = `<span>${guest.name}</span>
+                                                   <button class="unassign-btn" data-guest-id="${guest.id}">Desasignar</button>`;
+                            assignedGuestsList.appendChild(guestItem);
+                        });
+                    } else {
+                        const noGuestsAssigned = document.createElement('li');
+                        noGuestsAssigned.textContent = 'Ningún invitado asignado.';
+                        noGuestsAssigned.className = 'text-sm text-gray-500';
+                        assignedGuestsList.appendChild(noGuestsAssigned);
+                    }
+
+                    // Add event listeners for unassign buttons
+                    tableCard.querySelectorAll('.unassign-btn').forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            const guestId = event.target.dataset.guestId;
+                            unassignGuestFromTable(guestId);
+                        });
+                    });
+
+                    // Form to assign new guests to this table
+                    const assignForm = document.createElement('div');
+                    assignForm.className = 'add-guest-to-table-form';
+
+                    const unassignedGuestsSelect = document.createElement('select');
+                    unassignedGuestsSelect.innerHTML = '<option value="">Seleccionar invitado...</option>';
+
+                    // Populate select with unassigned AND CONFIRMED guests
+                    const unassignedConfirmedGuests = allGuestsData.filter(guest => !guest.assignedTableId && guest.confirmed);
+                    unassignedConfirmedGuests.forEach(guest => {
+                        const option = document.createElement('option');
+                        option.value = guest.id;
+                        option.textContent = guest.name;
+                        unassignedGuestsSelect.appendChild(option);
+                    });
+                    assignForm.appendChild(unassignedGuestsSelect);
+
+                    const assignBtn = document.createElement('button');
+                    assignBtn.textContent = 'Asignar';
+                    assignBtn.addEventListener('click', () => {
+                        const selectedGuestId = unassignedGuestsSelect.value;
+                        if (selectedGuestId) {
+                            const guestName = unassignedGuestsSelect.options[unassignedGuestsSelect.selectedIndex].text;
+                            assignGuestToTable(selectedGuestId, table.id, table.name, guestName);
+                        } else {
+                            showMessage('Por favor, selecciona un invitado para asignar.', 'error');
+                        }
+                    });
+                    assignForm.appendChild(assignBtn);
+                    //tableCard.appendChild(assignForm);
+
+                    tablesList.appendChild(tableCard);
+                });
+            } else {
+                const noTablesMessage = document.createElement('p');
+                noTablesMessage.className = 'text-center text-gray-500 py-4 col-span-full';
+                noTablesMessage.textContent = 'No hay mesas creadas. ¡Añade algunas!';
+                tablesList.appendChild(noTablesMessage);
+            }
+        }
+
+
+        // Agrega un nuevo invitado a la base de datos
+        async function addGuest() {
+            const name = newGuestNameInput.value.trim();
+            if (!name) {
+                showMessage('Por favor, ingresa un nombre para el invitado.', 'error');
+                return;
+            }
+            if (!userId) {
+                showMessage('Error: Usuario no autenticado. Inicia sesión para agregar invitados.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const guestCollectionPath = `/artifacts/${appId}/users/${userId}/guests`;
+                await addDoc(collection(db, guestCollectionPath), { name: name, confirmed: false, assignedTableId: null, assignedTableName: null });
+
+                newGuestNameInput.value = ''; // Limpia el input
+                showMessage('Invitado agregado exitosamente.');
+            } catch (error) {
+                console.error('Error al agregar invitado:', error.message);
+                showMessage('Error al agregar invitado: ' + error.message, 'error');
+                showLoading(false);
+            }
+        }
+
+        // Elimina un invitado de la base de datos (llamado por el modal de confirmación)
+        async function deleteGuestConfirmed() {
+            // Captura el ID del invitado a eliminar directamente del estado global
+            const idToDelete = guestIdToDelete; // Asegúrate de capturar el valor ANTES de ocultar el modal
+
+            hideGuestConfirmationModal(); // Ahora se oculta después de capturar el ID
+
+            if (!idToDelete) {
+                console.error("No guest ID to delete when confirm delete button clicked.");
+                showMessage('Error: No se pudo identificar al invitado a eliminar.', 'error');
+                return;
+            }
+            if (!userId) {
+                showMessage('Error: Usuario no autenticado. Inicia sesión para eliminar invitados.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const guestDocPath = `/artifacts/${appId}/users/${userId}/guests/${idToDelete}`;
+                await deleteDoc(doc(db, guestDocPath));
+
+                showMessage('Invitado eliminado exitosamente.');
+            } catch (error) {
+                console.error('Error al eliminar invitado:', error.message);
+                showMessage('Error al eliminar invitado: ' + error.message, 'error');
+                showLoading(false);
+            } finally {
+                guestIdToDelete = null; // Limpia el ID después de la operación
+            }
+        }
+
+        // Cambia el estado de confirmación de un invitado
+        async function toggleConfirmation(id, newStatus) {
+            if (!userId) {
+                showMessage('Error: Usuario no autenticado. Inicia sesión para actualizar el estado.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const guestDocPath = `/artifacts/${appId}/users/${userId}/guests/${id}`;
+                await updateDoc(doc(db, guestDocPath), { confirmed: newStatus });
+
+                showMessage('Estado de confirmación actualizado.');
+            } catch (error) {
+                console.error('Error al actualizar estado de confirmación:', error.message);
+                showMessage('Error al actualizar estado: ' + error.message, 'error');
+                showLoading(false);
+            }
+        }
+
+        // Añade una nueva mesa
+        async function addTable() {
+            const tableName = newTableNameInput.value.trim();
+            if (!tableName) {
+                showMessage('Por favor, ingresa un nombre para la mesa.', 'error');
+                return;
+            }
+            if (!userId) {
+                showMessage('Error: Usuario no autenticado. Inicia sesión para añadir mesas.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const tableCollectionPath = `/artifacts/${appId}/users/${userId}/tables`;
+                await addDoc(collection(db, tableCollectionPath), { name: tableName });
+                newTableNameInput.value = '';
+                showMessage('Mesa añadida exitosamente.');
+            } catch (error) {
+                console.error('Error al añadir mesa:', error.message);
+                showMessage('Error al añadir mesa: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Asigna un invitado a una mesa (desde el modal de asignación)
+        async function updateGuestTableAssignment() {
+            const selectedTableId = assignTableSelect.value;
+            const guestId = guestIdToAssignTable;
+
+            if (!guestId) {
+                showMessage('Error: No se pudo identificar al invitado.', 'error');
+                hideAssignTableModal();
+                return;
+            }
+            if (!userId) {
+                showMessage('Error: Usuario no autenticado. Inicia sesión para asignar invitados.', 'error');
+                hideAssignTableModal();
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const guestDocPath = `/artifacts/${appId}/users/${userId}/guests/${guestId}`;
+                let newAssignedTableId = null;
+                let newAssignedTableName = null;
+
+                if (selectedTableId === "unassign") {
+                    // Si se seleccionó "Desasignar"
+                    newAssignedTableId = null;
+                    newAssignedTableName = null;
+                    showMessage('Invitado desasignado exitosamente.');
+                } else if (selectedTableId) {
+                    // Si se seleccionó una mesa
+                    const selectedTable = allTablesData.find(table => table.id === selectedTableId);
+                    if (selectedTable) {
+                        newAssignedTableId = selectedTable.id;
+                        newAssignedTableName = selectedTable.name;
+                        showMessage(`Invitado asignado a "${selectedTable.name}" exitosamente.`);
+                    } else {
+                        showMessage('Mesa seleccionada no encontrada.', 'error');
+                        showLoading(false);
+                        return;
+                    }
+                } else {
+                    // Si no se seleccionó nada (opción por defecto)
+                    showMessage('Por favor, selecciona una mesa o desasigna al invitado.', 'error');
+                    showLoading(false);
+                    return;
+                }
+
+                await updateDoc(doc(db, guestDocPath), {
+                    assignedTableId: newAssignedTableId,
+                    assignedTableName: newAssignedTableName
+                });
+
+            } catch (error) {
+                console.error('Error al actualizar asignación de mesa:', error.message);
+                showMessage('Error al actualizar asignación: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+                hideAssignTableModal(); // Oculta el modal después de la operación
+            }
+        }
+
+
+        // Desasigna un invitado de una mesa (desde el botón "Desasignar")
+        async function unassignGuestFromTable(guestId) {
+            if (!userId) {
+                showMessage('Error: Usuario no autenticado. Inicia sesión para desasignar invitados.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const guestDocPath = `/artifacts/${appId}/users/${userId}/guests/${guestId}`;
+                await updateDoc(doc(db, guestDocPath), {
+                    assignedTableId: null,
+                    assignedTableName: null
+                });
+                showMessage('Invitado desasignado exitosamente.');
+            } catch (error) {
+                console.error('Error al desasignar invitado:', error.message);
+                showMessage('Error al desasignar invitado: ' + error.message, 'error');
+                showLoading(false);
+            } finally {
+                // No need to hide modal here, as this is called from renderTables, not directly from assignTableModal
+            }
+        }
+
+        // Elimina una mesa (y desasigna a sus invitados)
+        async function deleteTableConfirmed() {
+            const idToDelete = tableIdToDelete; // Captura el valor antes de ocultar el modal
+            hideTableConfirmationModal();
+
+            if (!idToDelete) {
+                console.error("No table ID to delete when confirm delete button clicked.");
+                showMessage('Error: No se pudo identificar la mesa a eliminar.', 'error');
+                return;
+            }
+            if (!userId) {
+                showMessage('Error: Usuario no autenticado. Inicia sesión para eliminar mesas.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                console.log(`Attempting to delete table: ${idToDelete} for user: ${userId}`);
+                const batch = writeBatch(db);
+
+                // Desasignar invitados de esta mesa
+                const guestsToUnassign = allGuestsData.filter(guest => guest.assignedTableId === idToDelete);
+                console.log(`Guests to unassign from table ${idToDelete}:`, guestsToUnassign.length);
+                guestsToUnassign.forEach(guest => {
+                    const guestDocRef = doc(db, `/artifacts/${appId}/users/${userId}/guests/${guest.id}`);
+                    batch.update(guestDocRef, { assignedTableId: null, assignedTableName: null });
+                });
+
+                // Eliminar la mesa
+                const tableDocPath = `/artifacts/${appId}/users/${userId}/tables/${idToDelete}`;
+                batch.delete(doc(db, tableDocPath));
+
+                await batch.commit();
+                showMessage('Mesa eliminada exitosamente y sus invitados desasignados.');
+                console.log('Table deletion and guest unassignment committed successfully.');
+            } catch (error) {
+                console.error('Error al eliminar mesa:', error.message);
+                showMessage('Error al eliminar mesa: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+                tableIdToDelete = null;
+            }
+        }
+
+
+        // Función para cargar la lista inicial de invitados si la tabla está vacía
+        async function initialLoad() {
+            showLoading(true);
+            if (!userId) {
+                console.log("Usuario no autenticado para carga inicial, esperando...");
+                return;
+            }
+
+            try {
+                const guestCollectionPath = `/artifacts/${appId}/users/${userId}/guests`;
+                const guestQuerySnapshot = await getDocs(collection(db, guestCollectionPath));
+
+                // Si no hay invitados existentes, inserta la lista inicial
+                if (guestQuerySnapshot.empty) {
+                    const guestsToInsert = initialGuestNames.map(name => ({ name: name, confirmed: false, assignedTableId: null, assignedTableName: null }));
+                    await Promise.all(guestsToInsert.map(guest => addDoc(collection(db, guestCollectionPath), guest)));
+                    showMessage('Lista inicial de invitados cargada.');
+                }
+            } catch (error) {
+                console.error('Error en la carga inicial de invitados:', error.message);
+                showMessage('Error en la carga inicial de invitados: ' + error.message, 'error');
+            } finally {
+                // showLoading(false) is handled by onSnapshot in fetchGuests
+            }
+        }
+
+        // --- Funciones de Autenticación ---
+
+        async function handleLogin() {
+            const email = loginEmailInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+
+            if (!email || !password) {
+                showMessage('Por favor, ingresa correo y contraseña.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage('Sesión iniciada exitosamente.');
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error.message);
+                let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = 'Correo o contraseña incorrectos.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Formato de correo electrónico inválido.';
+                }
+                showMessage(errorMessage, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function handleRegister() {
+            const email = loginEmailInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+
+            if (!email || !password) {
+                showMessage('Por favor, ingresa correo y contraseña para registrarte.', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showMessage('La contraseña debe tener al menos 6 caracteres.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessage('Registro exitoso. ¡Sesión iniciada automáticamente!');
+            } catch (error) {
+                console.error('Error al registrar usuario:', error.message);
+                let errorMessage = 'Error al registrar. Intenta de nuevo.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Este correo ya está registrado.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Formato de correo electrónico inválido.';
+                }
+                showMessage(errorMessage, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function handleLogout() {
+            showLoading(true);
+            try {
+                await signOut(auth);
+                showMessage('Sesión cerrada exitosamente.');
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error.message);
+                showMessage('Error al cerrar sesión: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // --- Gestión de Pestañas ---
+        function showTab(tabName) {
+            currentTab = tabName;
+
+            // Actualizar botones de pestaña
+            tabGuestsBtn.classList.remove('active');
+            tabTablesBtn.classList.remove('active');
+
+            if (tabName === 'guests') {
+                guestsContent.classList.remove('hidden');
+                tablesContent.classList.add('hidden');
+                tabGuestsBtn.classList.add('active');
+                applyFilter(); // Re-render guests when tab is active
+            } else if (tabName === 'tables') {
+                guestsContent.classList.add('hidden');
+                tablesContent.classList.remove('hidden');
+                tabTablesBtn.classList.add('active');
+                renderTables(); // Re-render tables when tab is active
+            }
+        }
+
+
+        // --- Inicialización de Firebase y Autenticación ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            showLoading(true); // Muestra el loading al inicio
+
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Escucha cambios en el estado de autenticación
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplay.textContent = `Sesión iniciada como: ${user.email || user.uid}`;
+                        console.log("Usuario autenticado:", user.email || user.uid);
+                        loginContainer.classList.add('hidden'); // Ocultar formulario de login
+                        appContainer.classList.remove('hidden'); // Mostrar la aplicación
+                        await initialLoad(); // Carga inicial de datos (invitados)
+                        fetchGuests(); // Inicia la escucha de invitados
+                        fetchTables(); // Inicia la escucha de mesas
+                        showTab(currentTab); // Muestra la pestaña inicial
+                    } else {
+                        userId = null;
+                        userIdDisplay.textContent = 'Cargando ID de usuario...';
+                        loginContainer.classList.remove('hidden'); // Mostrar formulario de login
+                        appContainer.classList.add('hidden'); // Ocultar la aplicación
+                        showLoading(false); // Ocultar loading si no hay usuario logueado
+                        renderGuests([]); // Limpiar lista de invitados
+                        tablesList.innerHTML = ''; // Limpiar lista de mesas
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error al inicializar Firebase:', error.message);
+                showMessage('Error al inicializar la aplicación. Consulta la consola.', 'error');
+                showLoading(false);
+            }
+
+            // --- Event Listeners ---
+            addGuestBtn.addEventListener('click', addGuest);
+            newGuestNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addGuest();
+                }
+            });
+
+            confirmDeleteBtn.addEventListener('click', deleteGuestConfirmed);
+            cancelDeleteBtn.addEventListener('click', hideGuestConfirmationModal);
+
+            // Modificación del event listener para deleteTableConfirmed
+            confirmDeleteTableBtn.addEventListener('click', deleteTableConfirmed);
+            cancelDeleteTableBtn.addEventListener('click', hideTableConfirmationModal);
+
+            // Event Listeners para Login/Registro/Logout
+            loginBtn.addEventListener('click', handleLogin);
+            registerBtn.addEventListener('click', handleRegister);
+            logoutBtn.addEventListener('click', handleLogout);
+
+            // Event Listeners para los botones de filtro de invitados
+            filterAllBtn.addEventListener('click', () => {
+                currentFilter = 'all';
+                applyFilter();
+            });
+            filterConfirmedBtn.addEventListener('click', () => {
+                currentFilter = 'confirmed';
+                applyFilter();
+            });
+            filterUnconfirmedBtn.addEventListener('click', () => {
+                currentFilter = 'unconfirmed';
+                applyFilter();
+            });
+
+            // Event Listeners para los botones de pestaña
+            tabGuestsBtn.addEventListener('click', () => showTab('guests'));
+            tabTablesBtn.addEventListener('click', () => showTab('tables'));
+
+            // Event Listeners para la gestión de mesas
+            addTableBtn.addEventListener('click', addTable);
+            newTableNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTable();
+                }
+            });
+
+            // Event Listeners para el modal de asignación de mesa
+            confirmAssignTableBtn.addEventListener('click', updateGuestTableAssignment);
+            cancelAssignTableBtn.addEventListener('click', hideAssignTableModal);
+
+            // Permitir Enter en los campos de login para iniciar sesión
+            loginEmailInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+            loginPasswordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
