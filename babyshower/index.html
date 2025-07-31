@@ -647,6 +647,12 @@
                     Confirmados</button>
             </div>
 
+            <!-- Search Input -->
+            <div class="mb-6">
+                <input type="text" id="guestSearchInput" placeholder="Buscar invitado por nombre..."
+                    class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+            </div>
+
             <!-- Moved Add Guest Form here -->
             <div class="add-guest-form">
                 <input type="text" id="newGuestName" placeholder="Nombre del nuevo invitado" class="w-full">
@@ -734,7 +740,7 @@
         let allTablesData = []; // Almacena la lista completa de mesas
         let currentFilter = 'all'; // Estado del filtro de invitados: 'all', 'confirmed', 'unconfirmed'
         let currentTab = 'guests'; // Estado de la pestaña activa: 'guests', 'tables'
-
+        let searchQuery = ''; // Variable para almacenar el texto de búsqueda
 
         // Variables globales proporcionadas por el entorno de Canvas
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -758,6 +764,7 @@
         const messageBox = document.getElementById('messageBox');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const userIdDisplay = document.getElementById('userIdDisplay');
+        const guestSearchInput = document.getElementById('guestSearchInput'); // Nuevo input de búsqueda
 
         // Referencias para el modal de confirmación de invitado
         const confirmationModal = document.getElementById('confirmationModal');
@@ -967,14 +974,23 @@
 
         // Aplica el filtro actual y renderiza los invitados
         function applyFilter() {
-            let filteredGuests = [];
-            if (currentFilter === 'all') {
-                filteredGuests = [...allGuestsData];
-            } else if (currentFilter === 'confirmed') {
-                filteredGuests = allGuestsData.filter(guest => guest.confirmed);
+            let filteredGuests = [...allGuestsData];
+
+            // Aplicar filtro de confirmación
+            if (currentFilter === 'confirmed') {
+                filteredGuests = filteredGuests.filter(guest => guest.confirmed);
             } else if (currentFilter === 'unconfirmed') {
-                filteredGuests = allGuestsData.filter(guest => !guest.confirmed);
+                filteredGuests = filteredGuests.filter(guest => !guest.confirmed);
             }
+
+            // Aplicar filtro de búsqueda por nombre
+            if (searchQuery) {
+                const lowerCaseSearchQuery = searchQuery.toLowerCase();
+                filteredGuests = filteredGuests.filter(guest =>
+                    guest.name.toLowerCase().includes(lowerCaseSearchQuery)
+                );
+            }
+
             renderGuests(filteredGuests);
             updateFilterButtons();
         }
@@ -1603,6 +1619,12 @@
                 if (e.key === 'Enter') {
                     addGuest();
                 }
+            });
+
+            // Event listener para el input de búsqueda
+            guestSearchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim();
+                applyFilter(); // Re-aplicar filtros cada vez que el texto de búsqueda cambia
             });
 
             confirmDeleteBtn.addEventListener('click', deleteGuestConfirmed);
