@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +12,10 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f9ff; /* Light blue background */
+            background-color: #f0f9ff;
+            /* Light blue background */
         }
+
         .container {
             max-width: 90%;
             margin: 2rem auto;
@@ -21,71 +24,96 @@
             border-radius: 1rem;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
+
         @media (min-width: 768px) {
             .container {
                 max-width: 768px;
             }
         }
+
         /* Styles for guest cards */
         #guestList {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Responsive grid of cards */
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            /* Responsive grid of cards */
             gap: 1rem;
-            list-style: none; /* Remove default list styling */
+            list-style: none;
+            /* Remove default list styling */
             padding: 0;
         }
+
         .guest-item {
-            position: relative; /* For absolute positioning of delete button */
+            position: relative;
+            /* For absolute positioning of delete button */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 1rem;
-            background-color: #f8fafc; /* Lighter background for items */
-            border-radius: 0.75rem; /* More rounded corners for cards */
+            background-color: #f8fafc;
+            /* Lighter background for items */
+            border-radius: 0.75rem;
+            /* More rounded corners for cards */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-            min-height: 100px; /* Minimum height for cards */
+            min-height: 100px;
+            /* Minimum height for cards */
             text-align: center;
         }
+
         .guest-item.confirmed {
-            background-color: #dcfce7; /* Light green for confirmed */
-            border: 2px solid #22c55e; /* Green border for confirmed */
+            background-color: #dcfce7;
+            /* Light green for confirmed */
+            border: 2px solid #22c55e;
+            /* Green border for confirmed */
         }
+
         .guest-item:hover {
-            transform: translateY(-3px); /* Slight lift on hover */
+            transform: translateY(-3px);
+            /* Slight lift on hover */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
+
         .guest-name {
             font-weight: 600;
             color: #1e293b;
             margin-bottom: 0.5rem;
-            word-break: break-word; /* Break long names */
+            word-break: break-word;
+            /* Break long names */
         }
+
         .guest-number {
             position: absolute;
             top: 0.5rem;
             left: 0.5rem;
-            font-size: 0.75rem; /* Smaller font for number */
+            font-size: 0.75rem;
+            /* Smaller font for number */
             font-weight: bold;
-            color: #64748b; /* Gray color for number */
+            color: #64748b;
+            /* Gray color for number */
         }
+
         .guest-actions {
             display: flex;
-            flex-direction: column; /* Stack checkbox below name if needed */
+            flex-direction: column;
+            /* Stack checkbox below name if needed */
             align-items: center;
             gap: 0.5rem;
         }
+
         .checkbox-container {
             display: flex;
             align-items: center;
             cursor: pointer;
             user-select: none;
             position: relative;
-            padding-left: 1.75rem; /* Space for custom checkbox */
-            font-size: 0.875rem; /* Smaller text for checkbox label */
+            padding-left: 1.75rem;
+            /* Space for custom checkbox */
+            font-size: 0.875rem;
+            /* Smaller text for checkbox label */
             color: #475569;
         }
+
         .checkbox-container input {
             position: absolute;
             opacity: 0;
@@ -93,6 +121,7 @@
             height: 0;
             width: 0;
         }
+
         .checkmark {
             position: absolute;
             top: 0;
@@ -103,17 +132,22 @@
             border-radius: 0.25rem;
             transition: background-color 0.2s ease-in-out;
         }
-        .checkbox-container input:checked ~ .checkmark {
-            background-color: #22c55e; /* Green for checked */
+
+        .checkbox-container input:checked~.checkmark {
+            background-color: #22c55e;
+            /* Green for checked */
         }
+
         .checkmark:after {
             content: "";
             position: absolute;
             display: none;
         }
-        .checkbox-container input:checked ~ .checkmark:after {
+
+        .checkbox-container input:checked~.checkmark:after {
             display: block;
         }
+
         .checkbox-container .checkmark:after {
             left: 0.45rem;
             top: 0.2rem;
@@ -123,13 +157,16 @@
             border-width: 0 3px 3px 0;
             transform: rotate(45deg);
         }
+
         .delete-btn {
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
-            background-color: #ef4444; /* Red */
+            background-color: #ef4444;
+            /* Red */
             color: white;
-            border-radius: 50%; /* Circular button */
+            border-radius: 50%;
+            /* Circular button */
             width: 24px;
             height: 24px;
             display: flex;
@@ -137,22 +174,28 @@
             justify-content: center;
             font-size: 0.875rem;
             font-weight: bold;
-            line-height: 1; /* Adjust line height for perfect centering of 'x' */
+            line-height: 1;
+            /* Adjust line height for perfect centering of 'x' */
             cursor: pointer;
             transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            opacity: 0.7; /* Slightly transparent when not hovered */
+            opacity: 0.7;
+            /* Slightly transparent when not hovered */
         }
+
         .delete-btn:hover {
             background-color: #dc2626;
             transform: scale(1.1);
             opacity: 1;
         }
+
         .add-guest-form {
             display: flex;
             gap: 0.75rem;
             margin-top: 1.5rem;
-            margin-bottom: 2rem; /* Added margin for separation */
+            margin-bottom: 2rem;
+            /* Added margin for separation */
         }
+
         .add-guest-form input {
             flex-grow: 1;
             padding: 0.75rem 1rem;
@@ -161,25 +204,32 @@
             outline: none;
             transition: border-color 0.2s ease-in-out;
         }
+
         .add-guest-form input:focus {
-            border-color: #3b82f6; /* Blue focus */
+            border-color: #3b82f6;
+            /* Blue focus */
         }
+
         .add-guest-form button {
-            background-color: #3b82f6; /* Blue */
+            background-color: #3b82f6;
+            /* Blue */
             color: white;
             padding: 0.75rem 1.25rem;
             border-radius: 0.5rem;
             font-weight: 600;
             transition: background-color 0.2s ease-in-out;
         }
+
         .add-guest-form button:hover {
             background-color: #2563eb;
         }
+
         .message-box {
             position: fixed;
             top: 1rem;
             right: 1rem;
-            background-color: #4CAF50; /* Green */
+            background-color: #4CAF50;
+            /* Green */
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 0.5rem;
@@ -188,9 +238,11 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
         }
+
         .message-box.show {
             opacity: 1;
         }
+
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -198,7 +250,8 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            display: flex; /* Make it flex by default */
+            display: flex;
+            /* Make it flex by default */
             justify-content: center;
             align-items: center;
             z-index: 2000;
@@ -206,6 +259,7 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
+
         /* Custom modal for confirmation */
         .custom-modal-overlay {
             position: fixed;
@@ -220,6 +274,7 @@
             z-index: 3000;
             /* Removed display: none; from here, using .hidden class instead */
         }
+
         .custom-modal-content {
             background-color: #ffffff;
             padding: 2rem;
@@ -229,12 +284,14 @@
             max-width: 400px;
             width: 90%;
         }
+
         .custom-modal-buttons {
             margin-top: 1.5rem;
             display: flex;
             justify-content: center;
             gap: 1rem;
         }
+
         .custom-modal-buttons button {
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
@@ -242,17 +299,23 @@
             cursor: pointer;
             transition: background-color 0.2s ease-in-out;
         }
+
         .custom-modal-buttons .confirm-btn {
-            background-color: #ef4444; /* Red */
+            background-color: #ef4444;
+            /* Red */
             color: white;
         }
+
         .custom-modal-buttons .confirm-btn:hover {
             background-color: #dc2626;
         }
+
         .custom-modal-buttons .cancel-btn {
-            background-color: #e2e8f0; /* Light gray */
+            background-color: #e2e8f0;
+            /* Light gray */
             color: #334155;
         }
+
         .custom-modal-buttons .cancel-btn:hover {
             background-color: #cbd5e1;
         }
@@ -269,6 +332,7 @@
             border-radius: 1rem;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
+
         #loginContainer input {
             padding: 0.75rem 1rem;
             border: 1px solid #cbd5e1;
@@ -276,9 +340,11 @@
             outline: none;
             transition: border-color 0.2s ease-in-out;
         }
+
         #loginContainer input:focus {
             border-color: #3b82f6;
         }
+
         #loginContainer button {
             background-color: #3b82f6;
             color: white;
@@ -287,9 +353,11 @@
             font-weight: 600;
             transition: background-color 0.2s ease-in-out;
         }
+
         #loginContainer button:hover {
             background-color: #2563eb;
         }
+
         #loginContainer h2 {
             text-align: center;
             font-size: 2rem;
@@ -297,19 +365,24 @@
             color: #1e293b;
             margin-bottom: 1rem;
         }
+
         .logout-btn {
-            background-color: #64748b; /* Gray */
+            background-color: #64748b;
+            /* Gray */
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
             font-weight: 600;
             transition: background-color 0.2s ease-in-out;
             margin-top: 1rem;
-            float: right; /* Align to right */
+            float: right;
+            /* Align to right */
         }
+
         .logout-btn:hover {
             background-color: #475569;
         }
+
         /* Styles for filter buttons */
         .filter-buttons button {
             padding: 0.6rem 1rem;
@@ -317,10 +390,12 @@
             font-weight: 600;
             transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
         }
+
         .filter-buttons button.active {
             transform: translateY(-2px);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
+
         /* Ensure .hidden always works */
         .hidden {
             display: none !important;
@@ -333,6 +408,7 @@
             margin-bottom: 1.5rem;
             border-bottom: 2px solid #e2e8f0;
         }
+
         .tab-buttons button {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -343,10 +419,12 @@
             transition: color 0.2s ease-in-out, border-bottom 0.2s ease-in-out;
             border-bottom: 2px solid transparent;
         }
+
         .tab-buttons button.active {
             color: #3b82f6;
             border-bottom: 2px solid #3b82f6;
         }
+
         .tab-buttons button:hover:not(.active) {
             color: #1e293b;
         }
@@ -364,18 +442,22 @@
             align-items: center;
             text-align: center;
         }
+
         .table-card h3 {
             font-size: 1.25rem;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 0.75rem;
         }
+
         .table-card .assigned-guests-list {
             list-style: none;
             padding: 0;
             margin-top: 0.5rem;
-            width: 100%; /* Take full width of card */
+            width: 100%;
+            /* Take full width of card */
         }
+
         .table-card .assigned-guest-item {
             display: flex;
             justify-content: space-between;
@@ -385,11 +467,14 @@
             font-size: 0.9rem;
             color: #475569;
         }
+
         .table-card .assigned-guest-item:last-child {
             border-bottom: none;
         }
+
         .table-card .unassign-btn {
-            background-color: #f97316; /* Orange */
+            background-color: #f97316;
+            /* Orange */
             color: white;
             border-radius: 0.375rem;
             padding: 0.25rem 0.5rem;
@@ -397,39 +482,50 @@
             cursor: pointer;
             transition: background-color 0.2s ease-in-out;
         }
+
         .table-card .unassign-btn:hover {
             background-color: #ea580c;
         }
+
         .table-card .add-guest-to-table-form {
             display: flex;
             gap: 0.5rem;
             margin-top: 1rem;
-            width: 100%; /* Take full width of card */
+            width: 100%;
+            /* Take full width of card */
         }
+
         .table-card .add-guest-to-table-form select,
         .table-card .add-guest-to-table-form button {
             padding: 0.5rem;
             border-radius: 0.5rem;
             border: 1px solid #cbd5e1;
         }
+
         .table-card .add-guest-to-table-form select {
-            flex-grow: 1; /* Allow select to take available space */
+            flex-grow: 1;
+            /* Allow select to take available space */
         }
+
         .table-card .add-guest-to-table-form button {
-            background-color: #10b981; /* Emerald green */
+            background-color: #10b981;
+            /* Emerald green */
             color: white;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s ease-in-out;
         }
+
         .table-card .add-guest-to-table-form button:hover {
             background-color: #059669;
         }
+
         .table-card .delete-table-btn {
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
-            background-color: #ef4444; /* Red */
+            background-color: #ef4444;
+            /* Red */
             color: white;
             border-radius: 50%;
             width: 24px;
@@ -444,47 +540,68 @@
             transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
             opacity: 0.7;
         }
+
         .table-card .delete-table-btn:hover {
             background-color: #dc2626;
             transform: scale(1.1);
             opacity: 1;
         }
-        .guest-table-actions-container { /* Renamed from guest-table-info */
-            margin-top: 0.5rem; /* Space below checkbox */
-            display: flex; /* Ensure flex behavior */
-            flex-direction: column; /* Stack items */
-            align-items: center; /* Center items horizontally */
+
+        .guest-table-actions-container {
+            /* Renamed from guest-table-info */
+            margin-top: 0.5rem;
+            /* Space below checkbox */
+            display: flex;
+            /* Ensure flex behavior */
+            flex-direction: column;
+            /* Stack items */
+            align-items: center;
+            /* Center items horizontally */
         }
-        .guest-table-actions-container span { /* For the table name span */
+
+        .guest-table-actions-container span {
+            /* For the table name span */
             cursor: pointer;
             text-decoration: underline;
             color: #3b82f6;
-            font-size: 0.85rem; /* Keep original font size */
+            font-size: 0.85rem;
+            /* Keep original font size */
         }
+
         .guest-table-actions-container span:hover {
             color: #2563eb;
         }
+
         .assign-table-icon-btn {
             /* Tailwind classes already define much of this */
             /* p-1 rounded-full bg-blue-500 hover:bg-blue-600 text-white */
-            display: flex; /* To center SVG */
+            display: flex;
+            /* To center SVG */
             justify-content: center;
             align-items: center;
-            border: none; /* Remove default button border */
+            border: none;
+            /* Remove default button border */
             cursor: pointer;
             transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            width: 24px; /* Fixed width for small button */
-            height: 24px; /* Fixed height for small button */
-            padding: 0; /* Remove padding to make it truly 24x24 */
+            width: 24px;
+            /* Fixed width for small button */
+            height: 24px;
+            /* Fixed height for small button */
+            padding: 0;
+            /* Remove padding to make it truly 24x24 */
         }
+
         .assign-table-icon-btn svg {
             /* Ensure SVG takes full size of button and is centered */
-            width: 20px; /* Slightly smaller than button to give some internal spacing */
+            width: 20px;
+            /* Slightly smaller than button to give some internal spacing */
             height: 20px;
-            stroke-width: 3; /* Adjusted stroke width for better visibility at smaller size */
+            stroke-width: 3;
+            /* Adjusted stroke width for better visibility at smaller size */
         }
     </style>
 </head>
+
 <body>
     <!-- Loading Overlay (Starts visible by default, hidden by JS when content is ready) -->
     <div id="loadingOverlay" class="loading-overlay">Cargando...</div>
@@ -498,13 +615,16 @@
         <button id="registerBtn" class="bg-emerald-500 hover:bg-emerald-600">Registrarse</button>
     </div>
 
+
+
     <!-- Main Application Container (Starts hidden by default, shown by JS if logged in) -->
     <div class="container hidden" id="appContainer">
-        <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">¡James Baby Shower!</h1>
         <div class="bg-blue-100 p-4 rounded-lg text-center mb-6 shadow-md">
-            <p class="text-xl font-semibold text-blue-800">Invitados confirmados: <span id="confirmedCount" class="text-3xl font-bold">0</span></p>
-            <p class="text-lg text-blue-700">Total de invitados: <span id="totalGuests" class="text-2xl font-bold">0</span></p>
+            <p class="text-xl font-semibold text-blue-800">Invitados confirmados: <span id="confirmedCount"
+                    class="text-3xl font-bold">0</span></p>
+            <p class="text-lg text-blue-700">Total de invitados: <span id="totalGuests"
+                    class="text-2xl font-bold">0</span></p>
             <p id="userIdDisplay" class="text-sm text-blue-600 mt-2">Cargando ID de usuario...</p>
         </div>
 
@@ -518,9 +638,13 @@
         <div id="guestsContent">
             <!-- Filter Buttons -->
             <div class="filter-buttons flex justify-center gap-4 mb-6">
-                <button id="filterAll" class="py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 active">Todos</button>
-                <button id="filterConfirmed" class="py-2 px-4 rounded-lg bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Confirmados</button>
-                <button id="filterUnconfirmed" class="py-2 px-4 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">No Confirmados</button>
+                <button id="filterAll"
+                    class="py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 active">Todos</button>
+                <button id="filterConfirmed"
+                    class="py-2 px-4 rounded-lg bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Confirmados</button>
+                <button id="filterUnconfirmed"
+                    class="py-2 px-4 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">No
+                    Confirmados</button>
             </div>
 
             <!-- Moved Add Guest Form here -->
@@ -539,8 +663,10 @@
         <div id="tablesContent" class="hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Gestión de Mesas</h2>
             <div class="add-table-form flex gap-3 mb-6">
-                <input type="text" id="newTableName" placeholder="Nombre de la nueva mesa" class="flex-grow p-2 border rounded-md">
-                <button id="addTableBtn" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600">Añadir Mesa</button>
+                <input type="text" id="newTableName" placeholder="Nombre de la nueva mesa"
+                    class="flex-grow p-2 border rounded-md">
+                <button id="addTableBtn"
+                    class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600">Añadir Mesa</button>
             </div>
             <div id="tablesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Las mesas se cargarán aquí -->
@@ -563,7 +689,8 @@
     <!-- Confirmation Modal for Table Deletion -->
     <div id="confirmTableDeleteModal" class="custom-modal-overlay hidden">
         <div class="custom-modal-content">
-            <p class="text-lg font-semibold mb-4">¿Estás seguro de que quieres eliminar esta mesa? Los invitados asignados a esta mesa serán desasignados.</p>
+            <p class="text-lg font-semibold mb-4">¿Estás seguro de que quieres eliminar esta mesa? Los invitados
+                asignados a esta mesa serán desasignados.</p>
             <div class="custom-modal-buttons">
                 <button id="confirmDeleteTableBtn" class="confirm-btn">Eliminar Mesa</button>
                 <button id="cancelDeleteTableBtn" class="cancel-btn">Cancelar</button>
@@ -574,15 +701,21 @@
     <!-- Assign Table Modal -->
     <div id="assignTableModal" class="custom-modal-overlay hidden">
         <div class="custom-modal-content">
-            <h3 class="text-xl font-semibold mb-4">Asignar/Cambiar Mesa a <span id="assignGuestName" class="font-bold text-blue-700"></span></h3>
+            <h3 class="text-xl font-semibold mb-4">Asignar/Cambiar Mesa a <span id="assignGuestName"
+                    class="font-bold text-blue-700"></span></h3>
             <select id="assignTableSelect" class="w-full p-2 border rounded-md mb-4">
                 <!-- Options populated by JS -->
             </select>
             <div class="custom-modal-buttons">
-                <button id="confirmAssignTableBtn" class="bg-blue-500 text-white hover:bg-blue-600">Guardar Asignación</button>
+                <button id="confirmAssignTableBtn" class="bg-blue-500 text-white hover:bg-blue-600">Guardar
+                    Asignación</button>
                 <button id="cancelAssignTableBtn" class="cancel-btn">Cancelar</button>
             </div>
         </div>
+    </div>
+
+    <div class="container">
+        <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
     </div>
 
     <!-- Firebase CDN -->
@@ -1528,4 +1661,5 @@
         });
     </script>
 </body>
+
 </html>
