@@ -329,8 +329,8 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // Se ha añadido 'query' y 'orderBy' a la importación
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Se han añadido 'query', 'where' y 'orderBy' a la importación para el filtrado y ordenamiento
+        import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         // Your web app's Firebase configuration
@@ -369,8 +369,12 @@
                     await signInAnonymously(auth);
                     
                     const comerciosCol = collection(db, 'comercios');
-                    // MODIFICACIÓN: Crear una consulta con orderBy para ordenar por el campo 'order'
-                    const q = query(comerciosCol, orderBy('order'));
+                    // MODIFICACIÓN: Crear una consulta que filtre por 'showInSite' y ordene por 'order'
+                    const q = query(
+                        comerciosCol,
+                        where('showInSite', '==', true), // Filtra solo los que tienen showInSite en true
+                        orderBy('order')
+                    );
                     
                     // MODIFICACIÓN: Usar la consulta 'q' en lugar de la colección directamente
                     const comerciosSnapshot = await getDocs(q);

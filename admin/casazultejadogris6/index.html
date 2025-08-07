@@ -613,6 +613,11 @@
                             <label for="comercioWebsite">Sitio Web</label>
                             <input type="text" id="comercioWebsite">
                         </div>
+                        <!-- New checkbox for showInSite -->
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="showInSite" name="showInSite">
+                            <label for="showInSite">Mostrar en el sitio</label>
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit">Guardar Comercio</button>
@@ -945,6 +950,7 @@
         const comercioGoogleMapsLocationInput = document.getElementById('comercioGoogleMapsLocation');
         const comercioPhoneNumberInput = document.getElementById('comercioPhoneNumber');
         const comercioWebsiteInput = document.getElementById('comercioWebsite');
+        const showInSiteCheckbox = document.getElementById('showInSite'); // Nuevo checkbox
         const cancelComercioEditButton = document.getElementById('cancelComercioEdit');
         const mainImagePreviewDiv = document.getElementById('mainImagePreview');
         const additionalPhotosPreviewDiv = document.getElementById('additionalPhotosPreview');
@@ -1200,6 +1206,7 @@
                 comercioGoogleMapsLocationInput.value = comercio.googleMapsLocation || '';
                 comercioPhoneNumberInput.value = comercio.phoneNumber || '';
                 comercioWebsiteInput.value = comercio.website || '';
+                showInSiteCheckbox.checked = comercio.showInSite || false; // Set checkbox state
 
                 updateImagePreview(comercio.mainImage, mainImagePreviewDiv);
                 updateImagePreview(comercio.additionalPhotos, additionalPhotosPreviewDiv);
@@ -1208,6 +1215,7 @@
                 comercioIdInput.value = '';
                 mainImagePreviewDiv.innerHTML = '';
                 additionalPhotosPreviewDiv.innerHTML = '';
+                showInSiteCheckbox.checked = false; // Set default value on reset
             }
         }
 
@@ -1241,6 +1249,7 @@
             const googleMapsLocation = comercioGoogleMapsLocationInput.value.trim();
             const phoneNumber = comercioPhoneNumberInput.value.trim();
             const website = comercioWebsiteInput.value.trim();
+            const showInSite = showInSiteCheckbox.checked; // Get the checkbox value
 
             if (!name) {
                 showMessage('Error', 'El nombre del comercio no puede estar vacío.');
@@ -1258,7 +1267,8 @@
                 additionalPhotos,
                 googleMapsLocation,
                 phoneNumber,
-                website
+                website,
+                showInSite // Add the new field
             };
 
             try {
@@ -1273,6 +1283,7 @@
                 comercioIdInput.value = '';
                 mainImagePreviewDiv.innerHTML = '';
                 additionalPhotosPreviewDiv.innerHTML = '';
+                showInSiteCheckbox.checked = false; // Reset default value
                 await fetchComercios(); // Re-fetch comercios to update lists and select
             } catch (error) {
                 console.error("Error saving comercio: ", error);
@@ -1311,6 +1322,7 @@
             comercioIdInput.value = '';
             mainImagePreviewDiv.innerHTML = '';
             additionalPhotosPreviewDiv.innerHTML = '';
+            showInSiteCheckbox.checked = false; // Reset default value
             // Deseleccionar el `<select>`
             selectComercio.value = '';
             updateCurrentComercioInfo(null);
@@ -1381,6 +1393,7 @@
             comercioIdInput.value = '';
             mainImagePreviewDiv.innerHTML = '';
             additionalPhotosPreviewDiv.innerHTML = '';
+            showInSiteCheckbox.checked = false; // Reset default value
         });
         
         // Helper to update image previews
