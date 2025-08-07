@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Directorio de Comercios</title>
-    <link rel="manifest" href="./manifest.json"> 
+    <link rel="manifest" href="./manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Estilos Generales */
@@ -262,6 +262,36 @@
                 width: 90%;
             }
         }
+        /* Loading Spinner */
+        #loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+        #loading-spinner::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto 0;
+            border-radius: 50%;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #D8BFD8;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -275,6 +305,7 @@
     </header>
 
     <main class="container">
+        <section id="loading-spinner">Cargando comercios...</section>
         <section id="comercios-grid"></section>
     </main>
 
@@ -295,48 +326,103 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // Se ha añadido 'query' y 'orderBy' a la importación
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHr8NSBkLN_Jt062C4RtYFiulFC13tOLA",
+            authDomain: "web2727.firebaseapp.com",
+            projectId: "web2727",
+            storageBucket: "web2727.firebasestorage.app",
+            messagingSenderId: "899729264501",
+            appId: "1:899729264501:web:e81099f4c1e7ba52ef4d3c",
+            measurementId: "G-VE3F22HX79"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        document.addEventListener('DOMContentLoaded', async () => {
             const comerciosGrid = document.getElementById('comercios-grid');
             const detallesModal = document.getElementById('detallesModal');
             const closeButton = document.querySelector('.close-button');
             const searchInput = document.getElementById('search-input');
             const searchButton = document.getElementById('search-button');
+            const loadingSpinner = document.getElementById('loading-spinner');
             let comerciosData = []; // Para almacenar los datos de los comercios
+        
+            // Función para obtener los comercios de Firestore
+            async function fetchComerciosFromFirestore() {
+                // Mostrar el spinner de carga
+                loadingSpinner.style.display = 'block';
+                comerciosGrid.style.display = 'none';
+
+                try {
+                    // Primero, intenta iniciar sesión de forma anónima
+                    await signInAnonymously(auth);
+                    
+                    const comerciosCol = collection(db, 'comercios');
+                    // MODIFICACIÓN: Crear una consulta con orderBy para ordenar por el campo 'order'
+                    const q = query(comerciosCol, orderBy('order'));
+                    
+                    // MODIFICACIÓN: Usar la consulta 'q' en lugar de la colección directamente
+                    const comerciosSnapshot = await getDocs(q);
+                    comerciosData = comerciosSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    renderComercios(comerciosData);
+                } catch (error) {
+                    console.error("Error al obtener los comercios de Firestore:", error);
+                    comerciosGrid.innerHTML = '<p>No se pudieron cargar los comercios. Por favor, inténtelo de nuevo más tarde.</p>';
+                } finally {
+                    // Ocultar el spinner de carga y mostrar la cuadrícula, sin importar si hubo un error o no
+                    loadingSpinner.style.display = 'none';
+                    comerciosGrid.style.display = 'grid';
+                }
+            }
 
             // Función para mostrar los detalles de un comercio en el modal
             function mostrarDetallesEnModal(id) {
                 const comercio = comerciosData.find(c => c.id === id);
                 if (comercio) {
-                    document.getElementById('detalle-nombre').textContent = comercio.nombre;
-                    document.getElementById('detalle-map').src = comercio.ubicacionGoogleMaps;
-                    document.getElementById('detalle-horario').textContent = comercio.horario;
-                    document.getElementById('detalle-telefono').textContent = comercio.telefono || 'No disponible';
+                    // Actualizado para usar los nombres de variables de tu Firestore
+                    document.getElementById('detalle-nombre').textContent = comercio.name;
+                    document.getElementById('detalle-map').src = comercio.googleMapsLocation;
+                    document.getElementById('detalle-horario').textContent = comercio.schedule;
+                    document.getElementById('detalle-telefono').textContent = comercio.phoneNumber || 'No disponible';
 
                     const sitioWebLink = document.getElementById('detalle-sitio-web');
-                    if (comercio.sitioWeb) {
-                        sitioWebLink.href = comercio.sitioWeb;
-                        sitioWebLink.textContent = comercio.sitioWeb;
+                    if (comercio.website) {
+                        sitioWebLink.href = `./${comercio.website}`;
+                        sitioWebLink.textContent = comercio.website;
                     } else {
                         sitioWebLink.textContent = 'No disponible';
                         sitioWebLink.removeAttribute('href');
                     }
 
-                    document.getElementById('detalle-descripcion').textContent = comercio.descripcionCompleta || comercio.descripcionCorta || '';
+                    document.getElementById('detalle-descripcion').textContent = comercio.fullDescription || comercio.shortDescription || '';
 
                     const galleryContainer = document.getElementById('detalle-galeria');
                     galleryContainer.innerHTML = '';
 
                     const mainImg = document.createElement('img');
-                    mainImg.src = comercio.imagenPrincipal;
-                    mainImg.alt = comercio.nombre;
+                    mainImg.src = comercio.mainImage;
+                    mainImg.alt = comercio.name;
                     galleryContainer.appendChild(mainImg);
 
-                    if (comercio.fotosAdicionales && comercio.fotosAdicionales.length > 0) {
-                        comercio.fotosAdicionales.forEach(foto => {
+                    if (comercio.additionalPhotos && comercio.additionalPhotos.length > 0) {
+                        comercio.additionalPhotos.forEach(foto => {
                             const img = document.createElement('img');
                             img.src = foto;
-                            img.alt = comercio.nombre + ' - foto adicional';
+                            img.alt = comercio.name + ' - foto adicional';
                             galleryContainer.appendChild(img);
                         });
                     }
@@ -361,21 +447,24 @@
                     card.addEventListener('click', (event) => {
                         // Evita que el clic en el botón "Ver Detalles" active la redirección de la tarjeta
                         if (!event.target.classList.contains('ver-detalles-btn')) {
-                            const targetLink = comercio.linkExterno || comercio.sitioWeb;
+                            const targetLink = comercio.externalLink || comercio.website;
                             if (targetLink) {
-                                window.open(targetLink, '_blank'); // Abrir en una nueva pestaña
+                                // Asegurar que el enlace se abra correctamente
+                                const link = `./${targetLink}`;
+                                window.open(link, '_blank'); // Abrir en una nueva pestaña
                             } else {
-                                console.warn(`No se definió un enlace para el comercio ${comercio.nombre}`);
+                                console.warn(`No se definió un enlace para el comercio ${comercio.name}`);
                             }
                         }
                     });
 
+                    // Actualizado para usar los nombres de variables de tu Firestore
                     card.innerHTML = `
-                        <img src="${comercio.imagenPrincipal}" alt="${comercio.nombre}">
+                        <img src="${comercio.mainImage}" alt="${comercio.name}">
                         <div class="comercio-info">
-                            <h3>${comercio.nombre}</h3>
-                            <p><strong>Horario:</strong> ${comercio.horario}</p>
-                            <p>${comercio.descripcionCorta || ''}</p>
+                            <h3>${comercio.name}</h3>
+                            <p><strong>Horario:</strong> ${comercio.schedule}</p>
+                            <p>${comercio.shortDescription || ''}</p>
                         </div>
                         <div class="card-buttons">
                             <button class="ver-detalles-btn" data-id="${comercio.id}">Ver Detalles</button>
@@ -397,7 +486,7 @@
             function filtrarComercios() {
                 const searchTerm = searchInput.value.toLowerCase();
                 const filteredComercios = comerciosData.filter(comercio =>
-                    comercio.nombre.toLowerCase().includes(searchTerm)
+                    comercio.name.toLowerCase().includes(searchTerm)
                 );
                 renderComercios(filteredComercios);
             }
@@ -427,95 +516,8 @@
                 }
             });
 
-            // Datos de los comercios
-            const dataComercios = [
-                {
-                    "id": "1",
-                    "nombre": "El punto",
-                    "horario": "L-V: 7am - 6pm, S: 8am - 2pm",
-                    "descripcionCorta": "Tu lugar favorito para empezar el día",
-                    "descripcionCompleta": "Ofrecemos una amplia variedad de cafés de especialidad, pasteles frescos y opciones de desayuno. Ambiente acogedor y Wi-Fi gratuito para que trabajes o te relajes.",
-                    "imagenPrincipal": "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrpU6mtoZY2rhZL33jro1nCEZPREAwbrjhqsmF6NgnIWgv4RW-hIKvx94kwF3Y2zkENf8T42xDTf3PqdJqTtPPJzI1G3YPEe8vRvmCv2hUB4ePZIyyeHkWqyuCXVSFsKEAy5o1JHBAqu1oD=s1360-w1360-h1020-rw",
-                    "fotosAdicionales": [
-                        "https://source.unsplash.com/random/300x200?coffeecup",
-                        "https://source.unsplash.com/random/300x200?cafeinterior"
-                    ],
-                    "ubicacionGoogleMaps": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.894372993883!2d-84.0757279858348!3d9.93294327797769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa0e3b9f47e3a9b%3A0x2f6b4b4b4b4b4b4b!2sCafe%20Brit%20Cafeteria!5e0!3m2!1ses-419!2scr!4v1700000000000!5m2!1ses-419!2scr",
-                    "telefono": "+50622221111",
-                    "sitioWeb": "https://www.google.com/search?q=cafeteria+el+aroma+costa+rica",
-                    "linkExterno": "/elpunto"
-                },
-                {
-                    "id": "2",
-                    "nombre": "Pizzería La Crocante",
-                    "horario": "M-D: 12pm - 10pm",
-                    "descripcionCorta": "Las pizzas más auténticas con ingredientes frescos.",
-                    "descripcionCompleta": "Disfruta de nuestras pizzas al horno de leña, pastas caseras y postres italianos. Ideal para cenas familiares o con amigos en un ambiente rústico y agradable.",
-                    "imagenPrincipal": "https://source.unsplash.com/random/400x300?pizza",
-                    "fotosAdicionales": [
-                        "https://source.unsplash.com/random/300x200?pizzaslice",
-                        "https://source.unsplash.com/random/300x200?restaurantinterior"
-                    ],
-                    "ubicacionGoogleMaps": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.894372993883!2d-84.0757279858348!3d9.93294327797769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa0e3b9f47e3a9b%3A0x2f6b4b4b4b4b4b4b!2sPizza%20Pata!5e0!3m2!1ses-419!2scr!4v1700000000000!5m2!1ses-419!2scr",
-                    "telefono": "+50622334455",
-                    "sitioWeb": "https://www.google.com/search?q=pizzeria+la+crocante+costa+rica",
-                    "linkExterno": "https://www.lacrocante.com"
-                },
-                {
-                    "id": "3",
-                    "nombre": "Tienda de Libros 'El Lector'",
-                    "horario": "L-S: 9am - 7pm",
-                    "descripcionCorta": "Un universo de historias te espera en cada página.",
-                    "descripcionCompleta": "Descubre una amplia selección de libros de todos los géneros, desde novelas clásicas hasta los best-sellers más recientes. Contamos con una acogedora zona de lectura y eventos literarios.",
-                    "imagenPrincipal": "https://source.unsplash.com/random/400x300?books",
-                    "fotosAdicionales": [
-                        "https://source.unsplash.com/random/300x200?bookstore",
-                        "https://source.unsplash.com/random/300x200?reading"
-                    ],
-                    "ubicacionGoogleMaps": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.894372993883!2d-84.0757279858348!3d9.93294327797769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa0e3b9f47e3a9b%3A0x2f6b4b4b4b4b4b4b!2sLibrer%C3%ADa%20Lehmann!5e0!3m2!1ses-419!2scr!4v1700000000000!5m2!1ses-419!2scr",
-                    "telefono": "+50622445566",
-                    "sitioWeb": "https://www.google.com/search?q=libreria+el+lector+costa+rica",
-                    "linkExterno": "https://www.ellecortienda.com"
-                },
-                {
-                    "id": "4",
-                    "nombre": "Floristería Pétalo Rojo",
-                    "horario": "L-V: 8am - 5pm",
-                    "descripcionCorta": "Las flores más frescas para cada ocasión especial.",
-                    "descripcionCompleta": "Ofrecemos arreglos florales personalizados, ramos para bodas, eventos y entregas a domicilio. ¡Sorprende a tus seres queridos con la belleza de las flores!",
-                    "imagenPrincipal": "https://source.unsplash.com/random/400x300?flowers",
-                    "fotosAdicionales": [
-                        "https://source.unsplash.com/random/300x200?roses",
-                        "https://source.unsplash.com/random/300x200?bouquet"
-                    ],
-                    "ubicacionGoogleMaps": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.894372993883!2d-84.0757279858348!3d9.93294327797769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa0e3b9f47e3a9b%3A0x2f6b4b4b4b4b4b4b!2sFlorister%C3%ADa%20Garden!5e0!3m2!1ses-419!2scr!4v1700000000000!5m2!1ses-419!2scr",
-                    "telefono": "+50622556677",
-                    "sitioWeb": "https://www.google.com/search?q=floristeria+petalo+rojo+costa+rica",
-                    "linkExterno": "https://www.petalorojo.com"
-                },
-                {
-                    "id": "5",
-                    "nombre": "Panadería El Pan Nuestro",
-                    "horario": "L-S: 6am - 7pm, D: 7am - 1pm",
-                    "descripcionCorta": "Pan fresco y delicias de repostería todos los días.",
-                    "descripcionCompleta": "Disfruta de nuestro pan artesanal, bollería, pasteles y galletas recién horneados. Utilizamos ingredientes de la más alta calidad para ofrecerte un sabor incomparable.",
-                    "imagenPrincipal": "https://source.unsplash.com/random/400x300?bakery",
-                    "fotosAdicionales": [
-                        "https://source.unsplash.com/random/300x200?bread",
-                        "https://source.unsplash.com/random/300x200?pastries"
-                    ],
-                    "ubicacionGoogleMaps": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.894372993883!2d-84.0757279858348!3d9.93294327797769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa0e3b9f47e3a9b%3A0x2f6b4b4b4b4b4b4b!2sPanader%C3%ADa%20La%20Selecta!5e0!3m2!1ses-419!2scr!4v1700000000000!5m2!1ses-419!2scr",
-                    "telefono": "+50622667788",
-                    "sitioWeb": "https://www.google.com/search?q=panaderia+el+pan+nuestro+costa+rica",
-                    "linkExterno": "https://www.elapannuestro.com"
-                }
-            ];
-
-            // Almacenar los datos cargados
-            comerciosData = dataComercios;
-
-            // Renderizar todos los comercios al cargar la página por primera vez
-            renderComercios(comerciosData);
+            // Llama a la función para obtener los datos al cargar la página
+            fetchComerciosFromFirestore();
 
             // PWA REGISTRATION (NEW CODE)
             // **********************************************
@@ -523,8 +525,8 @@
                 window.addEventListener('load', () => {
                     // Usamos la ruta base de la URL de la página actual
                     // El scope debe coincidir con la base URL del Service Worker
-                    const swPath = './service-worker.js'; 
-                    navigator.serviceWorker.register(swPath, { scope: './' }) 
+                    const swPath = './service-worker.js';
+                    navigator.serviceWorker.register(swPath, { scope: './' })
                         .then(registration => {
                             console.log('ServiceWorker registrado con éxito:', registration.scope);
                         })

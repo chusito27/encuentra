@@ -205,6 +205,10 @@
             color: var(--text-color);
         }
 
+        #comercioActions {
+            margin-top: 10px;
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -388,75 +392,23 @@
             color: #e91e63;
         }
 
-        /* Comercio List Styling */
-        #comerciosList {
+        /* Image preview styles */
+        .image-preview {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            padding: 15px;
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            margin-bottom: 25px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
-        #comerciosList .comercio-item {
-            background-color: #424242;
-            border: 1px solid #616161;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            color: #80cbc4;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        #comerciosList .comercio-item button {
-            background: none;
-            border: none;
-            color: #f48fb1;
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 0;
-            margin: 0;
-        }
-        #comerciosList .comercio-item button:hover {
-            color: #e91e63;
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
         }
 
-
-        /* JSON Display Specific Styles */
-        .json-display-section { /* Common class for both JSON sections */
-            background-color: #212121; /* Fondo más oscuro para el código */
-            color: #e0e0e0; /* Color de texto claro */
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            max-height: 600px; /* Limita la altura para evitar que ocupe toda la pantalla */
-            overflow: auto; /* Scroll en ambas direcciones si es necesario */
-            position: relative; /* Needed for positioning the copy button */
-            margin-top: 20px; /* Add some space if there are other elements above */
-        }
-        .json-display-section pre {
-            margin: 0; /* Elimina el margen por defecto de <pre> */
-            white-space: pre; /* NO WRAP! Mantiene el formato tal cual, con scroll horizontal */
-            word-break: normal; /* Evita que las palabras se corten */
-            word-wrap: normal; /* No rompe las palabras */
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; /* Fuente monoespaciada */
-            font-size: 0.95em;
-            line-height: 1.5;
-        }
-        .json-display-section code {
-            display: block; /* Asegura que el código tome el ancho completo del pre */
-            padding: 0; /* Asegura que no haya padding extra en el code */
-        }
-        .json-copy-button { /* Common class for both copy buttons */
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            z-index: 10;
-        }
+        /* JSON Display Specific Styles (Removed in this version) */
 
 
         /* Modal Specific Styles */
@@ -496,7 +448,7 @@
 
         .modal-header {
             padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1-px solid var(--border-color);
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
@@ -599,6 +551,7 @@
             <option value="">-- Seleccione un Comercio --</option>
         </select>
         <div id="currentComercioInfo"></div>
+        <div id="comercioActions"></div> <!-- Container for edit/delete buttons -->
     </div>
 
     <div class="container">
@@ -606,8 +559,6 @@
             <button class="tab-button active" onclick="openTab('comercio-gestion')">Gestión de Comercios</button>
             <button class="tab-button" onclick="openTab('products')">Gestión de Productos</button>
             <button class="tab-button" onclick="openTab('categories')">Gestión de Categorías</button>
-            <button class="tab-button" onclick="openTab('json-categories')">Ver JSON Categorías</button>
-            <button class="tab-button" onclick="openTab('json-products')">Ver JSON Productos</button>
         </div>
 
         <div id="comercio-gestion" class="tab-content active">
@@ -615,17 +566,53 @@
                 <h2>Añadir/Editar Comercio</h2>
                 <form id="comercioForm">
                     <input type="hidden" id="comercioId">
-                    <div class="form-group">
-                        <label for="comercioName">Nombre del Comercio</label>
-                        <input type="text" id="comercioName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="comercioLogoUrl">URL del Logo</label>
-                        <input type="text" id="comercioLogoUrl">
-                    </div>
-                    <div class="form-group">
-                        <label for="comercioPhone">Número de Teléfono</label>
-                        <input type="text" id="comercioPhone">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="comercioName">Nombre del Comercio</label>
+                            <input type="text" id="comercioName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioShortDescription">Descripción Corta</label>
+                            <input type="text" id="comercioShortDescription">
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioFullDescription">Descripción Completa</label>
+                            <textarea id="comercioFullDescription"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioSchedule">Horario</label>
+                            <input type="text" id="comercioSchedule">
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioOrder">Orden (para mostrar)</label>
+                            <input type="number" id="comercioOrder" value="999">
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioExternalLink">Enlace Externo (URL)</label>
+                            <input type="text" id="comercioExternalLink">
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioMainImage">URL de la Imagen Principal</label>
+                            <input type="text" id="comercioMainImage">
+                            <div id="mainImagePreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioAdditionalPhotos">URLs de Fotos Adicionales (separadas por coma)</label>
+                            <input type="text" id="comercioAdditionalPhotos">
+                            <div id="additionalPhotosPreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioGoogleMapsLocation">Código de Google Maps Embed</label>
+                            <input type="text" id="comercioGoogleMapsLocation">
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioPhoneNumber">Número de Teléfono</label>
+                            <input type="text" id="comercioPhoneNumber">
+                        </div>
+                        <div class="form-group">
+                            <label for="comercioWebsite">Sitio Web</label>
+                            <input type="text" id="comercioWebsite">
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit">Guardar Comercio</button>
@@ -633,9 +620,6 @@
                     </div>
                 </form>
             </div>
-            <h3>Comercios Existentes:</h3>
-            <div id="comerciosList">
-                </div>
         </div>
 
 
@@ -671,25 +655,6 @@
                 </div>
         </div>
 
-        <div id="json-categories" class="tab-content">
-            <div class="form-section">
-                <h2>JSON de Categorías</h2>
-                <div id="jsonCategoriesSection" class="json-display-section">
-                    <button id="copyCategoriesJsonButton" class="copy json-copy-button">Copiar JSON</button>
-                    <pre><code id="categoriesJsonDisplay"></code></pre>
-                </div>
-            </div>
-        </div>
-
-        <div id="json-products" class="tab-content">
-            <div class="form-section">
-                <h2>JSON de Productos</h2>
-                <div id="jsonProductsSection" class="json-display-section">
-                    <button id="copyProductsJsonButton" class="copy json-copy-button">Copiar JSON</button>
-                    <pre><code id="jsonDisplay"></code></pre>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div id="addProductModal" class="modal">
@@ -952,8 +917,6 @@
 
 
         const productsListDiv = document.getElementById('productsList');
-        const jsonProductsDisplayCode = document.getElementById('jsonDisplay');
-        const copyProductsJsonButton = document.getElementById('copyProductsJsonButton');
 
         // Category Management elements
         const categoryForm = document.getElementById('categoryForm');
@@ -968,18 +931,24 @@
         const addCategoryForm = document.getElementById('addCategoryForm');
         const newCategoryNameInput = document.getElementById('newCategoryName');
 
-        // Categories JSON section elements (now in its own tab)
-        const categoriesJsonDisplayCode = document.getElementById('categoriesJsonDisplay');
-        const copyCategoriesJsonButton = document.getElementById('copyCategoriesJsonButton');
-
         // ** Comercio DOM Elements **
         const comercioForm = document.getElementById('comercioForm');
         const comercioIdInput = document.getElementById('comercioId');
         const comercioNameInput = document.getElementById('comercioName');
-        const comercioLogoUrlInput = document.getElementById('comercioLogoUrl');
-        const comercioPhoneInput = document.getElementById('comercioPhone');
+        const comercioShortDescriptionInput = document.getElementById('comercioShortDescription');
+        const comercioFullDescriptionInput = document.getElementById('comercioFullDescription');
+        const comercioScheduleInput = document.getElementById('comercioSchedule');
+        const comercioOrderInput = document.getElementById('comercioOrder'); // Nuevo campo de orden
+        const comercioExternalLinkInput = document.getElementById('comercioExternalLink'); // Nuevo campo de enlace externo
+        const comercioMainImageInput = document.getElementById('comercioMainImage');
+        const comercioAdditionalPhotosInput = document.getElementById('comercioAdditionalPhotos');
+        const comercioGoogleMapsLocationInput = document.getElementById('comercioGoogleMapsLocation');
+        const comercioPhoneNumberInput = document.getElementById('comercioPhoneNumber');
+        const comercioWebsiteInput = document.getElementById('comercioWebsite');
         const cancelComercioEditButton = document.getElementById('cancelComercioEdit');
-        const comerciosListDiv = document.getElementById('comerciosList');
+        const mainImagePreviewDiv = document.getElementById('mainImagePreview');
+        const additionalPhotosPreviewDiv = document.getElementById('additionalPhotosPreview');
+        const comercioActionsDiv = document.getElementById('comercioActions');
 
         const selectComercio = document.getElementById('selectComercio');
         const currentComercioInfoDiv = document.getElementById('currentComercioInfo');
@@ -1097,18 +1066,6 @@
                 } else {
                     categoriesListDiv.innerHTML = '<p>Seleccione un comercio para gestionar sus categorías.</p>';
                 }
-            } else if (tabId === 'json-products') {
-                if (currentComercioId) {
-                    await displayProductsAsJson();
-                } else {
-                    jsonProductsDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de productos.';
-                }
-            } else if (tabId === 'json-categories') {
-                if (currentComercioId) {
-                    await displayCategoriesAsJson();
-                } else {
-                    categoriesJsonDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de categorías.';
-                }
             }
         }
 
@@ -1117,23 +1074,20 @@
         async function fetchComercios() {
             // Check if authenticated. If not, clear lists and return early.
             if (!currentUser) {
-                comerciosListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar comercios.</p>';
                 selectComercio.innerHTML = '<option value="">-- Inicie sesión para cargar comercios --</option>';
                 currentComercioInfoDiv.innerHTML = 'No hay comercio seleccionado.';
+                comercioActionsDiv.innerHTML = ''; // Clear action buttons
                 currentComercioId = null;
                 currentComercioName = null;
                 allComercios = [];
                 productsListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar productos.</p>';
                 categoriesListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar categorías.</p>';
-                jsonProductsDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de productos.';
-                categoriesJsonDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de categorías.';
                 return;
             }
 
             try {
                 const snapshot = await comerciosCollection.orderBy('name', 'asc').get();
                 allComercios = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderComerciosList(allComercios);
                 populateComercioSelect(allComercios);
                 
                 // Set the current selected comercio based on previous selection or first available
@@ -1142,15 +1096,20 @@
                     const selectedComercio = allComercios.find(c => c.id === currentComercioId);
                     currentComercioName = selectedComercio ? selectedComercio.name : null;
                     updateCurrentComercioInfo(currentComercioId);
+                    updateComercioForm(selectedComercio);
                 } else if (allComercios.length > 0) {
                     currentComercioId = allComercios[0].id;
                     currentComercioName = allComercios[0].name;
                     selectComercio.value = currentComercioId;
+                    const selectedComercio = allComercios[0];
                     updateCurrentComercioInfo(currentComercioId);
+                    updateComercioForm(selectedComercio);
                 } else {
                     currentComercioId = null;
                     currentComercioName = null;
                     updateCurrentComercioInfo(null);
+                    comercioForm.reset();
+                    comercioIdInput.value = '';
                 }
 
                 // Re-fetch data for the active tab AFTER the currentComercioId is set
@@ -1172,37 +1131,6 @@
         }
 
 
-        function renderComerciosList(comercios) {
-            comerciosListDiv.innerHTML = '';
-            if (comercios.length === 0) {
-                comerciosListDiv.innerHTML = '<p>No hay comercios disponibles.</p>';
-                return;
-            }
-            comercios.forEach(comercio => {
-                const comercioItem = document.createElement('div');
-                comercioItem.className = 'comercio-item card'; // Use card style for consistency
-                comercioItem.innerHTML = `
-                    <div class="card-content">
-                        <h3>${comercio.name}</h3>
-                        <p>Logo: <a href="${comercio.logoUrl}" target="_blank">${comercio.logoUrl || 'N/A'}</a></p>
-                        <p>Teléfono: ${comercio.phone || 'N/A'}</p>
-                    </div>
-                    <div class="card-actions">
-                        <button class="edit" data-id="${comercio.id}">Editar</button>
-                        <button class="delete" data-id="${comercio.id}">Eliminar</button>
-                    </div>
-                `;
-                comerciosListDiv.appendChild(comercioItem);
-            });
-
-            document.querySelectorAll('#comerciosList .edit').forEach(button => {
-                button.addEventListener('click', (e) => editComercio(e.target.dataset.id));
-            });
-            document.querySelectorAll('#comerciosList .delete').forEach(button => {
-                button.addEventListener('click', (e) => deleteComercio(e.target.dataset.id));
-            });
-        }
-
         function populateComercioSelect(comercios) {
             selectComercio.innerHTML = '<option value="">-- Seleccione un Comercio --</option>';
             comercios.forEach(comercio => {
@@ -1218,6 +1146,7 @@
             const selectedComercio = allComercios.find(c => c.id === currentComercioId);
             currentComercioName = selectedComercio ? selectedComercio.name : null;
             updateCurrentComercioInfo(currentComercioId);
+            updateComercioForm(selectedComercio);
 
             // Re-fetch data for the currently active tab
             const activeTab = document.querySelector('.tab-content.active');
@@ -1227,17 +1156,58 @@
         });
 
         function updateCurrentComercioInfo(comercioId) {
+            currentComercioInfoDiv.innerHTML = '';
+            comercioActionsDiv.innerHTML = ''; // Clear existing buttons
             if (comercioId) {
                 const comercio = allComercios.find(c => c.id === comercioId);
                 if (comercio) {
                     currentComercioInfoDiv.innerHTML = `
                         <strong>Comercio Activo:</strong> ${comercio.name}<br>
-                        <strong>Logo:</strong> <a href="${comercio.logoUrl}" target="_blank">${comercio.logoUrl || 'N/A'}</a><br>
-                        <strong>Teléfono:</strong> ${comercio.phone || 'N/A'}
+                        <strong>Descripción Corta:</strong> ${comercio.shortDescription || 'N/A'}<br>
+                        <strong>Horario:</strong> ${comercio.schedule || 'N/A'}
                     `;
+                    // Add edit and delete buttons
+                    const editButton = document.createElement('button');
+                    editButton.className = 'edit';
+                    editButton.textContent = 'Editar Comercio';
+                    editButton.addEventListener('click', () => editComercio(comercioId));
+
+                    // REEMPLAZADO: Botón "Eliminar Comercio" con "Añadir Nuevo Comercio"
+                    const addNewButton = document.createElement('button');
+                    addNewButton.className = '';
+                    addNewButton.textContent = 'Añadir Nuevo Comercio';
+                    addNewButton.addEventListener('click', () => addNewComercio());
+
+                    comercioActionsDiv.appendChild(editButton);
+                    comercioActionsDiv.appendChild(addNewButton); // Se añade el nuevo botón
                 }
             } else {
                 currentComercioInfoDiv.innerHTML = 'No hay comercio seleccionado.';
+            }
+        }
+        
+        function updateComercioForm(comercio) {
+            if (comercio) {
+                comercioIdInput.value = comercio.id || '';
+                comercioNameInput.value = comercio.name || '';
+                comercioShortDescriptionInput.value = comercio.shortDescription || '';
+                comercioFullDescriptionInput.value = comercio.fullDescription || '';
+                comercioScheduleInput.value = comercio.schedule || '';
+                comercioOrderInput.value = comercio.order || '999';
+                comercioExternalLinkInput.value = comercio.externalLink || '';
+                comercioMainImageInput.value = comercio.mainImage || '';
+                comercioAdditionalPhotosInput.value = (comercio.additionalPhotos || []).join(', ');
+                comercioGoogleMapsLocationInput.value = comercio.googleMapsLocation || '';
+                comercioPhoneNumberInput.value = comercio.phoneNumber || '';
+                comercioWebsiteInput.value = comercio.website || '';
+
+                updateImagePreview(comercio.mainImage, mainImagePreviewDiv);
+                updateImagePreview(comercio.additionalPhotos, additionalPhotosPreviewDiv);
+            } else {
+                comercioForm.reset();
+                comercioIdInput.value = '';
+                mainImagePreviewDiv.innerHTML = '';
+                additionalPhotosPreviewDiv.innerHTML = '';
             }
         }
 
@@ -1261,15 +1231,35 @@
 
             const id = comercioIdInput.value;
             const name = comercioNameInput.value.trim();
-            const logoUrl = comercioLogoUrlInput.value.trim();
-            const phone = comercioPhoneInput.value.trim();
+            const shortDescription = comercioShortDescriptionInput.value.trim();
+            const fullDescription = comercioFullDescriptionInput.value.trim();
+            const schedule = comercioScheduleInput.value.trim();
+            const order = parseInt(comercioOrderInput.value, 10);
+            const externalLink = comercioExternalLinkInput.value.trim();
+            const mainImage = comercioMainImageInput.value.trim();
+            const additionalPhotos = comercioAdditionalPhotosInput.value.split(',').map(url => url.trim()).filter(url => url);
+            const googleMapsLocation = comercioGoogleMapsLocationInput.value.trim();
+            const phoneNumber = comercioPhoneNumberInput.value.trim();
+            const website = comercioWebsiteInput.value.trim();
 
             if (!name) {
                 showMessage('Error', 'El nombre del comercio no puede estar vacío.');
                 return;
             }
 
-            const comercioData = { name, logoUrl, phone };
+            const comercioData = { 
+                name,
+                shortDescription,
+                fullDescription,
+                schedule,
+                order,
+                externalLink,
+                mainImage,
+                additionalPhotos,
+                googleMapsLocation,
+                phoneNumber,
+                website
+            };
 
             try {
                 if (id) {
@@ -1281,6 +1271,8 @@
                 }
                 comercioForm.reset();
                 comercioIdInput.value = '';
+                mainImagePreviewDiv.innerHTML = '';
+                additionalPhotosPreviewDiv.innerHTML = '';
                 await fetchComercios(); // Re-fetch comercios to update lists and select
             } catch (error) {
                 console.error("Error saving comercio: ", error);
@@ -1305,16 +1297,25 @@
                 const doc = await comerciosCollection.doc(id).get();
                 if (doc.exists) {
                     const comercio = doc.data();
-                    comercioIdInput.value = doc.id;
-                    comercioNameInput.value = comercio.name;
-                    comercioLogoUrlInput.value = comercio.logoUrl || '';
-                    comercioPhoneInput.value = comercio.phone || '';
+                    updateComercioForm(comercio);
                 }
             } catch (error) {
                 console.error("Error fetching comercio for edit: ", error);
                 showMessage('Error de Carga', "Error al cargar el comercio para editar. Asegúrese de tener permisos de lectura y autorización.");
             }
         };
+
+        // Función para añadir un nuevo comercio (reinicia el formulario)
+        function addNewComercio() {
+            comercioForm.reset();
+            comercioIdInput.value = '';
+            mainImagePreviewDiv.innerHTML = '';
+            additionalPhotosPreviewDiv.innerHTML = '';
+            // Deseleccionar el `<select>`
+            selectComercio.value = '';
+            updateCurrentComercioInfo(null);
+            console.log('Formulario listo para añadir un nuevo comercio.');
+        }
 
         async function deleteComercio(id) {
             // Check if authenticated and authorized
@@ -1378,6 +1379,40 @@
         cancelComercioEditButton.addEventListener('click', () => {
             comercioForm.reset();
             comercioIdInput.value = '';
+            mainImagePreviewDiv.innerHTML = '';
+            additionalPhotosPreviewDiv.innerHTML = '';
+        });
+        
+        // Helper to update image previews
+        function updateImagePreview(urlOrArray, container) {
+            container.innerHTML = '';
+            let urls = [];
+            if (typeof urlOrArray === 'string' && urlOrArray) {
+                urls = [urlOrArray];
+            } else if (Array.isArray(urlOrArray)) {
+                urls = urlOrArray;
+            }
+
+            urls.forEach(url => {
+                if (url) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Preview';
+                    img.onerror = () => img.src = 'https://placehold.co/100x100/555/eee?text=Error';
+                    container.appendChild(img);
+                }
+            });
+        }
+        
+        // Event listeners for image preview
+        comercioMainImageInput.addEventListener('input', (e) => {
+            const url = e.target.value;
+            updateImagePreview(url, mainImagePreviewDiv);
+        });
+
+        comercioAdditionalPhotosInput.addEventListener('input', (e) => {
+            const urls = e.target.value.split(',').map(url => url.trim());
+            updateImagePreview(urls, additionalPhotosPreviewDiv);
         });
 
 
@@ -1400,10 +1435,6 @@
                 const snapshot = await productsColRef.orderBy('order', 'asc').get();
                 const products = snapshot.docs.map(doc => ({ firebaseId: doc.id, ...doc.data() }));
                 renderProducts(products);
-                // Also update the JSON display if that tab is active
-                if (document.getElementById('json-products').classList.contains('active')) {
-                    await displayProductsAsJson();
-                }
             } catch (error) {
                 console.error("Error fetching products: ", error);
                 productsListDiv.innerHTML = '<p>Error al cargar los productos de este comercio. Asegúrese de que sus reglas de seguridad permitan leer los productos.</p>';
@@ -1437,11 +1468,6 @@
 
                 // Populate categories for the management tab
                 renderCategoriesForManagement(allCategories);
-
-                // Update categories JSON if category tab is active (now in new tab)
-                if (document.getElementById('json-categories').classList.contains('active')) {
-                    await displayCategoriesAsJson();
-                }
             }
             catch (error) {
                 console.error("Error fetching categories: ", error);
@@ -1463,7 +1489,7 @@
                 const productCard = document.createElement('div');
                 productCard.className = 'card';
                 productCard.innerHTML = `
-                    <img src="${imageUrl}" alt="${product.name}" class="card-image">
+                    <img src="${imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/300x200/555/eee?text=No+Image';" alt="${product.name}" class="card-image">
                     <div class="card-content">
                         <h3>${product.name}</h3>
                         <p class="price">₡${product.price ? product.price.toFixed(2) : '0.00'}
@@ -1525,173 +1551,6 @@
                 button.addEventListener('click', (e) => deleteCategory(e.target.dataset.id));
             });
         }
-
-        // Function to format product data for the desired JSON output
-        function formatProductForJSON(product, customId) {
-            const formattedProduct = {};
-            formattedProduct.id = customId; // Use the passed custom auto-incrementing ID
-            formattedProduct.name = product.name;
-            formattedProduct.price = parseFloat(product.price);
-            formattedProduct.image = product.image; // Use actual image URL from product, not the default
-            formattedProduct.productDetails = product.productDetails;
-            formattedProduct.isVegan = product.isVegan;
-            formattedProduct.isVegetarian = product.isVegetarian;
-            formattedProduct.isGlutenFree = product.isGlutenFree;
-            formattedProduct.dietaryInfo = product.dietaryInfo;
-            formattedProduct.categories = product.categories;
-            formattedProduct.order = parseInt(product.order);
-            formattedProduct.comercioId = currentComercioId; // Add comercioId to product JSON
-            formattedProduct.comercioName = currentComercioName; // Add comercioName to product JSON for convenience
-
-            if (product.oldPrice !== null && product.oldPrice !== undefined) {
-                formattedProduct.oldPrice = parseFloat(product.oldPrice);
-            }
-            return formattedProduct;
-        }
-
-        async function displayProductsAsJson() {
-            // Check if authenticated (rules will also enforce this)
-            if (!currentUser) { 
-                jsonProductsDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de productos.';
-                return;
-            }
-
-            const productsColRef = getProductsCollection();
-            if (!productsColRef) {
-                jsonProductsDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de productos.';
-                return;
-            }
-
-            try {
-                const snapshot = await productsColRef.orderBy('order', 'asc').get();
-                let productsData = snapshot.docs.map(doc => doc.data());
-
-                let count = 1; // Initialize the auto-incrementing counter
-                const formattedProducts = productsData.map(product => {
-                    return formatProductForJSON(product, count++);
-                });
-
-                let jsonString = "[\n";
-                formattedProducts.forEach((product, index) => {
-                    jsonString += "    {\n";
-                    const keys = Object.keys(product);
-                    keys.forEach((key, i) => {
-                        let value = product[key];
-                        let formattedValue;
-
-                        if (Array.isArray(value)) {
-                            formattedValue = `[${value.map(item => `"${item}"`).join(', ')}]`;
-                        } else if (typeof value === 'string') {
-                            formattedValue = `"${value}"`;
-                        } else if (value === null) {
-                            formattedValue = 'null';
-                        } else if (typeof value === 'boolean' || typeof value === 'number') {
-                            formattedValue = value;
-                        } else {
-                            formattedValue = JSON.stringify(value);
-                        }
-                        jsonString += `        ${key}: ${formattedValue}`;
-                        if (i < keys.length - 1) {
-                            jsonString += ",\n";
-                        } else {
-                            jsonString += "\n";
-                        }
-                    });
-                    jsonString += "    }";
-                    if (index < formattedProducts.length - 1) {
-                        jsonString += ",\n";
-                    } else {
-                        jsonString += "\n";
-                    }
-                });
-                jsonString += "]";
-
-                jsonProductsDisplayCode.textContent = `const products = ${jsonString};`;
-            } catch (error) {
-                console.error("Error displaying JSON: ", error);
-                jsonProductsDisplayCode.textContent = `Error al cargar el JSON: ${error.message}`;
-            }
-        }
-
-        // Function to display categories as a specific JSON format
-        async function displayCategoriesAsJson() {
-            // Check if authenticated (rules will also enforce this)
-            if (!currentUser) { 
-                categoriesJsonDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de categorías.';
-                return;
-            }
-
-            const categoriesColRef = getCategoriesCollection();
-            if (!categoriesColRef) {
-                categoriesJsonDisplayCode.textContent = 'Seleccione un comercio para ver el JSON de categorías.';
-                return;
-            }
-
-            try {
-                const snapshot = await categoriesColRef.orderBy('name', 'asc').get();
-                const firebaseCategories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name })); // Use doc.id for category ID
-
-                // Fixed categories to always be at the start
-                const defaultFixedCategories = [
-                    { id: "all", name: "Todas las Categorías" }
-                ];
-
-                // Combine fixed categories with fetched categories, avoiding duplicates by 'id'
-                const combinedCategoriesMap = new Map();
-                
-                // Add fixed categories first
-                defaultFixedCategories.forEach(cat => combinedCategoriesMap.set(cat.id, cat));
-                
-                // Add fetched categories, only if their ID doesn't already exist from fixed categories
-                firebaseCategories.forEach(cat => {
-                    if (!combinedCategoriesMap.has(cat.id)) {
-                        combinedCategoriesMap.set(cat.id, cat);
-                    }
-                });
-
-                const finalCategories = Array.from(combinedCategoriesMap.values());
-
-                // Sort the final list. Keep the fixed category at the very beginning
-                // and then sort the rest alphabetically by name.
-                finalCategories.sort((a, b) => {
-                    const aIsFixed = defaultFixedCategories.some(fc => fc.id === a.id);
-                    const bIsFixed = defaultFixedCategories.some(fc => fc.id === b.id);
-
-                    if (aIsFixed && !bIsFixed) return -1; // a comes before b if a is fixed and b is not
-                    if (!aIsFixed && bIsFixed) return 1;  // b comes before a if b is fixed and a is not
-
-                    // If both are fixed, maintain their original order (based on defaultFixedCategories array)
-                    if (aIsFixed && bIsFixed) {
-                        return defaultFixedCategories.indexOf(defaultFixedCategories.find(fc => fc.id === a.id)) -
-                               defaultFixedCategories.indexOf(defaultFixedCategories.find(fc => fc.id === b.id));
-                    }
-                    
-                    // If neither is fixed (both are from Firebase), sort alphabetically by name
-                    return a.name.localeCompare(b.name);
-                });
-
-
-                // Manually construct the JavaScript array string
-                let jsArrayString = "[\n";
-                finalCategories.forEach((cat, index) => {
-                    // Escape single quotes within the name for the 'name' value
-                    const escapedName = cat.name.replace(/'/g, "\\'");
-                    jsArrayString += `            { id: "${cat.id}", name: '${escapedName}' }`;
-                    if (index < finalCategories.length - 1) {
-                        jsArrayString += ",\n";
-                    } else {
-                        jsArrayString += "\n";
-                    }
-                });
-                jsArrayString += "        ];";
-
-                categoriesJsonDisplayCode.textContent = `const categories = ${jsArrayString}`;
-            } catch (error) {
-                console.error("Error displaying categories JSON: ", error);
-                categoriesJsonDisplayCode.textContent = `Error al cargar el JSON de categorías: ${error.message}`;
-            }
-        }
-
 
         // --- PRODUCT CRUD OPERATIONS (Using Modals) ---
 
@@ -2061,68 +1920,6 @@
             categoryIdInput.value = '';
         });
 
-        // --- COPY JSON FUNCTIONALITY ---
-        copyProductsJsonButton.addEventListener('click', () => {
-            if (!currentUser) { // Check authentication
-                showMessage('Acceso Denegado', 'Necesita iniciar sesión para copiar el JSON de productos.');
-                openModal(authModal);
-                return;
-            }
-            const textToCopy = jsonProductsDisplayCode.textContent;
-            if (textToCopy) {
-                const textArea = document.createElement("textarea");
-                textArea.value = textToCopy;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    console.log('JSON de productos copiado al portapapeles!');
-                    copyProductsJsonButton.textContent = "¡Copiado!";
-                    setTimeout(() => {
-                        copyProductsJsonButton.textContent = "Copiar JSON";
-                    }, 2000);
-                } catch (err) {
-                    console.error('No se pudo copiar el JSON de productos: ', err);
-                    copyProductsJsonButton.textContent = "Error al copiar";
-                    setTimeout(() => {
-                        copyProductsJsonButton.textContent = "Copiar JSON";
-                    }, 2000);
-                }
-                document.body.removeChild(textArea);
-            }
-        });
-
-        copyCategoriesJsonButton.addEventListener('click', () => {
-            if (!currentUser) { // Check authentication
-                showMessage('Acceso Denegado', 'Necesita iniciar sesión para copiar el JSON de categorías.');
-                openModal(authModal);
-                return;
-            }
-            const textToCopy = categoriesJsonDisplayCode.textContent;
-            if (textToCopy) {
-                const textArea = document.createElement("textarea");
-                textArea.value = textToCopy;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    console.log('JSON de categorías copiado al portapapeles!');
-                    copyCategoriesJsonButton.textContent = "¡Copiado!";
-                    setTimeout(() => {
-                        copyCategoriesJsonButton.textContent = "Copiar JSON";
-                    }, 2000);
-                } catch (err) {
-                    console.error('No se pudo copiar el JSON de categorías: ', err);
-                    copyCategoriesJsonButton.textContent = "Error al copiar";
-                    setTimeout(() => {
-                        copyCategoriesJsonButton.textContent = "Copiar JSON";
-                    }, 2000);
-                }
-                document.body.removeChild(textArea);
-            }
-        });
-
-
         // --- AUTHENTICATION LOGIC ---
 
         // Función para mostrar errores de autenticación
@@ -2278,8 +2075,6 @@
                 // Limpiar contenido de las pestañas sensibles y redirigir
                 productsListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar productos.</p>';
                 categoriesListDiv.innerHTML = '<p>Necesita iniciar sesión para gestionar categorías.</p>';
-                jsonProductsDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de productos.';
-                categoriesJsonDisplayCode.textContent = 'Necesita iniciar sesión para ver el JSON de categorías.';
                 
                 // Redirigir a la pestaña de gestión de comercios (donde está el botón de inicio de sesión)
                 openTab('comercio-gestion'); 
