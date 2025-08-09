@@ -1057,6 +1057,30 @@
                 /* Altura de imagen para 768px y más */
             }
         }
+
+        /* NEW: Styles for the store navigation link */
+        .store-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 0;
+        }
+
+        .store-link {
+            text-decoration: none;
+            color: var(--text-color);
+            background-color: var(--top-bar-bg);
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .store-link:hover {
+            background-color: var(--button-hover-bg);
+        }
+
     </style>
 </head>
 
@@ -1081,8 +1105,12 @@
     </div>
 
     <div class="container">
-        <h2 id="products-title"></h2>
+        <!-- NEW: Store navigation link and product title wrapper -->
+        <div class="store-header">
+            <a href="/" class="store-link">Tiendas</a>
 
+        </div>
+            <h2 id="products-title"></h2>
         <div class="categories" id="categories-menu">
         </div>
 
@@ -1143,7 +1171,7 @@
         let userId;
         let storeId;
 
-        const CART_STORAGE_KEY = 'e-commerce-cart'; // Clave para localStorage
+        const CART_STORAGE_PREFIX = 'e-commerce-cart-'; // Nuevo prefijo para la clave de localStorage
 
         // Cache DOM elements for better performance
         const DOMElements = {
@@ -1190,10 +1218,11 @@
             DOMElements.loadingOverlay.classList.add('hidden');
         };
 
-        // NEW: Function to load the cart from localStorage
+        // NEW: Function to load the cart from localStorage, using a dynamic key
         const loadCartFromLocalStorage = () => {
+            if (!storeId) return;
             try {
-                const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+                const storedCart = localStorage.getItem(CART_STORAGE_PREFIX + storeId);
                 if (storedCart) {
                     cart = JSON.parse(storedCart);
                 } else {
@@ -1205,10 +1234,11 @@
             }
         };
 
-        // NEW: Function to save the cart to localStorage
+        // NEW: Function to save the cart to localStorage, using a dynamic key
         const saveCartToLocalStorage = () => {
+            if (!storeId) return;
             try {
-                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+                localStorage.setItem(CART_STORAGE_PREFIX + storeId, JSON.stringify(cart));
             } catch (error) {
                 console.error("Error saving cart to localStorage:", error);
             }
@@ -1698,7 +1728,7 @@
                     loadProducts();
                     loadCategories();
 
-                    // NEW: Load the cart from localStorage
+                    // Load the cart from localStorage, which now uses the specific storeId
                     loadCartFromLocalStorage();
 
                     initializeTheme();

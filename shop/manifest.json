@@ -1,6 +1,6 @@
 {
-  "name": "El Punto",
-  "short_name": "El Punto",
+  "name": "Encuentra CR",
+  "short_name": "Encuentra CR",
   "description": "Tu app para encontrar productos fácilmente",
   "start_url": "./",
   "display": "standalone",
