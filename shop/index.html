@@ -392,7 +392,7 @@
             /* Smallest gap */
             margin-bottom: 30px;
         }
-        
+
         .no-products-message {
             grid-column: 1 / -1;
             /* Make the message span all columns */
@@ -402,10 +402,11 @@
             color: var(--text-color);
         }
 
+        /* NEW CSS for the refactored product card layout */
         .product-card {
             border: 1px solid var(--card-border);
             border-radius: 8px;
-            padding: 15px;
+            padding: 15px; /* Add padding to the card itself */
             text-align: center;
             background-color: var(--card-bg);
             display: flex;
@@ -445,36 +446,66 @@
             background-color: var(--button-hover-bg);
         }
 
-        .product-card img {
-            max-width: 100%;
+        /* Container for the image, now with relative position for overlay */
+        .product-image-container {
+            position: relative;
+            width: 100%;
             height: 100px;
             /* Default height for smallest screens */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 10px; /* Space between image and text */
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 4px;
-            margin-bottom: 10px;
-            display: block;
         }
 
-        .product-card h3 {
-            margin-top: 0;
-            color: var(--text-color);
-            transition: color 0.3s ease;
+        /* New class for the product name overlay */
+        .product-name-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            color: white;
+            padding: 5px 10px;
+            box-sizing: border-box; /* Include padding in width calculation */
+            text-align: left;
+            transition: background-color 0.3s ease;
+        }
+        
+        .product-name-overlay h3 {
+            margin: 0;
+            font-size: 1em;
+            color: white;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
 
-        .product-card p {
-            font-size: 1.1em;
+        /* New class for the product details with ellipsis */
+        .product-details-short {
+            font-size: 0.9em;
             color: var(--text-color);
-            /* Adjusted for better visibility in both modes */
-            margin-bottom: 15px;
-            font-size: 10px;
-            transition: color 0.3s ease;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center; /* Aligned to center as requested */
         }
 
         /* Estilos para los tags de productos */
         .product-tags {
             position: absolute;
+            top: 5px;
+            left: 5px;
             display: flex;
-            margin: 5px;
             gap: 5px;
             z-index: 10;
         }
@@ -499,12 +530,12 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
         }
 
-        /* Nuevo estilo para el precio como tag */
+        /* Nuevo estilo para el precio como tag, ahora en la esquina superior derecha de la tarjeta */
         .product-card .price-tag {
             position: absolute;
             top: 15px;
             right: 15px;
-            margin: 5px;
+            margin: 0;
             background-color: var(--price-tag-bg);
             color: var(--price-tag-color);
             padding: 5px 10px;
@@ -980,12 +1011,16 @@
                 padding: 10px;
             }
 
-            .product-card h3 {
-                font-size: 1.2em;
+            .product-image-container {
+                height: 120px; /* Adjust image height for mobile */
             }
 
-            .product-card p {
-                font-size: 0.9em;
+            .product-name {
+                font-size: 1em;
+            }
+
+            .product-details-short {
+                font-size: 0.8em;
             }
 
             .modal-content {
@@ -1065,6 +1100,7 @@
             justify-content: space-between;
             margin-bottom: 20px;
             padding: 10px 0;
+            margin-top: 10px;
         }
 
         .store-link {
@@ -1362,13 +1398,18 @@
 
                     const imageUrl = product.image || 'https://i.postimg.cc/vZQnpBpT/logo.png';
 
+                    // NEW HTML structure with separate details and button
                     productCard.innerHTML = `
                             ${tagsHtml}
-                            <div class="price-tag">${priceHtml}</div>
-                            <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://i.postimg.cc/vZQnpBpT/logo.png';">
-                            <h3>${product.name}</h3>
-                            <p>${product.productDetails || ''}</p>
+                            <div class="product-image-container">
+                                <img src="${imageUrl}" alt="${product.name}" loading="lazy" onerror="this.onerror=null;this.src='https://i.postimg.cc/vZQnpBpT/logo.png';">
+                                <div class="product-name-overlay">
+                                    <h3>${product.name}</h3>
+                                </div>
+                            </div>
+                            <p class="product-details-short">${product.productDetails || ''}</p>
                             <button class="add-to-cart-button" data-product-id="${product.id}">Añadir al Carrito</button>
+                            <div class="price-tag">${priceHtml}</div>
                         `;
                     fragment.appendChild(productCard);
                 });
@@ -1386,9 +1427,9 @@
                 clickedButton.classList.add('active');
 
                 // Obtener el valor del filtro del atributo data-category del botón
-                currentFilter = clickedButton.dataset.category; 
+                currentFilter = clickedButton.dataset.category;
                 console.log('Filtrando por:', currentFilter);
-                
+
                 DOMElements.productSearchInput.value = "";
                 currentSearchTerm = "";
                 renderProducts(); // Llama a la función para renderizar con el nuevo filtro
@@ -1551,7 +1592,7 @@
                 console.log("Tu carrito está vacío. Por favor, añade algunos productos antes de enviar el pedido.");
                 return;
             }
-            
+
             // Get the WhatsApp number from the storeInfo object
             const whatsappNumber = storeInfo.phoneNumber;
             if (!whatsappNumber) {
