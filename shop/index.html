@@ -58,6 +58,9 @@
             --promo-button-hover-bg: #FF6347;
             --promo-button-color: white;
             --search-border-color: #ccc;
+            --add-to-cart-bg: #6B8E23; /* Dark green for consistency */
+            --add-to-cart-color: white;
+            --add-to-cart-hover: #556B2F;
         }
 
         /* Dark Mode Variables */
@@ -108,6 +111,9 @@
             --promo-button-hover-bg: #b35239;
             /* Slightly darker tomato */
             --search-border-color: #666;
+            --add-to-cart-bg: #90ee90;
+            --add-to-cart-color: #282c34;
+            --add-to-cart-hover: #76c876;
         }
 
 
@@ -754,68 +760,145 @@
         .modal-whatsapp-button:hover {
             background-color: #556B2F;
         }
-
+        
         /* Estilos específicos para el modal de detalles del producto */
         #productDetailModal .modal-content {
             text-align: center;
+            padding: 30px; /* Más padding para un look profesional */
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Espacio entre los elementos */
+        }
+        
+        #productDetailModal .modal-content h3 {
+            font-size: 2em;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        #productDetailModal .detail-price-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #productDetailModal .old-price {
+            text-decoration: line-through;
+            color: var(--old-price-color);
+            font-size: 1.1em;
+            font-weight: normal;
+        }
+
+        #productDetailModal .new-price {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--new-price-color);
         }
 
         #productDetailModal img {
-            max-width: 80%;
+            max-width: 100%;
             height: auto;
-            max-height: 250px;
+            max-height: 300px;
             object-fit: contain;
             border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: box-shadow 0.3s ease;
         }
 
         body.dark-mode #productDetailModal img {
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
-        #productDetailModal h3 {
-            font-size: 1.8em;
-            margin-bottom: 10px;
-            color: var(--text-color);
-            transition: color 0.3s ease;
+        #productDetailModal .detail-tags {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        #productDetailModal p {
+        #productDetailModal .detail-tags i {
             font-size: 1.3em;
-            font-weight: bold;
+            color: var(--product-tags-color);
+            background-color: var(--product-tags-bg);
+            padding: 8px;
+            border-radius: 50%; /* Make them round */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-mode #productDetailModal .detail-tags i {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* NEW: Styles for the text-based status in the detail modal */
+        #productDetailModal #detail-status {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            text-align: left;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--modal-item-bg);
+            border-radius: 4px;
+            border-left: 3px solid var(--product-tags-color);
+        }
+
+        #productDetailModal #detail-status span {
+            font-size: 0.9em;
             color: var(--text-color);
-            /* Adjusted for consistency */
-            margin-bottom: 15px;
-            transition: color 0.3s ease;
         }
 
         #productDetailModal #detail-description {
-            font-size: 1.1em;
-            color: var(--text-color);
-            /* Adjusted for consistency */
-            text-align: left;
-            margin-top: 20px;
+            font-size: 1em;
             line-height: 1.6;
+            text-align: justify;
+            margin: 10px 0;
+            color: var(--text-color);
             transition: color 0.3s ease;
         }
 
+        #productDetailModal #detail-additional-info {
+            font-size: 0.9em;
+            line-height: 1.5;
+            text-align: left;
+            padding: 10px;
+            background-color: var(--modal-item-bg);
+            border-left: 3px solid var(--product-tags-color);
+            border-radius: 4px;
+            margin-top: 10px;
+            color: var(--text-color);
+        }
+        
+        .hidden-element {
+            display: none !important;
+        }
+
         #productDetailModal .add-to-cart-from-detail {
-            background-color: var(--button-bg);
-            color: var(--button-color);
+            background-color: var(--add-to-cart-bg);
+            color: var(--add-to-cart-color);
             border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
+            padding: 15px 30px;
+            border-radius: 50px; /* Pill-shaped button */
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1.2em;
             font-weight: bold;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         #productDetailModal .add-to-cart-from-detail:hover {
-            background-color: var(--button-hover-bg);
+            background-color: var(--add-to-cart-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
 
         .loading-overlay {
@@ -936,7 +1019,13 @@
                 font-size: 1.5em;
             }
 
-            #productDetailModal p {
+            #productDetailModal .new-price {
+                font-size: 1.5em;
+            }
+            
+            #productDetailModal .detail-tags i {
+                width: 30px;
+                height: 30px;
                 font-size: 1.1em;
             }
 
@@ -1182,8 +1271,13 @@
             <span class="close-button" id="close-product-detail-modal">&times;</span>
             <img id="detail-image" src="" alt="Imagen del producto">
             <h3 id="detail-name"></h3>
-            <p id="detail-price"></p>
+            <div class="detail-price-container">
+                <p id="detail-price"></p>
+            </div>
+            <div id="detail-tags" class="detail-tags"></div>
+            <div id="detail-status"></div>
             <p id="detail-description"></p>
+            <div id="detail-additional-info"></div>
             <button class="add-to-cart-from-detail" id="add-to-cart-from-detail-button">Añadir al Carrito</button>
         </div>
     </div>
@@ -1234,7 +1328,10 @@
             sendWhatsappOrderButton: document.getElementById('send-whatsapp-order-button'),
             loadingOverlay: document.getElementById('loading-overlay'),
             storeNameDiv: document.getElementById('store-name'),
-            productsTitle: document.getElementById('products-title')
+            productsTitle: document.getElementById('products-title'),
+            detailTagsContainer: document.getElementById('detail-tags'),
+            detailAdditionalInfo: document.getElementById('detail-additional-info'),
+            detailStatus: document.getElementById('detail-status')
         };
 
 
@@ -1569,12 +1666,44 @@
                     `<span class="old-price">${formatColones(product.oldPrice)}</span><span class="new-price">${formatColones(product.price)}</span>` :
                     `<span class="new-price">${formatColones(product.price)}</span>`;
                 DOMElements.detailPrice.innerHTML = detailPriceHtml;
-
-                let fullDescription = product.productDetails || '';
-                if (product.dietaryInfo) {
-                    fullDescription += `<br><br><strong>Información Dietética:</strong> ${product.dietaryInfo}`;
+                
+                // NEW: Populate text-based status
+                DOMElements.detailStatus.innerHTML = ''; // Clear previous content
+                let statusHtml = '';
+                if (product.isVegan !== undefined) {
+                    statusHtml += `<span><strong>Vegano:</strong> ${product.isVegan ? 'Sí' : 'No'}</span>`;
                 }
-                DOMElements.detailDescription.innerHTML = fullDescription;
+                if (product.isVegetarian !== undefined) {
+                    statusHtml += `<span><strong>Vegetariano:</strong> ${product.isVegetarian ? 'Sí' : 'No'}</span>`;
+                }
+                if (product.isGlutenFree !== undefined) {
+                    statusHtml += `<span><strong>Sin Gluten:</strong> ${product.isGlutenFree ? 'Sí' : 'No'}</span>`;
+                }
+                DOMElements.detailStatus.innerHTML = statusHtml;
+
+                // Handle description
+                DOMElements.detailDescription.textContent = product.productDetails || '';
+
+                // Handle additional info section, hide if empty
+                if (product.dietaryInfo) {
+                    DOMElements.detailAdditionalInfo.innerHTML = `<strong>Información Dietética:</strong> ${product.dietaryInfo}`;
+                    DOMElements.detailAdditionalInfo.classList.remove('hidden-element');
+                } else {
+                    DOMElements.detailAdditionalInfo.innerHTML = '';
+                    DOMElements.detailAdditionalInfo.classList.add('hidden-element');
+                }
+                
+                // Populate detail tags (icons)
+                DOMElements.detailTagsContainer.innerHTML = '';
+                if (product.isVegan) {
+                    DOMElements.detailTagsContainer.innerHTML += '<i class="fas fa-seedling" title="Vegano"></i>';
+                }
+                if (product.isVegetarian) {
+                    DOMElements.detailTagsContainer.innerHTML += '<i class="fas fa-leaf" title="Vegetariano"></i>';
+                }
+                if (product.isGlutenFree) {
+                    DOMElements.detailTagsContainer.innerHTML += '<i class="fas fa-bread-slice" data-fa-transform="flip-h" title="Sin Gluten"></i>';
+                }
 
                 // Set a custom property to store the product ID for the add to cart button in the detail modal
                 DOMElements.addToCartFromDetailButton.dataset.productId = product.id;
