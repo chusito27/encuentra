@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,23 +19,27 @@
 
         /* Header Profesional */
         header {
-            background-color: #D8BFD8; /* Color Thistle para el header */
-            color: #333; /* Texto oscuro para contrastar */
+            background-color: #D8BFD8;
+            /* Color Thistle para el header */
+            color: #333;
+            /* Texto oscuro para contrastar */
             padding: 1.5em 0;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         header h1 {
             margin: 0 0 10px 0;
             font-size: 2.5em;
-            color: #36454F; /* Tono marrón oscuro para el título */
+            color: #36454F;
+            /* Tono marrón oscuro para el título */
         }
 
         header p {
             margin: 0;
             font-size: 1.1em;
-            color: #36454F; /* Tono marrón oscuro para el subtitulo */
+            color: #36454F;
+            /* Tono marrón oscuro para el subtitulo */
         }
 
         /* Estilos del Buscador */
@@ -48,92 +53,108 @@
 
         .search-container input[type="text"] {
             padding: 10px 15px;
-            border: 1px solid #C0A8C0; /* Borde más sutil */
+            border: 1px solid #C0A8C0;
+            /* Borde más sutil */
             border-radius: 5px;
             width: 100%;
             max-width: 400px;
             font-size: 1em;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        .search-container button {
-            padding: 10px 20px;
-            background-color: #36454F; /* Botón púrpura fuerte */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        .search-container button:hover {
-            background-color: #6A1FB8; /* Tono más oscuro al pasar el mouse */
-        }
-
+        /* Estilos de la Cuadrícula de Comercios */
         .container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 0 15px;
         }
 
-        /* Estilos de la Cuadrícula de Comercios */
         #comercios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
-            margin-top: 30px; /* Espacio después del buscador */
+            margin-top: 30px;
+            /* Espacio después del buscador */
         }
 
         .comercio-card {
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: transform 0.2s ease-in-out;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
             border: 1px solid #D8BFD8;
             position: relative;
         }
 
         .comercio-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .comercio-card img {
+        /* Contenedor de imagen con superposición de texto y botón */
+        .image-container {
+            position: relative;
             width: 100%;
             height: 200px;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             display: block;
         }
 
-        .comercio-info {
-            padding: 15px;
-            flex-grow: 1;
+        /* Estilo para el contenedor de textos superpuestos */
+        .comercio-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000000a6;
+            color: white;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
-        .comercio-info h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #36454F;
+        /* Estilo para el título del comercio (Modificado) */
+        .comercio-overlay h3 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            align-self: flex-start;
+            padding: 5px 10px;
+            background-color: rgb(216 191 216 / 46%);
+            border-radius: 5px;
+            width: 100%;
         }
 
-        .comercio-info p {
+        /* Contenedor para la información de la parte inferior */
+        .comercio-overlay .bottom-info {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .comercio-overlay p {
+            margin: 5px 0 0 0;
             font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
+            color: #ccc;
         }
 
-        .card-buttons {
-            padding: 15px;
-            text-align: right;
-            border-top: 1px solid #eee;
+        .comercio-overlay p strong {
+            color: white;
         }
 
-        .card-buttons .ver-detalles-btn {
+        /* Estilo para el botón de detalles superpuesto */
+        .ver-detalles-overlay-btn {
             background-color: #D8BFD8;
             color: #333;
             border: none;
@@ -142,9 +163,13 @@
             cursor: pointer;
             transition: background-color 0.2s;
             font-size: 0.9em;
+            align-self: flex-end;
+            /* Alinea el botón a la derecha */
+            margin-top: auto;
+            /* Empuja el botón al final del contenedor */
         }
 
-        .card-buttons .ver-detalles-btn:hover {
+        .ver-detalles-overlay-btn:hover {
             background-color: #C0A8C0;
         }
 
@@ -158,7 +183,7 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.6);
+            background-color: rgba(0, 0, 0, 0.6);
             padding-top: 60px;
         }
 
@@ -170,7 +195,7 @@
             border-radius: 8px;
             width: 90%;
             max-width: 800px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             position: relative;
         }
 
@@ -246,22 +271,23 @@
             #comercios-grid {
                 grid-template-columns: 1fr;
             }
+
             .modal-content {
                 width: 95%;
                 margin: 20px auto;
                 padding: 15px;
             }
+
             .search-container {
                 flex-direction: column;
                 align-items: center;
             }
+
             .search-container input[type="text"] {
                 max-width: 90%;
             }
-            .search-container button {
-                width: 90%;
-            }
         }
+
         /* Loading Spinner */
         #loading-spinner {
             display: none;
@@ -270,6 +296,7 @@
             font-size: 1.2em;
             color: #666;
         }
+
         #loading-spinner::after {
             content: '';
             display: block;
@@ -284,23 +311,33 @@
         }
 
         @-webkit-keyframes spin {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <header>
         <h1>Encuentra CR</h1>
         <p>Encuentra tus lugares favoritos en Costa Rica</p>
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Buscar comercio por nombre...">
-            <button id="search-button">Buscar</button>
         </div>
     </header>
 
@@ -318,7 +355,8 @@
             </div>
             <div class="info-item"><strong>Horario:</strong> <span id="detalle-horario"></span></div>
             <div class="info-item"><strong>Teléfono:</strong> <span id="detalle-telefono"></span></div>
-            <div class="info-item"><strong>Sitio Web:</strong> <a id="detalle-sitio-web" href="#" target="_blank"></a></div>
+            <div class="info-item"><strong>Sitio Web:</strong> <a id="detalle-sitio-web" href="#" target="_blank"></a>
+            </div>
             <p id="detalle-descripcion"></p>
 
             <h3>Galería de Fotos</h3>
@@ -332,7 +370,7 @@
         // Se han añadido 'query', 'where' y 'orderBy' a la importación para el filtrado y ordenamiento
         import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
+
         // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAHr8NSBkLN_Jt062C4RtYFiulFC13tOLA",
@@ -343,21 +381,20 @@
             appId: "1:899729264501:web:e81099f4c1e7ba52ef4d3c",
             measurementId: "G-VE3F22HX79"
         };
-    
+
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        
+
         document.addEventListener('DOMContentLoaded', async () => {
             const comerciosGrid = document.getElementById('comercios-grid');
             const detallesModal = document.getElementById('detallesModal');
             const closeButton = document.querySelector('.close-button');
             const searchInput = document.getElementById('search-input');
-            const searchButton = document.getElementById('search-button');
             const loadingSpinner = document.getElementById('loading-spinner');
             let comerciosData = []; // Para almacenar los datos de los comercios
-        
+
             // Función para obtener los comercios de Firestore
             async function fetchComerciosFromFirestore() {
                 // Mostrar el spinner de carga
@@ -367,7 +404,7 @@
                 try {
                     // Primero, intenta iniciar sesión de forma anónima
                     await signInAnonymously(auth);
-                    
+
                     const comerciosCol = collection(db, 'comercios');
                     // MODIFICACIÓN: Crear una consulta que filtre por 'showInSite' y ordene por 'order'
                     const q = query(
@@ -375,7 +412,7 @@
                         where('showInSite', '==', true), // Filtra solo los que tienen showInSite en true
                         orderBy('order')
                     );
-                    
+
                     // MODIFICACIÓN: Usar la consulta 'q' en lugar de la colección directamente
                     const comerciosSnapshot = await getDocs(q);
                     comerciosData = comerciosSnapshot.docs.map(doc => ({
@@ -450,7 +487,7 @@
                     // Evento de clic principal de la tarjeta para redirección externa
                     card.addEventListener('click', (event) => {
                         // Evita que el clic en el botón "Ver Detalles" active la redirección de la tarjeta
-                        if (!event.target.classList.contains('ver-detalles-btn')) {
+                        if (!event.target.classList.contains('ver-detalles-overlay-btn')) {
                             const targetLink = comercio.externalLink || comercio.website;
                             if (targetLink) {
                                 // Asegurar que el enlace se abra correctamente
@@ -464,19 +501,21 @@
 
                     // Actualizado para usar los nombres de variables de tu Firestore
                     card.innerHTML = `
-                        <img src="${comercio.mainImage}" alt="${comercio.name}">
-                        <div class="comercio-info">
-                            <h3>${comercio.name}</h3>
-                            <p><strong>Horario:</strong> ${comercio.schedule}</p>
-                            <p>${comercio.shortDescription || ''}</p>
-                        </div>
-                        <div class="card-buttons">
-                            <button class="ver-detalles-btn" data-id="${comercio.id}">Ver Detalles</button>
+                        <div class="image-container">
+                            <img src="${comercio.mainImage}" alt="${comercio.name}">
+                            <div class="comercio-overlay">
+                                <h3>${comercio.name}</h3>
+                                <div class="bottom-info">
+                                    <p><strong>Horario:</strong> ${comercio.schedule}</p>
+                                    <p>${comercio.shortDescription || ''}</p>
+                                    <button class="ver-detalles-overlay-btn" data-id="${comercio.id}">Ver Detalles</button>
+                                </div>
+                            </div>
                         </div>
                     `;
 
                     // Añadir evento al botón "Ver Detalles" para abrir el modal
-                    const verDetallesBtn = card.querySelector('.ver-detalles-btn');
+                    const verDetallesBtn = card.querySelector('.ver-detalles-overlay-btn');
                     verDetallesBtn.addEventListener('click', (event) => {
                         event.stopPropagation(); // Evita que el clic en el botón active la redirección de la tarjeta
                         mostrarDetallesEnModal(event.target.dataset.id);
@@ -496,13 +535,10 @@
             }
 
             // Eventos del buscador
-            searchButton.addEventListener('click', filtrarComercios);
             searchInput.addEventListener('keyup', (event) => {
-                if (event.key === 'Enter') {
+                if (event.key === 'Enter' || searchInput.value === '') {
                     filtrarComercios();
-                } else if (searchInput.value === '') { // Mostrar todos si el campo está vacío
-                    renderComercios(comerciosData);
-                } else { // Filtrar en tiempo real mientras se escribe
+                } else {
                     filtrarComercios();
                 }
             });
@@ -543,4 +579,5 @@
         });
     </script>
 </body>
+
 </html>

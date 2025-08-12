@@ -1667,19 +1667,26 @@
                     `<span class="new-price">${formatColones(product.price)}</span>`;
                 DOMElements.detailPrice.innerHTML = detailPriceHtml;
                 
-                // NEW: Populate text-based status
-                DOMElements.detailStatus.innerHTML = ''; // Clear previous content
-                let statusHtml = '';
-                if (product.isVegan !== undefined) {
-                    statusHtml += `<span><strong>Vegano:</strong> ${product.isVegan ? 'Sí' : 'No'}</span>`;
+                // NEW: Populate text-based status and hide if no 'true' values exist
+                DOMElements.detailStatus.innerHTML = '';
+                const hasStatusInfo = product.isVegan || product.isVegetarian || product.isGlutenFree;
+                
+                if (hasStatusInfo) {
+                    let statusHtml = '';
+                    if (product.isVegan !== undefined) {
+                        statusHtml += `<span><strong>Vegano:</strong> ${product.isVegan ? 'Sí' : 'No'}</span>`;
+                    }
+                    if (product.isVegetarian !== undefined) {
+                        statusHtml += `<span><strong>Vegetariano:</strong> ${product.isVegetarian ? 'Sí' : 'No'}</span>`;
+                    }
+                    if (product.isGlutenFree !== undefined) {
+                        statusHtml += `<span><strong>Sin Gluten:</strong> ${product.isGlutenFree ? 'Sí' : 'No'}</span>`;
+                    }
+                    DOMElements.detailStatus.innerHTML = statusHtml;
+                    DOMElements.detailStatus.classList.remove('hidden-element');
+                } else {
+                    DOMElements.detailStatus.classList.add('hidden-element');
                 }
-                if (product.isVegetarian !== undefined) {
-                    statusHtml += `<span><strong>Vegetariano:</strong> ${product.isVegetarian ? 'Sí' : 'No'}</span>`;
-                }
-                if (product.isGlutenFree !== undefined) {
-                    statusHtml += `<span><strong>Sin Gluten:</strong> ${product.isGlutenFree ? 'Sí' : 'No'}</span>`;
-                }
-                DOMElements.detailStatus.innerHTML = statusHtml;
 
                 // Handle description
                 DOMElements.detailDescription.textContent = product.productDetails || '';
