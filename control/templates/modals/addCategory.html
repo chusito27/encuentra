@@ -1,0 +1,26 @@
+<!-- Modal para Añadir/Editar Categoría -->
+<div id="categoryModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="categoryFormTitle">Añadir Nueva Categoría</h2>
+            <span class="close-button">&times;</span>
+        </div>
+        <form id="categoryForm">
+            <input type="hidden" id="categoryId">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="categoryName">Nombre de la Categoría</label>
+                    <input type="text" id="categoryName" required>
+                </div>
+                <div class="form-group">
+                    <label for="categoryOrder">Orden</label>
+                    <input type="number" id="categoryOrder" value="99" required>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancelCategoryEdit" class="cancel">Cancelar</button>
+                <button type="submit">Guardar Categoría</button>
+            </div>
+        </form>
+    </div>
+</div>

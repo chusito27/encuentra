@@ -1,0 +1,71 @@
+<div id="comercioListView">
+    <div class="action-buttons-container">
+        <h2>Gestión de Comercios</h2>
+        <button id="addNewComercioButton">Añadir Nuevo Comercio</button>
+    </div>
+    <div id="comerciosTableContainer">
+        <p>Cargando lista de comercios...</p>
+    </div>
+</div>
+<div id="comercioFormView" style="display: none;">
+    <h2 id="comercioFormTitle">Añadir Nuevo Comercio</h2>
+    <form id="comercioForm">
+        <input type="hidden" id="comercioId">
+        <div class="form-grid">
+            <div class="input-group">
+                <label for="comercioName">Nombre del Comercio</label>
+                <input type="text" id="comercioName" required>
+            </div>
+            <div class="input-group">
+                <label for="comercioOrder">Orden</label>
+                <input type="number" id="comercioOrder" value="999">
+            </div>
+            <div class="input-group">
+                <label for="comercioPhoneNumber">Teléfono</label>
+                <input type="tel" id="comercioPhoneNumber">
+            </div>
+            <div class="input-group">
+                <label for="comercioSchedule">Horario</label>
+                <input type="text" id="comercioSchedule">
+            </div>
+            <div class="input-group full-width">
+                <label for="comercioShortDescription">Descripción Corta</label>
+                <textarea id="comercioShortDescription" rows="2"></textarea>
+            </div>
+            <div class="input-group full-width">
+                <label for="comercioFullDescription">Descripción Completa</label>
+                <textarea id="comercioFullDescription" rows="4"></textarea>
+            </div>
+            <div class="input-group">
+                <label for="comercioWebsite">Sitio Web (ej. https://...)</label>
+                <input type="url" id="comercioWebsite">
+            </div>
+            <div class="input-group">
+                <label for="comercioExternalLink">Enlace Externo (ej. PedidosYa)</label>
+                <input type="text" id="comercioExternalLink">
+            </div>
+            <div class="input-group full-width">
+                <label for="comercioGoogleMapsLocation">Ubicación Google Maps (URL)</label>
+                <input type="url" id="comercioGoogleMapsLocation">
+            </div>
+            <div class="input-group full-width">
+                <label for="comercioMainImage">Imagen Principal (URL)</label>
+                <input type="text" id="comercioMainImage">
+                <div id="mainImagePreview" class="image-preview-container"></div>
+            </div>
+            <div class="input-group full-width">
+                <label for="comercioAdditionalPhotos">Fotos Adicionales (URLs separadas por coma)</label>
+                <textarea id="comercioAdditionalPhotos" rows="3"></textarea>
+                <div id="additionalPhotosPreview" class="image-preview-container"></div>
+            </div>
+            <div class="input-group checkbox-group">
+                <input type="checkbox" id="showInSite" checked>
+                <label for="showInSite">Mostrar este comercio en el sitio público</label>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="save">Guardar Comercio</button>
+            <button type="button" class="cancel" id="cancelComercioEdit">Cancelar</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,57 @@
+<!-- Contenido de la Pestaña de Gestión de Productos -->
+
+<!-- 1. VISTA DE LISTA (lo que ya tenías) -->
+<div id="productsListView">
+    <div class="action-buttons-container" style="justify-content: space-between; align-items: center;">
+        <h2>Gestión de Productos</h2>
+        <button id="addNewProductButton">Añadir Nuevo Producto</button>
+    </div>
+    <div id="productsList">
+        <p>Selecciona un comercio para ver sus productos.</p>
+    </div>
+</div>
+
+<!-- 2. VISTA DE FORMULARIO/EDITOR (lo que estaba en el modal) -->
+<div id="productFormView" style="display: none;">
+    <h2 id="productFormTitle">Añadir Producto</h2>
+    <form id="productForm">
+        <input type="hidden" id="productId">
+        <div class="form-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="productName">Nombre del Producto</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Precio</label>
+                    <input type="number" id="productPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="productOrder">Orden</label>
+                    <input type="number" id="productOrder" value="99" required>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Categoría</label>
+                    <select id="productCategory"></select>
+                </div>
+                <div class="form-group full-width">
+                    <label for="productDescription">Descripción</label>
+                    <textarea id="productDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="productImage">URL de la Imagen Principal</label>
+                    <input type="text" id="productImage">
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+                <div class="form-group">
+                    <label for="productImageUpload">O subir una nueva imagen</label>
+                    <input type="file" id="productImageUpload" accept="image/*">
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="button" id="cancelProductEdit" class="cancel">Cancelar</button>
+            <button type="submit">Guardar Producto</button>
+        </div>
+    </form>
+</div>

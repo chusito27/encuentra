@@ -1,0 +1,66 @@
+<div id="editProductModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Editar Producto</h2>
+            <span class="close-button" data-modal="editProductModal">&times;</span>
+        </div>
+        <form id="editProductForm">
+            <input type="hidden" id="editProductId">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="editProductName">Nombre</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductPrice">Precio</label>
+                    <input type="number" step="0.01" id="editProductPrice" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductOldPrice">Precio Anterior (Opcional)</label>
+                    <input type="number" step="0.01" id="editProductOldPrice">
+                </div>
+                <div class="form-group">
+                    <label for="editProductOrder">Orden</label>
+                    <input type="number" id="editProductOrder" value="999">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editProductImage">URL de la Imagen</label>
+                <input type="url" id="editProductImage" placeholder="Pega una URL o sube un archivo">
+                <label for="editProductImageFile" class="file-upload-label">O sube una imagen...</label>
+                <input type="file" id="editProductImageFile" accept="image/*" style="display: none;">
+                <div class="image-preview" id="editProductImagePreview"></div>
+            </div>
+            <div class="form-group">
+                <label for="editProductDetails">Detalles</label>
+                <textarea id="editProductDetails"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="editProductCategories">Categorías</label>
+                <select id="editProductCategories" multiple style="min-height: 100px;"></select>
+            </div>
+            <div class="form-grid">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="editIsVegan">
+                    <label for="editIsVegan">Vegano</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="editIsVegetarian">
+                    <label for="editIsVegetarian">Vegetariano</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="editIsGlutenFree">
+                    <label for="editIsGlutenFree">Sin Gluten</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editProductDietaryInfo">Info Dietética Adicional</label>
+                <input type="text" id="editProductDietaryInfo">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel" data-modal="editProductModal">Cancelar</button>
+                <button type="submit">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>

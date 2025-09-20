@@ -1,0 +1,65 @@
+<div id="addProductModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Añadir Nuevo Producto</h2>
+            <span class="close-button" data-modal="addProductModal">&times;</span>
+        </div>
+        <form id="addProductForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="newProductName">Nombre</label>
+                    <input type="text" id="newProductName" required>
+                </div>
+                <div class="form-group">
+                    <label for="newProductPrice">Precio</label>
+                    <input type="number" step="0.01" id="newProductPrice" required>
+                </div>
+                <div class="form-group">
+                    <label for="newProductOldPrice">Precio Anterior (Opcional)</label>
+                    <input type="number" step="0.01" id="newProductOldPrice">
+                </div>
+                <div class="form-group">
+                    <label for="newProductOrder">Orden</label>
+                    <input type="number" id="newProductOrder" value="999">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="newProductImage">URL de la Imagen</label>
+                <input type="url" id="newProductImage" placeholder="Pega una URL o sube un archivo">
+                <label for="newProductImageFile" class="file-upload-label">O sube una imagen...</label>
+                <input type="file" id="newProductImageFile" accept="image/*" style="display: none;">
+                <div class="image-preview" id="newProductImagePreview"></div>
+            </div>
+            <div class="form-group">
+                <label for="newProductDetails">Detalles</label>
+                <textarea id="newProductDetails"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="newProductCategories">Categorías</label>
+                <select id="newProductCategories" multiple style="min-height: 100px;"></select>
+            </div>
+            <div class="form-grid">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="newIsVegan">
+                    <label for="newIsVegan">Vegano</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="newIsVegetarian">
+                    <label for="newIsVegetarian">Vegetariano</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="newIsGlutenFree">
+                    <label for="newIsGlutenFree">Sin Gluten</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="newProductDietaryInfo">Info Dietética Adicional</label>
+                <input type="text" id="newProductDietaryInfo">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel" data-modal="addProductModal">Cancelar</button>
+                <button type="submit">Añadir Producto</button>
+            </div>
+        </form>
+    </div>
+</div>

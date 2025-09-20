@@ -1,0 +1,745 @@
+/* Definición de la paleta de colores con el nuevo color principal */
+:root {
+    --primary-color: #480066; /* Tu color principal */
+    --primary-color-dark: #3a0052;
+    --primary-color-light: #6a1a8a;
+    --secondary-color: #f4f4f4;
+    --text-color: #333;
+    --text-on-primary: #ffffff;
+    --background-color: #f9f9f9;
+    --border-color: #ddd;
+    --danger-color: #d9534f;
+    --success-color: #5cb85c;
+    --card-bg: #ffffff;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos generales */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    background-color: var(--primary-color);
+    color: var(--text-on-primary);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+/* Nuevo contenedor para los controles del header */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+#comercioSelector, .auth-buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#comercioSelector label, #currentComercioInfo {
+    font-weight: 500;
+}
+
+/* Estilos para el nuevo botón de logout */
+.logout-btn {
+    background-color: var(--primary-color-light);
+    color: var(--text-on-primary);
+    border: 1px solid var(--primary-color-dark);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+    background-color: var(--primary-color-dark);
+    border-color: var(--primary-color-light);
+}
+
+
+/* Layout principal */
+.main-layout {
+    display: none; /* Oculto hasta que el usuario inicie sesión */
+    height: calc(100vh - 70px); /* Ajustar altura */
+}
+
+/* Contenido principal */
+.main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h2 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+/* Formularios */
+.form-section {
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(72, 0, 102, 0.2);
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Botones */
+button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+button[type="submit"], #signInButton, #signUpButton {
+    background-color: var(--primary-color);
+    color: var(--text-on-primary);
+}
+
+button[type="submit"]:hover, #signInButton:hover, #signUpButton:hover {
+    background-color: var(--primary-color-dark);
+}
+
+button.cancel, button[type="button"] {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+button.cancel:hover, button[type="button"]:hover {
+    background-color: #e0e0e0;
+}
+
+button.delete {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+button.delete:hover {
+    background-color: #c9302c;
+}
+
+.action-buttons-container {
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Listas (Productos, Categorías) */
+.list-section {
+    margin-top: 2rem;
+}
+
+.list-grid {
+    display: grid;
+    /* Reducimos el tamaño mínimo de la tarjeta de 280px a 240px */
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.2rem; /* Reducimos un poco el espacio entre tarjetas */
+}
+
+.product-card, .category-item {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s; /* Añadimos transición */
+}
+
+/* Efecto hover para las tarjetas de producto */
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.product-card img {
+    width: 100%;
+    /* Reducimos la altura de la imagen de 180px a 140px */
+    height: 140px;
+    object-fit: cover;
+    background-color: #f0f0f0; /* Color de fondo mientras carga la imagen */
+}
+
+.product-card-info {
+    /* Reducimos el padding de 1rem a 0.8rem */
+    padding: 0.8rem;
+    flex-grow: 1; /* Empuja las acciones hacia abajo */
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card-info h4 {
+    margin: 0 0 0.4rem 0;
+    color: var(--primary-color);
+    /* Reducimos el tamaño de la fuente del título */
+    font-size: 1rem;
+}
+
+/* Nuevos estilos para precio y orden */
+.product-card-info .product-price {
+    /* Reducimos el tamaño de la fuente del precio */
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 0 0 0.4rem 0;
+}
+
+.product-card-info .product-order {
+    font-size: 0.8rem;
+    color: #777;
+    margin-top: auto; /* Empuja este elemento al final del 'info' */
+}
+
+
+.product-card-actions {
+    /* Reducimos el padding */
+    padding: 0 0.8rem 0.8rem 0.8rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Ajuste para que los botones de acción ocupen todo el ancho */
+.product-card-actions button {
+    flex-grow: 1;
+    /* Reducimos el padding y el tamaño de la fuente de los botones */
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.category-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+}
+
+/* Modales */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: var(--background-color);
+    margin: auto;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 800px;
+    position: relative;
+    animation: fadeIn 0.3s;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin: 0;
+}
+
+.close-button {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+}
+
+/* Estilos para el botón de subida de archivos */
+.file-upload-label {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.file-upload-label:hover {
+    background-color: #e0e0e0;
+}
+
+/* Previsualización de imágenes */
+.image-preview {
+    margin-top: 1rem;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.image-preview img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Estilos para la tabla de comercios */
+/* AÑADIMOS EL SELECTOR PARA LA TABLA DE CATEGORÍAS */
+#comerciosTableContainer table,
+#categoriesTableContainer table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow);
+}
+
+/* AÑADIMOS EL SELECTOR PARA LA TABLA DE CATEGORÍAS */
+#comerciosTableContainer th,
+#comerciosTableContainer td,
+#categoriesTableContainer th,
+#categoriesTableContainer td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* AÑADIMOS EL SELECTOR PARA LA TABLA DE CATEGORÍAS */
+#comerciosTableContainer th,
+#categoriesTableContainer th {
+    background-color: var(--secondary-color);
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* AÑADIMOS EL SELECTOR PARA LA TABLA DE CATEGORÍAS */
+#comerciosTableContainer tr:last-of-type td,
+#categoriesTableContainer tr:last-of-type td {
+    border-bottom: none;
+}
+
+/* AÑADIMOS EL SELECTOR PARA LA TABLA DE CATEGORÍAS */
+#comerciosTableContainer tr:hover,
+#categoriesTableContainer tr:hover {
+    background-color: #f0e6f5; /* Un lila muy claro para el hover */
+}
+
+/* AÑADIMOS EL SELECTOR PARA LA TABLA DE CATEGORÍAS */
+#comerciosTableContainer .actions-cell,
+#categoriesTableContainer .actions-cell {
+    display: flex;
+    gap: 10px;
+}
+
+/* AÑADIMOS EL SELECTOR PARA LA TABLA DE CATEGORÍAS */
+#comerciosTableContainer .actions-cell button,
+#categoriesTableContainer .actions-cell button {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+/* --- Estilos para la Vista de Login --- */
+#login-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.login-box {
+    padding: 40px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-box h2 {
+    margin-bottom: 24px;
+    color: #333;
+}
+
+.login-box .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.login-box label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
+}
+
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.login-box button:hover {
+    background-color: #3a0052; /* Un tono más oscuro de la variable --primary-color */
+}
+
+.error-message {
+    color: #d93025;
+    margin-top: 15px;
+}
+
+/* --- Estilos para el Layout Principal --- */
+
+/* Hacemos que la vista de la app ocupe toda la pantalla y se organice en columna (header arriba, container abajo) */
+#app-view {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    /* Eliminamos overflow: hidden de aquí para estar seguros */
+}
+
+#header-container {
+    flex-shrink: 0; /* Evita que el header se encoja si el contenido es grande */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* Este es el cambio principal: .container ahora es un contenedor flex horizontal */
+.container {
+    display: flex;
+    flex-direction: row; /* Sidebar a la izquierda, main a la derecha */
+    flex-grow: 1;       /* Ocupa todo el espacio vertical restante */
+    /* La clave es que este contenedor también necesita poder desbordarse si es necesario */
+    /* Por eso, cambiamos overflow: hidden a overflow: auto (o lo eliminamos) */
+    overflow: auto;
+}
+
+/* Estilos del Sidebar (el elemento <nav class="sidebar">) */
+.sidebar {
+    width: 250px;       /* Ancho fijo para el sidebar */
+    flex-shrink: 0;     /* Evita que se encoja */
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    padding: 20px 0;
+    height: 100%;
+    overflow-y: auto;   /* Añade scroll si el menú es muy largo */
+}
+
+.sidebar-header {
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 10px;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu .tablink {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-menu .tablink:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar-menu .tablink.active {
+    background-color: #e0d7e6; /* Un color suave basado en el primario */
+    border-left-color: var(--primary-color);
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+/* Estilos del Contenido Principal */
+#main-content {
+    flex-grow: 1;       /* Ocupa todo el espacio horizontal restante */
+    padding: 25px;
+    overflow-y: auto;   /* ESTO ES CORRECTO. Permite el scroll vertical DENTRO del main-content */
+    /* La altura ya no es necesaria, flex-grow se encarga */
+    box-sizing: border-box;
+}
+
+/* --- ASEGÚRATE DE QUE ESTAS REGLAS CORRECTAS EXISTAN --- */
+/* --- (Ya deberían estar al final de tu archivo) --- */
+
+/* Por defecto, todo el contenido de las pestañas está oculto */
+.tabcontent {
+    display: none;
+    animation: fadeIn 0.5s;
+}
+
+/* Solo el contenido de la pestaña con la clase 'active' se muestra */
+.tabcontent.active {
+    display: block;
+}
+
+/* Estilo para el botón de la pestaña activa en el sidebar */
+.sidebar-menu .tablink.active {
+    background-color: #e0d7e6; /* Un color suave basado en el primario */
+    border-left-color: var(--primary-color);
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+/* ==========================================================================
+   ESTILOS RESPONSIVE PARA MÓVILES
+   ========================================================================== */
+
+/* Botón de hamburguesa (oculto por defecto en escritorio) */
+.menu-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Overlay del sidebar (oculto por defecto) */
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 199; /* Justo debajo del sidebar */
+}
+
+#sidebar-overlay.open {
+    display: block;
+}
+
+
+/* Media Query para pantallas de 768px o menos (tablets y móviles) */
+@media (max-width: 768px) {
+    /* Header */
+    header {
+        padding: 0.8rem 1rem;
+        /* Hacemos que el header sea un contenedor flex para alinear todo */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .menu-toggle-btn {
+        display: block; /* Mostrar el botón de hamburguesa */
+        /* Ajustamos el orden para que aparezca primero */
+        order: 1;
+    }
+    header h1 {
+        /* Ocultamos el título en móviles para ahorrar espacio */
+        display: none;
+    }
+    .header-controls {
+        /* Hacemos que los controles ocupen el espacio restante */
+        display: flex;
+        flex-grow: 1;
+        justify-content: flex-end; /* Alineamos los controles a la derecha */
+        align-items: center;
+        gap: 1rem; /* Reducimos el espacio entre el selector y el logout */
+        order: 2; /* Se posiciona después de la hamburguesa */
+    }
+    #comercioSelector {
+        /* Hacemos que el selector sea flexible */
+        flex-grow: 1;
+        max-width: 150px; /* Limitamos el ancho máximo para que no sea enorme */
+    }
+    #comercioSelector label, #currentComercioInfo {
+        display: none; /* Ocultar texto para ahorrar espacio */
+    }
+    .logout-btn {
+        /* Hacemos el botón de logout más compacto */
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed; /* El sidebar ahora es un overlay */
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 200;
+        transform: translateX(-100%); /* Oculto fuera de la pantalla */
+        transition: transform 0.3s ease-in-out;
+        padding-top: 60px; /* Espacio para el header */
+    }
+    #sidebar-container.open .sidebar {
+        transform: translateX(0); /* Mostrar el sidebar */
+    }
+
+    /* Contenido Principal */
+    #main-content {
+        padding: 1rem;
+    }
+
+    /* Formularios */
+    .form-grid {
+        grid-template-columns: 1fr; /* Una sola columna en móviles */
+    }
+
+    /* Modales */
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    /* Tablas */
+    /* Hacemos que las tablas puedan tener scroll horizontal */
+    #comerciosTableContainer, #categoriesTableContainer {
+        overflow-x: auto;
+    }
+}

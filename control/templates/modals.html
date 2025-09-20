@@ -1,0 +1,45 @@
+<!-- Modal para Añadir/Editar Producto -->
+<div id="productModal" class="modal">
+    <div class="modal-content large">
+        <span class="close-button" id="closeProductModal">&times;</span>
+        <h2 id="productModalTitle">Añadir Producto</h2>
+        <form id="productForm">
+            <input type="hidden" id="productId">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="productName">Nombre del Producto</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="input-group">
+                    <label for="productPrice">Precio</label>
+                    <input type="number" id="productPrice" step="0.01" required>
+                </div>
+                <div class="input-group">
+                    <label for="productOrder">Orden</label>
+                    <input type="number" id="productOrder" value="99">
+                </div>
+                <div class="input-group">
+                    <label for="productCategory">Categoría</label>
+                    <select id="productCategory" required></select>
+                </div>
+                <div class="input-group full-width">
+                    <label for="productDescription">Descripción</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="productImage">URL de la Imagen</label>
+                    <input type="text" id="productImage">
+                </div>
+                <div class="input-group">
+                    <label for="productImageUpload">O subir una imagen</label>
+                    <input type="file" id="productImageUpload" accept="image/*">
+                </div>
+                <div id="imagePreview" class="input-group full-width image-preview-container"></div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="save">Guardar Producto</button>
+                <button type="button" class="cancel" id="cancelProductEdit">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
