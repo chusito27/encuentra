@@ -56,6 +56,25 @@
                 <label for="newProductDietaryInfo">Info Dietética Adicional</label>
                 <input type="text" id="newProductDietaryInfo">
             </div>
+            <div class="input-group">
+                <label for="productComercio">Comercio</label>
+                <select id="productComercio" name="comercioId" required>
+                    <!-- Opciones de comercio se llenarán dinámicamente -->
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Categorías</label>
+                <div id="productCategories" class="checkbox-group">
+                    <!-- Las categorías se cargarán aquí como checkboxes -->
+                    <p>Cargando categorías...</p>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="productImage">Imagen del Producto</label>
+                <input type="file" id="productImage" name="image" accept="image/*" required>
+            </div>
             <div class="form-actions">
                 <button type="button" class="cancel" data-modal="addProductModal">Cancelar</button>
                 <button type="submit">Añadir Producto</button>

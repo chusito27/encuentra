@@ -22,21 +22,48 @@
                     <label for="productName">Nombre del Producto</label>
                     <input type="text" id="productName" required>
                 </div>
-                <div class="form-group">
+                <div class="input-group">
                     <label for="productPrice">Precio</label>
                     <input type="number" id="productPrice" step="0.01" required>
                 </div>
-                <div class="form-group">
+                <!-- CAMPO NUEVO: Precio Anterior -->
+                <div class="input-group">
+                    <label for="productOldPrice">Precio Anterior (para ofertas)</label>
+                    <input type="number" id="productOldPrice" step="0.01">
+                </div>
+                <div class="input-group">
                     <label for="productOrder">Orden</label>
-                    <input type="number" id="productOrder" value="99" required>
+                    <input type="number" id="productOrder" value="0">
                 </div>
-                <div class="form-group">
-                    <label for="productCategory">Categoría</label>
-                    <select id="productCategory"></select>
+                <div class="input-group">
+                    <label>Categorías</label>
+                    <div id="productCategoriesContainer" class="checkbox-group">
+                        <!-- Los checkboxes de las categorías se cargarán aquí -->
+                    </div>
                 </div>
-                <div class="form-group full-width">
+                <div class="input-group">
                     <label for="productDescription">Descripción</label>
-                    <textarea id="productDescription"></textarea>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+                <!-- CAMPO NUEVO: Detalles -->
+                <div class="input-group">
+                    <label for="productDetails">Detalles Adicionales</label>
+                    <textarea id="productDetails" rows="5"></textarea>
+                </div>
+                <!-- CAMPOS NUEVOS: Opciones alimentarias -->
+                <div class="input-group checkbox-options">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="isGlutenFree">
+                        <label for="isGlutenFree">Sin Gluten</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="isVegan">
+                        <label for="isVegan">Vegano</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="isVegetarian">
+                        <label for="isVegetarian">Vegetariano</label>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="productImage">URL de la Imagen Principal</label>

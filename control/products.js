@@ -3,6 +3,7 @@ import { showMessage } from './ui.js';
 import { getCurrentComercioId } from './comercios.js';
 import { uploadImage } from './image-uploader.js';
 import { resizeImage } from './image-utils.js';
+import { getAllCategories } from './categories.js'; 
 import { collection, query, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // Vistas y elementos del formulario
@@ -102,32 +103,48 @@ async function openProductForm(productId = null) {
     productForm.reset();
     document.getElementById('productId').value = '';
     document.getElementById('imagePreview').innerHTML = '';
+    document.getElementById('productCategoriesContainer').innerHTML = '';
 
     if (productId) {
         productFormTitle.textContent = 'Editar Producto';
         const comercioId = getCurrentComercioId();
         const docRef = doc(db, `comercios/${comercioId}/products`, productId);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
             const data = docSnap.data();
+            // --- Llenar campos existentes ---
             document.getElementById('productId').value = docSnap.id;
             document.getElementById('productName').value = data.name;
             document.getElementById('productPrice').value = data.price;
             document.getElementById('productOrder').value = data.order;
-            document.getElementById('productCategory').value = data.categoryId;
             document.getElementById('productDescription').value = data.description;
             document.getElementById('productImage').value = data.image;
+            
+            // --- Llenar NUEVOS campos ---
+            document.getElementById('productOldPrice').value = data.oldPrice || '';
+            document.getElementById('productDetails').value = data.details || '';
+            document.getElementById('isGlutenFree').checked = data.isGlutenFree || false;
+            document.getElementById('isVegan').checked = data.isVegan || false;
+            document.getElementById('isVegetarian').checked = data.isVegetarian || false;
+
             if (data.image) {
                 document.getElementById('imagePreview').innerHTML = `<img src="${data.image}" style="max-width: 100px;"/>`;
             }
+            await loadCategoriesIntoCheckboxes('productCategoriesContainer', data.categoryIds || []);
         }
     } else {
         productFormTitle.textContent = 'Añadir Nuevo Producto';
+        // Asegurarse de que los checkboxes estén desmarcados para un producto nuevo (reset ya lo hace, pero es bueno ser explícito)
+        document.getElementById('isGlutenFree').checked = false;
+        document.getElementById('isVegan').checked = false;
+        document.getElementById('isVegetarian').checked = false;
+        await loadCategoriesIntoCheckboxes('productCategoriesContainer');
     }
-    // Mostramos la vista de formulario
     showProductView('form');
 }
 
+// --- FUNCIÓN MODIFICADA ---
 async function saveProduct(e) {
     e.preventDefault();
     const comercioId = getCurrentComercioId();
@@ -140,6 +157,16 @@ async function saveProduct(e) {
     let imageUrl = document.getElementById('productImage').value;
     const imageFile = document.getElementById('productImageUpload').files[0];
 
+    const selectedCategories = [];
+    document.querySelectorAll('#productCategoriesContainer input[type="checkbox"]:checked').forEach(checkbox => {
+        selectedCategories.push(checkbox.value);
+    });
+
+    if (selectedCategories.length === 0) {
+        showMessage("Error", "Debes seleccionar al menos una categoría.");
+        return;
+    }
+
     try {
         if (imageFile) {
             const resizedFile = await resizeImage(imageFile);
@@ -147,13 +174,21 @@ async function saveProduct(e) {
             document.getElementById('productImage').value = imageUrl;
         }
 
+        // --- Objeto de datos actualizado con NUEVOS campos ---
         const productData = {
             name: document.getElementById('productName').value,
             price: parseFloat(document.getElementById('productPrice').value),
             order: parseInt(document.getElementById('productOrder').value, 10),
-            categoryId: document.getElementById('productCategory').value,
             description: document.getElementById('productDescription').value,
-            image: imageUrl
+            image: imageUrl,
+            categoryIds: selectedCategories,
+            
+            // --- NUEVOS CAMPOS ---
+            oldPrice: parseFloat(document.getElementById('productOldPrice').value) || null, // Guardar null si está vacío
+            details: document.getElementById('productDetails').value,
+            isGlutenFree: document.getElementById('isGlutenFree').checked,
+            isVegan: document.getElementById('isVegan').checked,
+            isVegetarian: document.getElementById('isVegetarian').checked
         };
 
         if (productId) {
@@ -165,7 +200,6 @@ async function saveProduct(e) {
             showMessage("Éxito", "Producto añadido.");
         }
 
-        // Volvemos a la vista de lista
         showProductView('list');
         loadProducts(comercioId);
     } catch (error) {
@@ -190,3 +224,126 @@ async function deleteProduct(productId) {
         }
     }
 }
+
+// --- FUNCIÓN AUXILIAR MODIFICADA ---
+// Carga categorías como checkboxes y marca las seleccionadas.
+async function loadCategoriesIntoCheckboxes(containerId, selectedIds = []) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = 'Cargando categorías...';
+    
+    // --- PASAMOS EL ID DEL COMERCIO ACTUAL ---
+    const comercioId = getCurrentComercioId();
+    const categories = await getAllCategories(comercioId);
+
+    if (!comercioId) {
+        container.innerHTML = '<p>Por favor, selecciona un comercio primero.</p>';
+        return;
+    }
+
+    if (categories.length === 0) {
+        container.innerHTML = '<p>No hay categorías para este comercio. Ve a la pestaña "Categorías" para crear una.</p>';
+        return;
+    }
+
+    container.innerHTML = ''; // Limpiar antes de añadir
+    categories.forEach(category => {
+        const isChecked = selectedIds.includes(category.id) ? 'checked' : '';
+        const checkboxHTML = `
+            <div class="checkbox-item">
+                <input type="checkbox" id="cat-prod-${category.id}" name="category" value="${category.id}" ${isChecked}>
+                <label for="cat-prod-${category.id}">${category.name}</label>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', checkboxHTML);
+    });
+}
+
+
+// Modificar la función que muestra el modal de añadir producto
+async function handleShowAddProductModal() {
+    // ... (código existente para cargar comercios)
+    
+    // Cargar categorías en el modal de añadir
+    await loadCategoriesIntoCheckboxes('productCategories');
+
+    showModal('addProductModal');
+}
+
+// Modificar la función que guarda el producto
+async function handleAddProductSubmit(e) {
+    e.preventDefault();
+    // ... (obtener otros valores del formulario)
+
+    // Obtener las categorías seleccionadas
+    const selectedCategories = [];
+    document.querySelectorAll('#productCategories input[type="checkbox"]:checked').forEach(checkbox => {
+        selectedCategories.push(checkbox.value);
+    });
+
+    if (selectedCategories.length === 0) {
+        alert('Por favor, selecciona al menos una categoría.');
+        return;
+    }
+
+    const productData = {
+        // ... (otros datos del producto)
+        name: productName,
+        price: productPrice,
+        comercioId: productComercio,
+        categoryIds: selectedCategories, // Guardar como un array
+        // ... (resto de datos)
+    };
+
+    // ... (lógica para guardar en Firestore)
+    // Asegúrate de que al guardar en Firestore, el campo sea `categoryIds` (o como lo llames)
+    // y contenga el array `selectedCategories`.
+}
+
+
+// Modificar la función que abre el modal de edición
+async function handleEditProductClick(productId) {
+    // ... (código existente para obtener datos del producto y llenar campos)
+    
+    // Cargar todas las categorías como checkboxes
+    await loadCategoriesIntoCheckboxes('editProductCategories');
+
+    // Marcar las categorías que el producto ya tiene
+    if (productData.categoryIds && Array.isArray(productData.categoryIds)) {
+        productData.categoryIds.forEach(catId => {
+            const checkbox = document.querySelector(`#editProductCategories input[value="${catId}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
+    
+    showModal('editProductModal');
+}
+
+// Modificar la función que actualiza el producto
+async function handleUpdateProductSubmit(e) {
+    e.preventDefault();
+    // ... (obtener otros valores del formulario)
+
+    // Obtener las nuevas categorías seleccionadas
+    const selectedCategories = [];
+    document.querySelectorAll('#editProductCategories input[type="checkbox"]:checked').forEach(checkbox => {
+        selectedCategories.push(checkbox.value);
+    });
+
+    if (selectedCategories.length === 0) {
+        alert('Por favor, selecciona al menos una categoría.');
+        return;
+    }
+
+    const updatedData = {
+        // ... (otros datos actualizados)
+        categoryIds: selectedCategories, // Guardar el nuevo array
+    };
+
+    // ... (lógica para actualizar en Firestore)
+}
+
+// ... (resto del código en products.js, como los event listeners)
+// Asegúrate de que los event listeners llamen a estas nuevas funciones.

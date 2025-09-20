@@ -36,8 +36,16 @@
                 <textarea id="editProductDetails"></textarea>
             </div>
             <div class="form-group">
-                <label for="editProductCategories">Categorías</label>
-                <select id="editProductCategories" multiple style="min-height: 100px;"></select>
+                <label for="editProductComercio">Comercio</label>
+                <select id="editProductComercio" name="comercioId" required>
+                    <!-- Opciones de comercio se llenarán dinámicamente -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Categorías</label>
+                <div id="editProductCategories" class="checkbox-group">
+                    <!-- Las categorías se cargarán aquí como checkboxes -->
+                </div>
             </div>
             <div class="form-grid">
                 <div class="checkbox-group">

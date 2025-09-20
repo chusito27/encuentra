@@ -197,3 +197,31 @@ function resetCategoryForm() {
     categoryForm.reset();
     document.getElementById('categoryId').value = '';
 }
+
+// --- AÑADE O MODIFICA ESTA FUNCIÓN PARA EXPORTARLA ---
+// Ahora acepta comercioId para saber de dónde leer las categorías.
+export async function getAllCategories(comercioId) {
+    // Si no se proporciona un comercioId, no podemos cargar categorías.
+    if (!comercioId) {
+        console.warn("Se intentó cargar categorías sin un comercioId.");
+        return [];
+    }
+
+    try {
+        // --- RUTA CORREGIDA ---
+        // Construimos la ruta a la subcolección de categorías del comercio.
+        const categoriesPath = `comercios/${comercioId}/categories`;
+        const q = query(collection(db, categoriesPath), orderBy("name", "asc"));
+        
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            return [];
+        }
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    } catch (error) {
+        console.error(`Error al obtener categorías para el comercio ${comercioId}:`, error);
+        return []; // Devuelve un array vacío en caso de error
+    }
+}
