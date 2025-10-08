@@ -23,6 +23,10 @@ const DOMElements = {
     mainScreen: document.querySelector('.container'),
     topBar: document.querySelector('.top-bar'),
     storeName: document.getElementById('store-name'),
+    // --- AÑADIR ESTOS ELEMENTOS ---
+    storeLogoHeader: document.getElementById('store-logo-header'),
+    storeNameHeader: document.getElementById('store-name-header'),
+    // ---------------------------------
     productList: document.getElementById('product-list'),
     categoriesMenu: document.getElementById('categories-menu'),
     cartIconContainer: document.getElementById('top-cart-icon-container'),
@@ -182,44 +186,77 @@ const loadStoreInfo = async () => {
 
     if (storeDocSnap.exists()) {
         storeInfo = storeDocSnap.data();
-        // DOMElements.storeNameDiv.textContent = storeInfo.name || "Encuentra"; // 2. ELIMINA O COMENTA ESTA LÍNEA
-        renderStoreInfo(); // <-- AÑADE ESTA LLAMADA
+        renderStoreInfo(); // <-- Esto ya estaba, renderiza la pantalla de info
+        renderTopBarInfo(); // <-- AÑADIR ESTA LLAMADA para la barra superior
     } else {
         console.error("No se encontró la información de la tienda.");
     }
 };
 
+// --- AÑADIR ESTA NUEVA FUNCIÓN ---
+// Función para renderizar la información en la barra superior
+const renderTopBarInfo = () => {
+    if (!storeInfo || Object.keys(storeInfo).length === 0) return;
+
+    if (DOMElements.storeNameHeader) {
+        DOMElements.storeNameHeader.textContent = storeInfo.name || 'Tienda';
+    }
+    if (DOMElements.storeLogoHeader) {
+        // Usamos 'logoUrl' si existe, si no, 'mainImage' como alternativa
+        DOMElements.storeLogoHeader.src = storeInfo.logoUrl || storeInfo.mainImage || '';
+    }
+};
+// ---------------------------------
+
 // Función para cargar las categorías desde Firestore
 const loadCategories = () => {
-    if (!storeId) return;
+    console.log("1. Iniciando la carga de categorías...");
+    return new Promise((resolve, reject) => { // 1. Envolver en una Promise
+        if (!storeId) {
+            console.log("No hay storeId, usando categorías por defecto.");
+            categories = [{ id: "all", name: 'Todo' }];
+            return resolve(); // Resolver inmediatamente si no hay storeId
+        }
 
-    const q = query(collection(db, `comercios/${storeId}/categories`));
-    onSnapshot(q, (querySnapshot) => {
-        const loadedCategories = [];
-        // Special "all" category - RENAMED TO "Todo"
-        const allButtonData = { id: "all", name: 'Todo' };
-        loadedCategories.push(allButtonData);
+        const q = query(collection(db, `comercios/${storeId}/categories`));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => { // Usar onSnapshot para actualizaciones en tiempo real
+            console.log("2. Snapshot de categorías recibido de Firestore.");
+            if (querySnapshot.empty) {
+                console.warn("   -> El snapshot de categorías está vacío. No se encontraron documentos en la colección.");
+            }
+            const loadedCategories = [];
+            const allButtonData = { id: "all", name: 'Todo' };
+            loadedCategories.push(allButtonData);
 
-        querySnapshot.forEach((doc) => {
-            const categoryData = doc.data();
-            loadedCategories.push({ id: doc.id, ...categoryData });
+            querySnapshot.forEach((doc) => {
+                const categoryData = doc.data();
+                console.log(`   -> Categoría encontrada: ID=${doc.id}, Nombre=${categoryData.name}`);
+                loadedCategories.push({ id: doc.id, ...categoryData });
+            });
+
+            loadedCategories.sort((a, b) => {
+                if (a.id === 'all') return -1;
+                if (b.id === 'all') return 1;
+                return (a.order || 0) - (b.order || 0);
+            });
+
+            categories = loadedCategories;
+            console.log("3. Variable global 'categories' actualizada:", JSON.stringify(categories, null, 2));
+            
+            // En lugar de llamar a render, resolvemos la promesa
+            // La lógica de renderizado se moverá a loadProducts
+            resolve(); // 2. Resolver la promesa cuando las categorías estén listas
+            unsubscribe(); // Detener la escucha después de la carga inicial
+
+        }, (error) => {
+            console.error("ERROR al cargar las categorías:", error);
+            categories = [{ id: "all", name: 'Todo' }];
+            reject(error); // 3. Rechazar la promesa en caso de error
+            unsubscribe(); // Detener la escucha en caso de error
         });
-
-        // Sort categories by order, with "all" first
-        loadedCategories.sort((a, b) => {
-            if (a.id === 'all') return -1;
-            if (b.id === 'all') return 1;
-            return (a.order || 0) - (b.order || 0);
-        });
-
-        categories = loadedCategories; // Actualiza la variable global
-        // La llamada a renderCategories() se moverá a loadProducts
-        
-    }, (error) => {
-        console.error("Error al cargar las categorías:", error);
-        categories = [{ id: "all", name: 'Todo' }]; // RENAMED HERE AS WELL
     });
 };
+
 
 const renderCategories = (categoriesToRender) => {
     DOMElements.categoriesMenu.innerHTML = '';
@@ -265,8 +302,12 @@ const loadProducts = () => {
 
         // --- INICIO DE LA NUEVA LÓGICA ---
         // Obtener todos los IDs de categoría que tienen al menos un producto
-        const productCategoryIds = new Set(products.map(p => p.categoryId));
+        // MODIFICACIÓN: Usar flatMap para manejar el array 'categoryIds'
+        const productCategoryIds = new Set(products.flatMap(p => p.categoryIds || []));
         const productCategoryNames = new Set(products.map(p => p.category?.toLowerCase()));
+
+        console.log("5. Filtrando categorías. Categorías disponibles:", JSON.stringify(categories, null, 2));
+        console.log("   -> IDs de categoría en productos:", [...productCategoryIds]);
 
         // Filtrar las categorías para mostrar solo las que tienen productos
         const categoriesWithProducts = categories.filter(cat => {
@@ -278,6 +319,7 @@ const loadProducts = () => {
             return productCategoryIds.has(cat.id) || productCategoryNames.has(cat.name?.toLowerCase());
         });
 
+        console.log("6. Categorías que se van a renderizar (después de filtrar):", JSON.stringify(categoriesWithProducts, null, 2));
         // Renderizar solo las categorías filtradas
         renderCategories(categoriesWithProducts);
         // --- FIN DE LA NUEVA LÓGICA ---
@@ -305,10 +347,9 @@ const renderProducts = () => {
 
     const filteredProducts = products
         .filter(product => {
-            // LÓGICA DE FILTRADO CORREGIDA
-            const matchesCategory = currentFilter === 'all' || 
-                                    (product.category && product.category.toLowerCase() === currentFilter.toLowerCase()) ||
-                                    (product.categoryId && selectedCategoryId && product.categoryId === selectedCategoryId);
+            // LÓGICA DE FILTRADO CORREGIDA para soportar el array 'categoryIds'
+            const matchesCategory = currentFilter === 'all' ||
+                                    (product.categoryIds && product.categoryIds.includes(selectedCategoryId));
 
             const matchesSearch = !currentSearchTerm || product.name.toLowerCase().includes(lowerCaseSearchTerm);
             return matchesCategory && matchesSearch;
@@ -869,18 +910,25 @@ async function initializeAppLogic() {
         if (user) {
             userId = user.uid;
 
-            // Cargar datos iniciales
-            await loadStoreInfo();
-            loadCategories();
-            loadProducts();
-            loadCartFromLocalStorage();
-            updateCartDisplay();
+            try {
+                // Cargar datos iniciales en orden
+                await loadStoreInfo();
+                await loadCategories(); // Esperar a que las categorías se carguen
+                console.log("4. 'loadCategories' ha terminado. La variable 'categories' es:", JSON.stringify(categories, null, 2));
+                loadProducts(); // Esta función ya se encarga de renderizar productos y categorías
+                loadCartFromLocalStorage();
+                updateCartDisplay();
 
-            // Inicializar tema y listeners
-            initializeTheme();
-            setupEventListeners(); // Nueva función para configurar listeners
+                // Inicializar tema y listeners
+                initializeTheme();
+                setupEventListeners();
 
-            hideLoading(); // Ocultar el loading al final
+            } catch (error) {
+                console.error("Error durante la inicialización:", error);
+                document.body.innerHTML = "<h1>Error al cargar la tienda.</h1>";
+            } finally {
+                hideLoading(); // Ocultar el loading al final, incluso si hay un error
+            }
         }
     });
 }

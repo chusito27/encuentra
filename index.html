@@ -329,6 +329,33 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Estilos del Footer */
+        .footer-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .footer-item {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .footer-item:hover {
+            color: #D8BFD8;
+        }
     </style>
 </head>
 
@@ -394,6 +421,28 @@
             const searchInput = document.getElementById('search-input');
             const loadingSpinner = document.getElementById('loading-spinner');
             let comerciosData = []; // Para almacenar los datos de los comercios
+            let categoriesData = new Map(); // Mapa para almacenar las categorías por ID
+
+            // Función para obtener las categorías de Firestore
+            async function fetchCategoriesFromFirestore() {
+                // No es necesario un bloque try/catch aquí si se maneja en la función que la llama
+                const categoriesCol = collection(db, 'categories');
+                // MODIFICACIÓN: Añadir un filtro y orden a la consulta de categorías
+                const q = query(
+                    categoriesCol,
+                    where('showInSite', '==', true),
+                    orderBy('order')
+                );
+                const categoriesSnapshot = await getDocs(q);
+                if (categoriesSnapshot.empty) {
+                    console.warn("No se encontraron categorías o la colección está vacía.");
+                    return; // Salir si no hay categorías
+                }
+                categoriesSnapshot.docs.forEach(doc => {
+                    categoriesData.set(doc.id, doc.data());
+                });
+                console.log("Categorías cargadas:", categoriesData); // Para depuración
+            }
 
             // Función para obtener los comercios de Firestore
             async function fetchComerciosFromFirestore() {
@@ -405,15 +454,16 @@
                     // Primero, intenta iniciar sesión de forma anónima
                     await signInAnonymously(auth);
 
+                    // Obtener las categorías primero. Si falla, el catch lo capturará.
+                    await fetchCategoriesFromFirestore();
+
                     const comerciosCol = collection(db, 'comercios');
-                    // MODIFICACIÓN: Crear una consulta que filtre por 'showInSite' y ordene por 'order'
                     const q = query(
                         comerciosCol,
-                        where('showInSite', '==', true), // Filtra solo los que tienen showInSite en true
+                        where('showInSite', '==', true),
                         orderBy('order')
                     );
 
-                    // MODIFICACIÓN: Usar la consulta 'q' en lugar de la colección directamente
                     const comerciosSnapshot = await getDocs(q);
                     comerciosData = comerciosSnapshot.docs.map(doc => ({
                         id: doc.id,
@@ -421,10 +471,10 @@
                     }));
                     renderComercios(comerciosData);
                 } catch (error) {
-                    console.error("Error al obtener los comercios de Firestore:", error);
-                    comerciosGrid.innerHTML = '<p>No se pudieron cargar los comercios. Por favor, inténtelo de nuevo más tarde.</p>';
+                    console.error("Error al obtener datos de Firestore:", error);
+                    comerciosGrid.innerHTML = '<p>No se pudieron cargar los datos. Revisa la consola para más detalles.</p>';
                 } finally {
-                    // Ocultar el spinner de carga y mostrar la cuadrícula, sin importar si hubo un error o no
+                    // Ocultar el spinner de carga y mostrar la cuadrícula
                     loadingSpinner.style.display = 'none';
                     comerciosGrid.style.display = 'grid';
                 }
@@ -506,6 +556,7 @@
                             <div class="comercio-overlay">
                                 <h3>${comercio.name}</h3>
                                 <div class="bottom-info">
+                                    <p><strong>Categoría:</strong> ${comercio.categoryIds && comercio.categoryIds.length > 0 ? comercio.categoryIds.map(id => categoriesData.get(id)?.name).filter(Boolean).join(', ') : 'Sin categoría'}</p>
                                     <p><strong>Horario:</strong> ${comercio.schedule}</p>
                                     <p>${comercio.shortDescription || ''}</p>
                                     <button class="ver-detalles-overlay-btn" data-id="${comercio.id}">Ver Detalles</button>
@@ -578,6 +629,18 @@
             // **********************************************
         });
     </script>
+
+    <script type="module" src="./app.js"></script>
+
+    <!-- Footer Menu -->
+    <footer class="footer-menu">
+        <button class="footer-item" id="footer-home" aria-label="Inicio">
+            <i class="fas fa-home"></i>
+        </button>
+        <button class="footer-item" id="footer-cart" aria-label="Ver carrito">
+            <i class="fas fa-shopping-cart"></i>
+        </button>
+    </footer>
 </body>
 
 </html>
