@@ -288,7 +288,7 @@ h2 {
     
     /* --- Bloque de Posicionamiento Corregido --- */
     position: fixed;
-    top: 105px; /* MODIFICADO: Ajustado para la altura de la top-bar en móvil */
+    top: 50px; /* MODIFICADO: Ajustado para la altura de la top-bar en móvil */
     left: 0;
     right: 0;
     z-index: 99;
@@ -302,10 +302,9 @@ h2 {
 }
 
 /* Media Query para alinear en pantallas grandes */
-@media (min-width: 900px) {
+@media (max-width: 412px) {
     .categories {
-        padding-left: max(20px, calc((100% - 900px) / 2));
-        padding-right: max(20px, calc((100% - 900px) / 2));
+        top: 150px;
     }
 }
 
@@ -400,7 +399,7 @@ body.dark-mode .category-button.active {
     gap: 15px;
     /* Un poco más de espacio */
     margin-bottom: 30px;
-    margin-top: 35px;
+    margin-top: 65px;
     /* Se eliminan las propiedades de overflow y flex-grow */
 }
 
