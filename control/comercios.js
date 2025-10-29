@@ -2,6 +2,7 @@ import { db } from './firebase-config.js';
 import { showMessage, previewImage, previewImages } from './ui.js';
 import { loadCategoriesForSelection, loadManagedCategories } from './categories.js';
 import { loadProducts } from './products.js';
+import { loadFinanceData } from './finanzas.js';
 import { getUserPermissions } from './auth.js';
 
 // --- ¡NUEVO! Importaciones para Firebase v9+ ---
@@ -42,19 +43,29 @@ export function initComercioFeatures() {
     cancelComercioEdit = document.getElementById('cancelComercioEdit');
 
     // Event Listeners
-    selectComercio.addEventListener('change', handleComercioSelection);
-    comercioForm.addEventListener('submit', saveComercio);
-    
-    addNewComercioButton.addEventListener('click', () => {
-        resetComercioForm();
-        comercioFormTitle.textContent = 'Añadir Nuevo Comercio';
-        showComercioView('form');
-    });
+    // --- CORRECCIÓN: Añadir comprobaciones de existencia antes de añadir listeners ---
+    if (selectComercio) {
+        selectComercio.addEventListener('change', handleComercioSelection);
+    }
 
-    cancelComercioEdit.addEventListener('click', () => {
-        resetComercioForm();
-        showComercioView('list');
-    });
+    if (comercioForm) {
+        comercioForm.addEventListener('submit', saveComercio);
+    }
+    
+    if (addNewComercioButton) {
+        addNewComercioButton.addEventListener('click', () => {
+            resetComercioForm();
+            comercioFormTitle.textContent = 'Añadir Nuevo Comercio';
+            showComercioView('form');
+        });
+    }
+
+    if (cancelComercioEdit) {
+        cancelComercioEdit.addEventListener('click', () => {
+            resetComercioForm();
+            showComercioView('list');
+        });
+    }
 }
 
 export async function loadComercios() {
@@ -95,12 +106,14 @@ export async function loadComercios() {
             selectComercio.value = currentComercioId;
         }
 
-        // --- NUEVA LÓGICA ---
-        // Si hay comercios accesibles y no hay ninguno seleccionado, selecciona el primero.
+        // --- LÓGICA CORREGIDA ---
+        // Si hay comercios y no hay ninguno seleccionado, selecciona el primero por defecto.
         if (accessibleComercios.length > 0 && !selectComercio.value) {
             selectComercio.selectedIndex = 1; // El índice 0 es el placeholder "-- Seleccione --"
-            // Disparamos el evento 'change' manualmente para cargar los datos del comercio.
-            selectComercio.dispatchEvent(new Event('change'));
+        }
+        // Si después de todo, hay un comercio seleccionado, disparamos el evento 'change' para asegurar la carga de datos.
+        if (selectComercio.value) {
+             selectComercio.dispatchEvent(new Event('change'));
         }
 
         // Renderizar la tabla en la pestaña "Comercios" (siempre con todos los comercios para gestión)
@@ -163,9 +176,13 @@ async function handleComercioSelection() {
         if (currentComercioInfo) {
             currentComercioInfo.textContent = `Editando: ${selectComercio.options[selectComercio.selectedIndex].text}`;
         }
-        await loadProducts(currentComercioId);
-        await loadManagedCategories(currentComercioId);
-        await loadCategoriesForSelection(currentComercioId);
+        // Carga los datos de las diferentes pestañas en paralelo para mayor eficiencia.
+        await Promise.all([
+            loadProducts(currentComercioId),
+            loadManagedCategories(currentComercioId),
+            loadFinanceData(currentComercioId)
+        ]);
+        await loadCategoriesForSelection(currentComercioId); // Necesario para los formularios de producto
     } else {
         if (currentComercioInfo) {
             currentComercioInfo.textContent = '';

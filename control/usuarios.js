@@ -1,5 +1,6 @@
 import { db } from './firebase-config.js';
 import { showMessage } from './ui.js';
+import { getUserPermissions } from './auth.js';
 
 // --- ¡NUEVO! Importaciones para Firebase v9+ ---
 import { collection, getDocs, doc, setDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
@@ -35,23 +36,31 @@ export function initUserFeatures() {
     userAccessAll = document.getElementById('userAccessAll');
     userComerciosGroup = document.getElementById('userComerciosGroup');
 
-    addNewUserButton.addEventListener('click', () => {
-        resetUserForm();
-        userFormTitle.textContent = 'Añadir Nuevo Usuario';
-        document.getElementById('userUid').disabled = false;
-        showUserView('form');
-    });
+    if (addNewUserButton) {
+        addNewUserButton.addEventListener('click', () => {
+            resetUserForm();
+            userFormTitle.textContent = 'Añadir Nuevo Usuario';
+            document.getElementById('userUid').disabled = false;
+            showUserView('form');
+        });
+    }
 
-    cancelUserEdit.addEventListener('click', () => {
-        resetUserForm();
-        showUserView('list');
-    });
+    if (cancelUserEdit) {
+        cancelUserEdit.addEventListener('click', () => {
+            resetUserForm();
+            showUserView('list');
+        });
+    }
 
-    userForm.addEventListener('submit', saveUser);
+    if (userForm) {
+        userForm.addEventListener('submit', saveUser);
+    }
 
-    userAccessAll.addEventListener('change', (e) => {
-        userComerciosGroup.style.display = e.target.checked ? 'none' : 'flex';
-    });
+    if (userAccessAll) {
+        userAccessAll.addEventListener('change', (e) => {
+            userComerciosGroup.style.display = e.target.checked ? 'none' : 'flex';
+        });
+    }
 
     // Cargar los datos iniciales cuando se inicializa el módulo
     loadInitialData();
@@ -59,6 +68,14 @@ export function initUserFeatures() {
 
 // Carga los datos necesarios para este módulo (usuarios y comercios)
 async function loadInitialData() {
+    // --- CORRECCIÓN DE SEGURIDAD ---
+    // Solo los Super Admins pueden cargar la lista de todos los usuarios y comercios.
+    const permissions = getUserPermissions();
+    if (!permissions || !permissions.accessAllComercios) {
+        console.log("Acceso a gestión de usuarios denegado. El usuario no es Super Admin.");
+        return; // No se cargan los datos si no tiene permisos.
+    }
+
     try {
         // --- SINTAXIS v9 ---
         const comerciosQuery = query(collection(db, 'comercios'), orderBy('name'));
@@ -127,6 +144,7 @@ function renderUsersTable(users) {
 // Guarda o actualiza un usuario en Firestore
 async function saveUser(e) {
     e.preventDefault();
+    const submitButton = e.target.querySelector('button[type="submit"]');
     const uid = document.getElementById('userUid').value.trim();
     if (!uid) {
         showMessage("Error", "El UID del usuario es obligatorio.");
@@ -141,6 +159,9 @@ async function saveUser(e) {
             : Array.from(document.getElementById('userComerciosSelect').selectedOptions).map(opt => opt.value)
     };
 
+    submitButton.disabled = true;
+    submitButton.textContent = 'Guardando...';
+
     try {
         // --- SINTAXIS v9 ---
         await setDoc(doc(db, 'allowedUsers', uid), userData);
@@ -151,6 +172,9 @@ async function saveUser(e) {
     } catch (error) {
         console.error("Error guardando usuario:", error);
         showMessage("Error", "No se pudo guardar el usuario.");
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Guardar Usuario';
     }
 }
 

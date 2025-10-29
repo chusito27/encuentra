@@ -12,24 +12,36 @@ export function initCategoryFeatures() {
     // Main tab elements
     categoriesTableContainer = document.getElementById('categoriesTableContainer');
     const addNewCategoryBtn = document.getElementById('addNewCategoryBtn');
-    addNewCategoryBtn.addEventListener('click', () => openCategoryModal());
+    if (addNewCategoryBtn) {
+        addNewCategoryBtn.addEventListener('click', () => openCategoryModal());
+    }
 
     // Modal elements (assuming a generic modal structure in your index.html)
     categoryModal = document.getElementById('categoryModal'); // You will need to add this modal to your HTML
     categoryForm = document.getElementById('categoryForm');
     categoryFormTitle = document.getElementById('categoryFormTitle');
-    closeModalBtn = categoryModal.querySelector('.close-button'); // Standard close button
     cancelCategoryEdit = document.getElementById('cancelCategoryEdit');
 
-    // Modal event listeners
-    categoryForm.addEventListener('submit', saveCategory);
-    closeModalBtn.addEventListener('click', () => closeCategoryModal());
-    cancelCategoryEdit.addEventListener('click', () => closeCategoryModal());
-    window.addEventListener('click', (event) => { // Close modal if clicking outside
-        if (event.target == categoryModal) {
-            closeCategoryModal();
+    // --- CORRECCIÓN: Añadir comprobaciones de existencia para todos los elementos ---
+    if (categoryModal) {
+        closeModalBtn = categoryModal.querySelector('.close-button'); // Standard close button
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => closeCategoryModal());
         }
-    });
+        window.addEventListener('click', (event) => { // Close modal if clicking outside
+            if (event.target == categoryModal) {
+                closeCategoryModal();
+            }
+        });
+    }
+
+    if (categoryForm) {
+        categoryForm.addEventListener('submit', saveCategory);
+    }
+
+    if (cancelCategoryEdit) {
+        cancelCategoryEdit.addEventListener('click', () => closeCategoryModal());
+    }
 }
 
 function openCategoryModal(categoryId = null) {
@@ -87,47 +99,45 @@ export async function loadManagedCategories(comercioId) {
             return;
         }
 
-        // Crear la estructura de la tabla
-        const table = document.createElement('table');
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Nombre de la Categoría</th>
-                    <th>Orden</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${snapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return `
-                        <tr>
-                            <td>${data.name}</td>
-                            <td>${data.order}</td>
-                            <td class="actions-cell">
-                                <button class="edit-category" data-id="${doc.id}">Editar</button>
-                                <button class="delete-category delete" data-id="${doc.id}">Eliminar</button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('')}
-            </tbody>
-        `;
+        // --- NUEVO: Crear una lista de tarjetas en lugar de una tabla ---
+        const listContainer = document.createElement('div');
+        listContainer.className = 'category-list'; // Nueva clase para el contenedor
+
+        const listHTML = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return `
+                <div class="category-list-item">
+                    <div class="category-info">
+                        <span class="category-name">${data.name}</span>
+                        <span class="category-order">Orden: ${data.order}</span>
+                    </div>
+                    <div class="category-actions">
+                        <button class="edit-category" data-id="${doc.id}" title="Editar">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="delete-category delete" data-id="${doc.id}" title="Eliminar">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        listContainer.innerHTML = listHTML;
 
         categoriesTableContainer.innerHTML = '';
-        categoriesTableContainer.appendChild(table);
+        categoriesTableContainer.appendChild(listContainer);
 
         // Añadir event listeners para los nuevos botones de la tabla
-        table.querySelectorAll('.edit-category').forEach(button => {
+        listContainer.querySelectorAll('.edit-category').forEach(button => {
             button.addEventListener('click', (e) => {
-                e.stopPropagation(); // Evita que se dispare el click de la fila
-                openCategoryModal(e.target.dataset.id);
+                // Usamos currentTarget para asegurarnos de que obtenemos el botón, incluso si se hace clic en el icono <i>
+                openCategoryModal(e.currentTarget.dataset.id);
             });
         });
-        table.querySelectorAll('.delete-category').forEach(button => {
+        listContainer.querySelectorAll('.delete-category').forEach(button => {
             button.addEventListener('click', (e) => {
-                e.stopPropagation();
-                deleteCategory(e.target.dataset.id);
+                deleteCategory(e.currentTarget.dataset.id);
             });
         });
 

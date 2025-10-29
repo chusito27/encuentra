@@ -6,6 +6,19 @@
         <h2>Gestión de Productos</h2>
         <button id="addNewProductButton">Añadir Nuevo Producto</button>
     </div>
+    <!-- NUEVO: Contenedor para filtros y búsqueda -->
+    <div id="product-filters" class="filters-container">
+        <input type="text" id="productSearchInput" placeholder="Buscar por nombre...">
+        <select id="productSortSelect">
+            <option value="order-asc">Ordenar por: Orden (defecto)</option>
+            <option value="name-asc">Nombre (A-Z)</option>
+            <option value="name-desc">Nombre (Z-A)</option>
+            <option value="price-desc">Precio (Mayor a menor)</option>
+            <option value="price-asc">Precio (Menor a mayor)</option>
+            <option value="profit-desc">Ganancia (Mayor a menor)</option>
+            <option value="stock-asc">Stock (Menor a mayor)</option>
+        </select>
+    </div>
     <div id="productsList">
         <p>Selecciona un comercio para ver sus productos.</p>
     </div>
@@ -26,6 +39,16 @@
                     <label for="productPrice">Precio</label>
                     <input type="number" id="productPrice" step="0.01" required>
                 </div>
+                <!-- CAMPO NUEVO: Precio Costo -->
+                <div class="input-group">
+                    <label for="productCostPrice">Precio Costo</label>
+                    <input type="number" id="productCostPrice" step="0.01">
+                </div>
+                <!-- CAMPO NUEVO: Ganancia (solo visual) -->
+                <div class="input-group">
+                    <label>Ganancia</label>
+                    <p id="productProfit" class="form-static-text">₡0.00</p>
+                </div>
                 <!-- CAMPO NUEVO: Precio Anterior -->
                 <div class="input-group">
                     <label for="productOldPrice">Precio Anterior (para ofertas)</label>
@@ -34,6 +57,11 @@
                 <div class="input-group">
                     <label for="productOrder">Orden</label>
                     <input type="number" id="productOrder" value="0">
+                </div>
+                <!-- CAMPO NUEVO: Stock -->
+                <div class="input-group">
+                    <label for="productStock">Cantidad en Stock</label>
+                    <input type="number" id="productStock" step="1" placeholder="Dejar en blanco para stock ilimitado">
                 </div>
                 <div class="input-group">
                     <label>Categorías</label>

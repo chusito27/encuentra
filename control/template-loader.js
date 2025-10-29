@@ -1,4 +1,4 @@
-async function loadTemplate(url, containerId) {
+async function loadTemplate(url, containerId, append = false) {
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -7,9 +7,8 @@ async function loadTemplate(url, containerId) {
         const text = await response.text();
         const container = document.getElementById(containerId);
         if (container) {
-            // Cambiamos la lógica: += solo para el contenedor de modales.
-            // Para los demás, reemplazamos el contenido.
-            if (container.id === 'modal-container') {
+            // Si 'append' es true, añadimos el contenido. Si no, lo reemplazamos.
+            if (append) {
                  container.innerHTML += text;
             } else {
                  container.innerHTML = text;
@@ -24,28 +23,24 @@ async function loadTemplate(url, containerId) {
 }
 
 export async function loadAllTemplatesAndInit(onCompleteCallback) {
-    const baseTemplates = [
+    const templatesToLoad = [
+        // Estructura base
         { url: 'templates/header.html', container: 'header-container' },
         { url: 'templates/sidebar.html', container: 'sidebar-container' },
         { url: 'templates/main-content.html', container: 'main-content' },
-        { url: 'templates/modals.html', container: 'modal-container' },
-        { url: 'templates/modals/addCategory.html', container: 'modal-container' }
-    ];
-
-    // 2. Define qué contenido va DENTRO de cada pestaña
-    const tabContentTemplates = [
+        // Contenido de pestañas
         { url: 'templates/tabs/comercio-gestion.html', container: 'Comercios' },
         { url: 'templates/tabs/categories-gestion.html', container: 'Categorias' },
         { url: 'templates/tabs/products-gestion.html', container: 'Productos' },
-        { url: 'templates/tabs/usuarios-gestion.html', container: 'Usuarios' }
+        { url: 'templates/tabs/usuarios-gestion.html', container: 'Usuarios' },
+        { url: 'templates/tabs/finanzas-gestion.html', container: 'Finanzas' },
+        // Modales (se añaden al contenedor de modales)
+        { url: 'templates/modals.html', container: 'modal-container', append: true },
+        { url: 'templates/modals/addCategory.html', container: 'modal-container', append: true }
     ];
 
     try {
-        // Carga la estructura base (header, sidebar, y los DIVs de las pestañas)
-        await Promise.all(baseTemplates.map(t => loadTemplate(t.url, t.container)));
-        
-        // Carga el contenido específico DENTRO de cada DIV de pestaña
-        await Promise.all(tabContentTemplates.map(t => loadTemplate(t.url, t.container)));
+        await Promise.all(templatesToLoad.map(t => loadTemplate(t.url, t.container, t.append || false)));
 
         // Una vez que TODO está en el DOM, ejecuta la función de inicialización
         if (onCompleteCallback) {

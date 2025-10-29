@@ -4,6 +4,7 @@ import { initComercioFeatures, loadComercios } from './comercios.js';
 import { initUI } from './ui.js';
 import { initUserFeatures } from './usuarios.js';
 import { initProductFeatures } from './products.js';
+import { initFinanceFeatures, loadFinanceData } from './finanzas.js';
 // 1. Importamos el inicializador de categorías
 import { initCategoryFeatures } from './categories.js';
 
@@ -18,6 +19,7 @@ export function initComponents() {
     initUserFeatures();
     initUI();
     initProductFeatures();
+    initFinanceFeatures();
     // 2. Inicializamos las funcionalidades de categorías aquí
     initCategoryFeatures();
     console.log("Componentes inicializados.");

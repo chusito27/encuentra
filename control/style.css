@@ -192,6 +192,17 @@ button.cancel:hover, button[type="button"]:hover {
     background-color: #e0e0e0;
 }
 
+/* NUEVO: Estilo para texto estático en formularios (como la ganancia) */
+.form-static-text {
+    padding: 0.75rem;
+    margin: 0;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+}
+
 button.delete {
     background-color: var(--danger-color);
     color: white;
@@ -205,6 +216,19 @@ button.delete:hover {
     margin-bottom: 1.5rem;
     display: flex;
     gap: 1rem;
+}
+
+/* NUEVO: Estilos para el contenedor de filtros */
+.filters-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap; /* Para que se ajuste en pantallas pequeñas */
+}
+
+.filters-container input,
+.filters-container select {
+    flex-grow: 1; /* Para que ocupen el espacio disponible */
 }
 
 /* Listas (Productos, Categorías) */
@@ -233,6 +257,28 @@ button.delete:hover {
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* NUEVO: Estilos para la etiqueta de stock en la tarjeta de producto */
+.product-stock {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.stock-ok { background-color: var(--success-color); }
+.stock-low { background-color: #f0ad4e; } /* Naranja para stock bajo */
+.stock-out { background-color: var(--danger-color); }
+.stock-unlimited { background-color: #5bc0de; } /* Azul para stock ilimitado */
+
+/* Ajuste para que la tarjeta sea relativa y la etiqueta de stock absoluta funcione */
+.product-card {
+    position: relative;
 }
 
 .product-card img {
@@ -273,6 +319,32 @@ button.delete:hover {
     margin-top: auto; /* Empuja este elemento al final del 'info' */
 }
 
+/* NUEVO: Estilo para el texto de stock en la tarjeta */
+.product-card-info .product-stock-text {
+    font-size: 0.8rem;
+    color: #777;
+}
+
+/* NUEVO: Estilo para el texto de categorías en la tarjeta */
+.product-card-info .product-categories-text {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 0.2rem; /* Pequeño margen para separarlo del stock */
+}
+
+/* NUEVO: Estilos para la ganancia en la tarjeta de producto */
+.product-card-info .product-profit {
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.product-profit.profit-positive {
+    color: var(--success-color);
+}
+
+.product-profit.profit-negative {
+    color: var(--danger-color);
+}
 
 .product-card-actions {
     /* Reducimos el padding */
@@ -631,6 +703,51 @@ button.delete:hover {
     to { opacity: 1; }
 }
 
+/* ==========================================================================
+   NUEVOS ESTILOS PARA EL MÓDULO DE FINANZAS
+   ========================================================================== */
+
+.finance-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border-left: 5px solid var(--primary-color);
+}
+
+.summary-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-color);
+}
+
+.summary-card p {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.summary-card small {
+    color: #777;
+}
+
+.sale-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.sale-quantity {
+    width: 60px !important; /* Forzar un ancho menor */
+}
+
 
 /* ==========================================================================
    ESTILOS RESPONSIVE PARA MÓVILES
@@ -742,4 +859,76 @@ button.delete:hover {
     #comerciosTableContainer, #categoriesTableContainer {
         overflow-x: auto;
     }
+}
+
+/* ==========================================================================
+   NUEVOS ESTILOS PARA LA LISTA DE CATEGORÍAS
+   ========================================================================== */
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* Espacio entre cada item de categoría */
+}
+
+.category-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary-color-light);
+    transition: all 0.2s ease-in-out;
+}
+
+.category-list-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-left-color: var(--primary-color);
+}
+
+.category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.category-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.category-order {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.category-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.category-actions button {
+    background: none;
+    border: 1px solid transparent;
+    padding: 0.5rem;
+    font-size: 1rem;
+    line-height: 1;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    color: #888;
+}
+
+.category-actions button:hover {
+    background-color: #f0f0f0;
+    color: var(--primary-color);
+}
+
+.category-actions button.delete:hover {
+    color: var(--danger-color);
+}
 }
