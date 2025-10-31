@@ -95,11 +95,6 @@ h2 {
     padding-bottom: 0.5rem;
     margin-top: 0;
 }
-/* NUEVO: Estilo para títulos de sección con margen superior */
-.section-title {
-    margin-top: 2rem;
-}
-
 
 /* Formularios */
 .form-section {
@@ -157,13 +152,6 @@ textarea {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1rem;
-}
-/* NUEVO: Grupo de checkboxes en vertical */
-.checkbox-group-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
     margin-top: 1rem;
 }
 
@@ -454,69 +442,10 @@ button.delete:hover {
 
 /* Previsualización de imágenes */
 .image-preview {
+    margin-top: 1rem;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-}
-
-/* NUEVO: Grid para previsualización de múltiples imágenes */
-.image-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-    padding: 1rem;
-    border: 1px dashed var(--border-color);
-    border-radius: 5px;
-    min-height: 120px; /* Para que el área no colapse si está vacía */
-}
-
-.image-preview-item {
-    position: relative;
-    width: 100px;
-    height: 100px;
-}
-
-.image-preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 5px;
-}
-
-.delete-img-btn {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--danger-color);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    font-size: 14px;
-    line-height: 22px;
-    text-align: center;
-    cursor: pointer;
-    padding: 0;
-}
-
-.main-image-tag {
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 2px 6px;
-    font-size: 0.7rem;
-    border-radius: 3px;
-}
-
-.image-upload-controls {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    align-items: center;
 }
 
 .image-preview img {
@@ -525,51 +454,6 @@ button.delete:hover {
     border-radius: 5px;
     border: 1px solid var(--border-color);
 }
-
-/* ==========================================================================
-   NUEVOS ESTILOS PARA PESTAÑAS EN FORMULARIOS
-   ========================================================================== */
-
-.product-form-tabs {
-    background-color: var(--card-bg);
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    margin-bottom: 2rem;
-}
-
-.tab-buttons {
-    display: flex;
-    border-bottom: 2px solid var(--border-color);
-    margin-bottom: 1.5rem;
-}
-
-.tab-button {
-    padding: 0.75rem 1.5rem;
-    cursor: pointer;
-    border: none;
-    background-color: transparent;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #555;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px; /* Alinea el borde inferior con el borde del contenedor */
-}
-
-.tab-button:hover {
-    background-color: var(--secondary-color);
-}
-
-.tab-button.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-.tab-panel {
-    display: none;
-    animation: fadeIn 0.3s;
-}
-.tab-panel.active { display: block; }
 
 @keyframes fadeIn {
     from {
@@ -864,26 +748,6 @@ button.delete:hover {
     width: 60px !important; /* Forzar un ancho menor */
 }
 
-/* NUEVO: Estilos para la tarjeta de venta durante el proceso */
-.sale-card.selling {
-    opacity: 0.6;
-    pointer-events: none; /* Evita más clics en la tarjeta */
-    position: relative;
-}
-
-.sale-card.selling::after {
-    content: 'Vendiendo...';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-weight: bold;
-    color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.8);
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-}
-
 
 /* ==========================================================================
    ESTILOS RESPONSIVE PARA MÓVILES
@@ -984,21 +848,6 @@ button.delete:hover {
         grid-template-columns: 1fr; /* Una sola columna en móviles */
     }
 
-    /* NUEVO: Ajustes para las pestañas del formulario de producto en móvil */
-    .tab-buttons {
-        overflow-x: auto; /* Permite el scroll horizontal */
-        white-space: nowrap; /* Evita que los botones salten de línea */
-        -ms-overflow-style: none;  /* IE y Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
-    .tab-buttons::-webkit-scrollbar {
-        display: none; /* Chrome, Safari y Opera */
-    }
-
-    /* NUEVO: Ajuste para el resumen financiero en móvil */
-    .finance-summary-grid {
-        grid-template-columns: 1fr; /* Una sola columna */
-    }
     /* Modales */
     .modal-content {
         width: 95%;
@@ -1082,42 +931,4 @@ button.delete:hover {
 .category-actions button.delete:hover {
     color: var(--danger-color);
 }
-}
-
-/* ==========================================================================
-   NUEVOS ESTILOS PARA SELECTOR DE CATEGORÍAS EN FORMULARIO DE PRODUCTO
-   ========================================================================== */
-
-.category-selector-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    background-color: #fafafa;
-}
-
-/* Ocultamos el checkbox real, ya que interactuaremos a través de su label */
-.category-selector-grid .checkbox-item input[type="checkbox"] {
-    display: none;
-}
-
-/* Estilo del "cuadrito" o botón de categoría */
-.category-selector-grid .checkbox-item label {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 20px; /* Bordes redondeados para un look de "píldora" */
-    cursor: pointer;
-    background-color: #fff;
-    transition: all 0.2s ease;
-}
-
-/* Cuando el checkbox está seleccionado, cambiamos el estilo de su label */
-.category-selector-grid .checkbox-item input[type="checkbox"]:checked + label {
-    background-color: var(--primary-color);
-    color: var(--text-on-primary);
-    border-color: var(--primary-color-dark);
 }

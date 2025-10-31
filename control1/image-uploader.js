@@ -1,9 +1,5 @@
-// =================================================================================================
-// ADVERTENCIA DE SEGURIDAD: La clave de API está expuesta en el código del lado del cliente.
-// Esto es un riesgo significativo. Cualquier persona puede inspeccionar el código y usar tu clave.
-// Para una aplicación en producción, esta lógica DEBE moverse a una Cloud Function de Firebase
-// que actúe como un proxy seguro para la subida de imágenes.
-// =================================================================================================
+// ADVERTENCIA: La API key está expuesta en el lado del cliente.
+// Para una mayor seguridad, esto debería moverse a una Cloud Function de Firebase.
 const IBB_API_KEY = 'c3c967bfcb3d9af7f562173450c95ce1';
 const IBB_UPLOAD_URL = 'https://api.imgbb.com/1/upload';
 

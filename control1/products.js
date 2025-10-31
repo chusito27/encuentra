@@ -13,9 +13,6 @@ let productsList, addNewProductButton;
 // --- NUEVO: Variable para almacenar todos los productos del comercio actual ---
 let allProducts = [];
 
-// --- NUEVO: Constante para el límite de imágenes ---
-const MAX_IMAGES_PER_PRODUCT = 5;
-
 // --- FUNCIÓN NUEVA: Calcular y mostrar ganancia ---
 function updateProfit() {
     const price = parseFloat(document.getElementById('productPrice').value) || 0;
@@ -64,27 +61,6 @@ export function initProductFeatures() {
     const sortSelect = document.getElementById('productSortSelect');
     searchInput.addEventListener('input', applyFiltersAndSort);
     sortSelect.addEventListener('change', applyFiltersAndSort);
-
-    // --- NUEVO: Event listeners para la nueva gestión de imágenes ---
-    document.getElementById('productImageUploads').addEventListener('change', handleImageFilesSelect);
-    document.getElementById('productImageUrlInput').addEventListener('keypress', handleImageUrlEnter);
-
-    // --- NUEVO: Lógica para las pestañas del formulario de producto ---
-    const tabButtons = document.querySelectorAll('.product-form-tabs .tab-button');
-    const tabPanels = document.querySelectorAll('.product-form-tabs .tab-panel');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Quitar clase 'active' de todos
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanels.forEach(panel => panel.classList.remove('active'));
-
-            // Añadir 'active' al botón y panel correctos
-            button.classList.add('active');
-            const tabId = button.getAttribute('data-tab');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-        });
-    });
 }
 
 export async function loadProducts(comercioId) { // Esta función ya se exportaba, solo nos aseguramos.
@@ -216,9 +192,8 @@ function renderProductsGrid(products, allCategories) {
             .join(', ');
         const categoriesDisplay = productCategoryNames ? `<small class="product-categories-text">Categorías: ${productCategoryNames}</small>` : '';
 
-        const mainImage = Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : 'https://via.placeholder.com/300x200.png?text=Sin+Imagen';
         card.innerHTML = `
-            <img src="${mainImage}" alt="${p.name}">
+            <img src="${p.image || 'https://via.placeholder.com/300x200.png?text=Sin+Imagen'}" alt="${p.name}">
             ${stockInfo}
             <div class="product-card-info">
                 <h4>${p.name}</h4>
@@ -249,10 +224,8 @@ function renderProductsGrid(products, allCategories) {
 // Renombramos la función para mayor claridad
 async function openProductForm(productId = null) {
     productForm.reset();
-    updateImageState([]); // Limpiar previsualizaciones e input oculto
-    // --- NUEVO: Resetear a la primera pestaña al abrir ---
-    document.querySelector('.tab-button[data-tab="general"]').click();
-
+    document.getElementById('productId').value = '';
+    document.getElementById('imagePreview').innerHTML = '';
     document.getElementById('productCategoriesContainer').innerHTML = '';
 
     if (productId) {
@@ -269,6 +242,7 @@ async function openProductForm(productId = null) {
             document.getElementById('productPrice').value = data.price;
             document.getElementById('productOrder').value = data.order;
             document.getElementById('productDescription').value = data.description;
+            document.getElementById('productImage').value = data.image;
             
             // --- Llenar NUEVOS campos ---
             document.getElementById('productOldPrice').value = data.oldPrice || '';
@@ -279,8 +253,10 @@ async function openProductForm(productId = null) {
             document.getElementById('isVegan').checked = data.isVegan || false;
             document.getElementById('isVegetarian').checked = data.isVegetarian || false;
 
+            if (data.image) {
+                document.getElementById('imagePreview').innerHTML = `<img src="${data.image}" style="max-width: 100px;"/>`;
+            }
             await loadCategoriesIntoCheckboxes('productCategoriesContainer', data.categoryIds || []);
-            updateImageState(data.images || []); // Cargar imágenes existentes
             updateProfit(); // Calcular ganancia al cargar
         }
     } else {
@@ -316,7 +292,8 @@ async function saveProduct(e) {
     }
 
     const productId = document.getElementById('productId').value;
-    let finalImageUrls = JSON.parse(document.getElementById('productImages').value || '[]');
+    let imageUrl = document.getElementById('productImage').value;
+    const imageFile = document.getElementById('productImageUpload').files[0];
 
     const selectedCategories = [];
     document.querySelectorAll('#productCategoriesContainer input[type="checkbox"]:checked').forEach(checkbox => {
@@ -330,16 +307,22 @@ async function saveProduct(e) {
 
     const stockValue = document.getElementById('productStock').value;
     try {
+        if (imageFile) {
+            const resizedFile = await resizeImage(imageFile);
+            imageUrl = await uploadImage(resizedFile, comercioId);
+            document.getElementById('productImage').value = imageUrl;
+        }
+
         // --- Objeto de datos actualizado con NUEVOS campos ---
         const productData = {
             name: document.getElementById('productName').value,
             price: parseFloat(document.getElementById('productPrice').value),
             order: parseInt(document.getElementById('productOrder').value, 10),
             description: document.getElementById('productDescription').value,
+            image: imageUrl,
             categoryIds: selectedCategories,
             
             // --- NUEVOS CAMPOS ---
-            images: finalImageUrls, // Guardar el array de imágenes
             oldPrice: parseFloat(document.getElementById('productOldPrice').value) || null, // Guardar null si está vacío
             costPrice: parseFloat(document.getElementById('productCostPrice').value) || null,
             details: document.getElementById('productDetails').value,
@@ -361,7 +344,7 @@ async function saveProduct(e) {
         showProductView('list');
         loadProducts(comercioId);
     } catch (error) {
-        console.error("Error al guardar el producto:", error);
+        console.error("Error al guardar producto:", error);
         showMessage("Error", "No se pudo guardar el producto.");
     }
 }
@@ -417,95 +400,6 @@ async function loadCategoriesIntoCheckboxes(containerId, selectedIds = []) {
     });
 }
 
-// --- NUEVAS FUNCIONES PARA GESTIONAR IMÁGENES ---
-
-/**
- * Actualiza tanto el input oculto como la previsualización de imágenes.
- * @param {string[]} urls - El array de URLs de imágenes.
- */
-function updateImageState(urls) {
-    // Almacenar como JSON en el input oculto
-    document.getElementById('productImages').value = JSON.stringify(urls);
-    
-    const previewContainer = document.getElementById('productImagesPreview');
-    previewContainer.innerHTML = '';
-
-    urls.forEach((url, index) => {
-        const imgContainer = document.createElement('div');
-        imgContainer.className = 'image-preview-item';
-        imgContainer.innerHTML = `
-            <img src="${url}" alt="Previsualización ${index + 1}">
-            <button type="button" class="delete-img-btn" data-index="${index}">&times;</button>
-            ${index === 0 ? '<span class="main-image-tag">Principal</span>' : ''}
-        `;
-        previewContainer.appendChild(imgContainer);
-    });
-
-    // Añadir listeners a los nuevos botones de eliminar
-    previewContainer.querySelectorAll('.delete-img-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const indexToRemove = parseInt(e.target.dataset.index, 10);
-            let currentUrls = JSON.parse(document.getElementById('productImages').value || '[]');
-            currentUrls.splice(indexToRemove, 1); // Eliminar la imagen del array
-            updateImageState(currentUrls); // Volver a renderizar
-        });
-    });
-}
-
-/**
- * Maneja la selección de archivos de imagen desde el input.
- * @param {Event} e - El evento del input de archivo.
- */
-async function handleImageFilesSelect(e) {
-    const files = e.target.files;
-    if (!files.length) return;
-
-    let currentUrls = JSON.parse(document.getElementById('productImages').value || '[]');
-    if (currentUrls.length + files.length > MAX_IMAGES_PER_PRODUCT) {
-        showMessage("Límite excedido", `Solo puedes tener un máximo de ${MAX_IMAGES_PER_PRODUCT} imágenes. Has intentado añadir ${files.length}.`);
-        return;
-    }
-
-    const comercioId = getCurrentComercioId();
-    showMessage("Subiendo...", "Espera mientras se suben las imágenes.");
-
-    try {
-        for (const file of files) {
-            const resizedFile = await resizeImage(file);
-            const newUrl = await uploadImage(resizedFile, comercioId);
-            currentUrls.push(newUrl);
-        }
-        updateImageState(currentUrls);
-        showMessage("Éxito", "Imágenes subidas y añadidas correctamente.");
-    } catch (error) {
-        showMessage("Error", "Ocurrió un error al subir una o más imágenes.");
-        console.error(error);
-    } finally {
-        e.target.value = ''; // Resetear el input para poder seleccionar los mismos archivos de nuevo
-    }
-}
-
-/**
- * Maneja cuando el usuario pega una URL y presiona Enter.
- * @param {Event} e - El evento de teclado.
- */
-function handleImageUrlEnter(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        const input = e.target;
-        const newUrl = input.value.trim();
-        if (!newUrl) return;
-
-        let currentUrls = JSON.parse(document.getElementById('productImages').value || '[]');
-        if (currentUrls.length < MAX_IMAGES_PER_PRODUCT) {
-            currentUrls.push(newUrl);
-            updateImageState(currentUrls);
-            input.value = ''; // Limpiar el input
-        } else {
-            showMessage("Límite alcanzado", `No puedes añadir más de ${MAX_IMAGES_PER_PRODUCT} imágenes.`);
-        }
-    }
-}
 
 // Modificar la función que muestra el modal de añadir producto
 async function handleShowAddProductModal() {

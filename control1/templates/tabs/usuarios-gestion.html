@@ -1,0 +1,36 @@
+<div id="userListView">
+    <div class="action-buttons-container">
+        <h2>Gestión de Usuarios</h2>
+        <button id="addNewUserButton">Añadir Nuevo Usuario</button>
+    </div>
+    <div id="usersTableContainer">
+        <p>Cargando lista de usuarios...</p>
+    </div>
+</div>
+<div id="userFormView" style="display: none;">
+    <h2 id="userFormTitle">Añadir Nuevo Usuario</h2>
+    <form id="userForm">
+        <div class="form-grid">
+            <div class="input-group full-width">
+                <label for="userUid">UID del Usuario (de Firebase Authentication)</label>
+                <input type="text" id="userUid" required>
+            </div>
+            <div class="input-group full-width">
+                <label for="userEmail">Email del Usuario</label>
+                <input type="email" id="userEmail" required>
+            </div>
+            <div class="input-group checkbox-group">
+                <input type="checkbox" id="userAccessAll">
+                <label for="userAccessAll">Dar acceso a TODOS los comercios (Super Admin)</label>
+            </div>
+            <div id="userComerciosGroup" class="input-group full-width">
+                <label for="userComerciosSelect">O seleccionar comercios específicos:</label>
+                <select id="userComerciosSelect" multiple></select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="save">Guardar Usuario</button>
+            <button type="button" class="cancel" id="cancelUserEdit">Cancelar</button>
+        </div>
+    </form>
+</div>

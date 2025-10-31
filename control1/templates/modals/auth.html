@@ -1,0 +1,23 @@
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="authModalTitle">Iniciar Sesión / Registrarse</h2>
+            <span class="close-button" data-modal="authModal">&times;</span>
+        </div>
+        <form id="authForm">
+            <div class="form-group">
+                <label for="authEmail">Email</label>
+                <input type="email" id="authEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="authPassword">Contraseña</label>
+                <input type="password" id="authPassword" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="signInButton">Iniciar Sesión</button>
+                <button type="button" id="signUpButton">Registrarse</button>
+            </div>
+            <p id="authError" style="color: var(--danger-color); text-align: center; margin-top: 10px; display: none;"></p>
+        </form>
+    </div>
+</div>

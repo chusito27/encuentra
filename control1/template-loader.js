@@ -23,31 +23,24 @@ async function loadTemplate(url, containerId, append = false) {
 }
 
 export async function loadAllTemplatesAndInit(onCompleteCallback) {
-    // 1. Plantillas de la estructura principal. Se cargan primero.
-    const baseTemplates = [
+    const templatesToLoad = [
+        // Estructura base
         { url: 'templates/header.html', container: 'header-container' },
         { url: 'templates/sidebar.html', container: 'sidebar-container' },
         { url: 'templates/main-content.html', container: 'main-content' },
-    ];
-
-    // 2. Plantillas que dependen de la estructura principal. Se cargan después.
-    const dependentTemplates = [
         // Contenido de pestañas
         { url: 'templates/tabs/comercio-gestion.html', container: 'Comercios' },
         { url: 'templates/tabs/categories-gestion.html', container: 'Categorias' },
         { url: 'templates/tabs/products-gestion.html', container: 'Productos' },
         { url: 'templates/tabs/usuarios-gestion.html', container: 'Usuarios' },
         { url: 'templates/tabs/finanzas-gestion.html', container: 'Finanzas' },
-        // Modales
+        // Modales (se añaden al contenedor de modales)
         { url: 'templates/modals.html', container: 'modal-container', append: true },
         { url: 'templates/modals/addCategory.html', container: 'modal-container', append: true }
     ];
 
     try {
-        // Paso 1: Cargar la estructura base y esperar a que termine.
-        await Promise.all(baseTemplates.map(t => loadTemplate(t.url, t.container, t.append || false)));
-        // Paso 2: Ahora que la base está cargada, cargar el resto.
-        await Promise.all(dependentTemplates.map(t => loadTemplate(t.url, t.container, t.append || false)));
+        await Promise.all(templatesToLoad.map(t => loadTemplate(t.url, t.container, t.append || false)));
 
         // Una vez que TODO está en el DOM, ejecuta la función de inicialización
         if (onCompleteCallback) {

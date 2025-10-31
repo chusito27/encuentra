@@ -86,7 +86,6 @@ function renderProductsForSale(products) {
 
 async function handleSellProduct(e) {
     const button = e.currentTarget;
-    const card = button.closest('.sale-card');
     const productId = button.dataset.id;
     const price = parseFloat(button.dataset.price);
     const cost = parseFloat(button.dataset.cost);
@@ -100,7 +99,8 @@ async function handleSellProduct(e) {
         return;
     }
 
-    card.classList.add('selling');
+    button.disabled = true;
+    button.textContent = 'Vendiendo...';
 
     try {
         const productRef = doc(db, `comercios/${comercioId}/products`, productId);
@@ -128,7 +128,7 @@ async function handleSellProduct(e) {
     } catch (error) {
         console.error("Error al registrar la venta:", error);
         showMessage("Error", "No se pudo registrar la venta.");
-    } finally {
-        card.classList.remove('selling');
+        button.disabled = false;
+        button.textContent = 'Vender';
     }
 }
