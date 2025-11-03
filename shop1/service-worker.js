@@ -1,11 +1,11 @@
 // service-worker.js
 
-const CACHE_NAME = 'encuentra-v2'; // Increment version to trigger update
+const CACHE_NAME = 'encuentra-v1';
 const urlsToCache = [
   './', // Cache the root (index.html)
   './index.html', // If your main page is index.html
   './manifest.json', // Add the manifest here to cache it too
-  './style.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
   // Ensure icon paths are also relative if they are in subfolders
   './images/icons/icon-72x72.png',
   './images/icons/icon-96x96.png',
@@ -15,6 +15,8 @@ const urlsToCache = [
   './images/icons/icon-192x192.png',
   './images/icons/icon-384x384.png',
   './images/icons/icon-512x512.png',
+  // Do NOT include products.js or categories.js here,
+  // as we want them to always be fetched from the network.
 ];
 
 // 'install' event: Fired when the Service Worker is installed.
@@ -59,36 +61,46 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
-  // Strategy: Cache First, then Network Fallback.
-  // Good for static assets and app shell.
-  // For external resources like Firebase and FontAwesome, this will cache them on first load.
-  if (event.request.method === 'GET') {
+  // Strategy for products.js and categories.js: Network First
+  // This ensures that the latest version is always attempted to be fetched.
+  if (requestUrl.pathname.endsWith('/products.js') || requestUrl.pathname.endsWith('/categories.js')) {
     event.respondWith(
-      caches.match(event.request)
-        .then((cachedResponse) => {
-          // If we have a cached response, return it.
-          if (cachedResponse) {
-            return cachedResponse;
-          }
+      fetch(event.request)
+        .then(networkResponse => {
+          // If the network response is successful, return it.
+          // We are explicitly NOT caching these files here,
+          // so they are always fresh from the network.
+          return networkResponse;
+        })
+        .catch(() => {
+          // If the network fails, try to serve from the cache as a fallback (Stale-While-Revalidate fallback)
+          console.log('Service Worker: Network failed for', requestUrl.pathname, 'serving from cache if available.');
+          return caches.match(event.request);
+        })
+    );
+    return; // Important: Stop processing this fetch event here for these specific URLs
+  }
 
-          // If not in cache, fetch from the network.
-          return fetch(event.request).then((networkResponse) => {
-            // Check if the response is valid before caching.
-            if (
-              !networkResponse ||
-              networkResponse.status !== 200 ||
-              (networkResponse.type !== 'basic' && networkResponse.type !== 'cors') ||
-              requestUrl.hostname.includes('firestore.googleapis.com') // Do not cache Firestore requests
-            ) {
-              return networkResponse;
-            }
-
+  // Default strategy for other resources (Cache First, then Network Fallback)
+  // For static resources that don't change often.
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // If the resource is in the cache, return it.
+        if (response) {
+          return response;
+        }
+        // If not in cache, try to get it from the network.
+        return fetch(event.request)
+          .then((networkResponse) => {
             // Clone the network response because a response stream can only be consumed once
             const clonedResponse = networkResponse.clone();
-
             // Open the cache and save the new response
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, clonedResponse);
+              // Do not cache POST requests or non-file extensions
+              if (event.request.method === 'GET' && event.request.url.startsWith('http')) {
+                  cache.put(event.request, clonedResponse);
+              }
             });
             return networkResponse;
           })
@@ -98,7 +110,6 @@ self.addEventListener('fetch', (event) => {
             // You can return an error page or an offline resource if desired
             // return caches.match('/offline.html'); // Example: if you have an offline.html page
           });
-        })
-    );
-  }
+      })
+  );
 });

@@ -1,34 +1,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, getDocs, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Global variables to store fetched data
 let products = [];
 let categories = [];
 let storeInfo = {};
 
-let cart = [];
+let cart = []; // El carrito se gestiona en la memoria
 let currentFilter = "all";
 let currentSearchTerm = "";
 let isDarkMode = false;
 let db, auth;
 let userId;
 let storeId;
-const PLACEHOLDER_IMAGE_URL = 'https://i.ibb.co/h1K7Y6Gm/icon-192x192.png';
 
-const AppState = {
-    STORE_LIST: 'store_list',
-    SHOP: 'shop',
-    CART: 'cart',
-    INFO: 'info'
-};
-let currentScreen = AppState.SHOP;
 const CART_STORAGE_PREFIX = 'e-commerce-cart-'; // Nuevo prefijo para la clave de localStorage
 
 // Cache DOM elements for better performance
 const DOMElements = {
     loadingOverlay: document.getElementById('loading-overlay'),
-    headerContainer: document.querySelector('.header-container'), // NUEVO
     mainScreen: document.querySelector('.container'),
     topBar: document.querySelector('.top-bar'),
     storeName: document.getElementById('store-name'),
@@ -43,7 +34,6 @@ const DOMElements = {
     cartTotal: document.getElementById('cart-total'),
     productDetailModal: document.getElementById('productDetailModal'),
     productDetailContent: document.getElementById('productDetailContent'),
-    detailImageGallery: document.getElementById('detail-image-gallery'), // NUEVO
     closeProductDetailModal: document.getElementById('closeProductDetailModal'),
     detailImage: document.getElementById('detail-image'),
     detailCategories: document.getElementById('detail-categories'),
@@ -55,12 +45,11 @@ const DOMElements = {
     detailAdditionalInfoContainer: document.getElementById('detail-additional-info-container'),
     detailAdditionalInfo: document.getElementById('detail-additional-info'),
     detailAddToCartButton: document.getElementById('add-to-cart-from-detail'), // CORREGIDO
-    detailQuantityInput: document.getElementById('detail-quantity-input'), // NUEVO
 
-    cartScreen: document.getElementById('cart-screen'), // The full screen container
-    backToShopBtn: document.getElementById('back-to-shop-btn'),
+    cartScreen: document.getElementById('cart-screen'),
+    closeCartScreen: document.getElementById('back-to-shop-btn'), // <-- ID CORREGIDO
     cartItemsContainer: document.getElementById('cart-items-container'),
-    cartScreenTotalPrice: document.getElementById('cart-screen-total-price'), // Corrected ID
+    cartScreenTotalPrice: document.getElementById('cart-screen-total-price'),
     sendOrderButton: document.getElementById('send-order-button'),
     searchInput: document.getElementById('search-input'),
     settingsIcon: document.getElementById('settings-icon'),
@@ -79,12 +68,12 @@ const DOMElements = {
 
     // --- Elementos de la Pantalla de Información (IDs CORREGIDOS Y VERIFICADOS) ---
     infoScreen: document.getElementById('info-screen'),
-    infoBackButton: document.getElementById('back-to-shop-from-info-btn'),
+    infoBackButton: document.getElementById('back-to-shop-from-info-btn'), // CORREGIDO
     infoContent: document.getElementById('info-content'),
     infoMainImage: document.getElementById('info-main-image'),
-    infoStoreName: document.getElementById('info-name'),
-    infoStoreSlogan: document.getElementById('info-short-description'),
-    infoActions: document.querySelector('#info-screen .info-actions'),
+    infoStoreName: document.getElementById('info-name'), // CORREGIDO
+    infoStoreSlogan: document.getElementById('info-short-description'), // CORREGIDO
+    infoActions: document.querySelector('#info-screen .info-actions'), // CORREGIDO
     infoDescription: document.getElementById('info-full-description'), // CORREGIDO
     infoSchedule: document.getElementById('info-schedule'), // CORREGIDO
     infoGallery: document.getElementById('info-gallery'), // CORREGIDO
@@ -94,17 +83,12 @@ const DOMElements = {
     infoScheduleContainer: document.getElementById('info-schedule-container'),
     infoDescriptionContainer: document.getElementById('info-description-container'),
     infoGalleryContainer: document.getElementById('info-gallery-container'),
-
-    // --- Elementos de la Lista de Comercios (NUEVO) ---
-    storeListScreen: document.getElementById('store-list-screen'),
-    storeListContainer: document.getElementById('store-list'),
 };
 
 // Global state
 let isCartOpen = false;
 
 // Initialize Firebase
-// TODO: Consider moving Firebase config to a more secure location or use environment variables.
 const firebaseConfig = {
     apiKey: "AIzaSyAHr8NSBkLN_Jt062C4RtYFiulFC13tOLA",
     authDomain: "web2727.firebaseapp.com",
@@ -164,21 +148,6 @@ const formatColones = (amount) => {
     }).format(numericAmount);
 };
 
-// --- INICIO: NUEVA FUNCIÓN PARA AJUSTAR PADDING ---
-const adjustBodyPadding = () => {
-    if (DOMElements.headerContainer) {
-        const headerHeight = DOMElements.headerContainer.offsetHeight;
-        document.body.style.paddingTop = `${headerHeight}px`;
-    }
-};
-
-// Observer para reajustar el padding si la altura del header cambia (ej. al rotar el móvil)
-const initializeResizeObserver = () => {
-    const resizeObserver = new ResizeObserver(adjustBodyPadding);
-    resizeObserver.observe(DOMElements.headerContainer);
-};
-// --- FIN: NUEVA FUNCIÓN ---
-
 // --- MANEJADORES DE EVENTOS ---
 
 // Evento para abrir el carrito (desde el icono del header o el footer)
@@ -186,7 +155,7 @@ const openCartHandler = () => {
     if (cart.length === 0) {
         DOMElements.emptyCartModal.style.display = 'flex'; // Mostrar modal de carrito vacío
     } else {
-        showScreen(AppState.CART); // Mostrar pantalla del carrito
+        showScreen(DOMElements.cartScreen); // Mostrar pantalla del carrito
     }
 };
 
@@ -204,8 +173,8 @@ DOMElements.closeEmptyCartModalBtn.addEventListener('click', closeEmptyCartModal
 
 
 // Evento para cerrar el carrito y volver a la tienda
-DOMElements.backToShopBtn.addEventListener('click', () => {
-    showScreen(AppState.SHOP); // Oculta el carrito y muestra la pantalla principal
+DOMElements.closeCartScreen.addEventListener('click', () => {
+    showScreen(null); // Oculta el carrito y no muestra ninguna otra pantalla (vuelve a la tienda)
 });
 
 // Función para cargar la información de la tienda desde Firestore
@@ -374,8 +343,8 @@ const renderProducts = () => {
 
     // OBTENER EL ID DE LA CATEGORÍA SELECCIONADA
     const selectedCategory = categories.find(cat => cat.name.toLowerCase() === currentFilter.toLowerCase());
-    const selectedCategoryId = selectedCategory ? selectedCategory.id : 'all'; // Fallback to 'all'
-    
+    const selectedCategoryId = selectedCategory ? selectedCategory.id : null;
+
     const filteredProducts = products
         .filter(product => {
             // LÓGICA DE FILTRADO CORREGIDA para soportar el array 'categoryIds'
@@ -401,100 +370,35 @@ const renderProducts = () => {
     }
 };
 
-function createProductCard(product) { // REFACTORIZADO para mayor seguridad y claridad
+function createProductCard(product) {
     const productCard = document.createElement('div');
     productCard.className = 'product-card';
     productCard.dataset.productId = product.id;
 
-    // Tags
-    const tagsContainer = document.createElement('div');
-    tagsContainer.className = 'product-tags';
-    tagsContainer.innerHTML = (product.tags || []).map(tag => `<i class="${tag.icon}" title="${tag.name}"></i>`).join('');
-    productCard.appendChild(tagsContainer);
-
-    // Image
-    const imageContainer = document.createElement('div');
-    imageContainer.className = 'product-image-container';
-    const image = document.createElement('img');
-    image.src = (product.images && product.images.length > 0) ? product.images[0] : PLACEHOLDER_IMAGE_URL;
-    image.alt = product.name;
-    image.loading = 'lazy';
-    imageContainer.appendChild(image);
-
-    // --- INICIO: NUEVA LÓGICA PARA INDICADORES DE IMAGEN ---
-    if (product.images && product.images.length > 1) {
-        const indicatorsContainer = document.createElement('div');
-        indicatorsContainer.className = 'product-image-indicators';
-        product.images.forEach((_, index) => {
-            const indicator = document.createElement('span');
-            indicator.className = 'indicator-dot';
-            if (index === 0) {
-                indicator.classList.add('active');
-            }
-            indicatorsContainer.appendChild(indicator);
-        });
-        imageContainer.appendChild(indicatorsContainer);
-
-        // --- INICIO: Lógica de carrusel al pasar el ratón ---
-        let currentIndex = 0;
-        let intervalId = null;
-
-        productCard.addEventListener('mouseenter', () => {
-            if (product.images.length > 1) {
-                intervalId = setInterval(() => {
-                    currentIndex = (currentIndex + 1) % product.images.length;
-                    image.src = product.images[currentIndex];
-                    // Actualizar indicador activo
-                    indicatorsContainer.querySelectorAll('.indicator-dot').forEach((dot, idx) => {
-                        dot.classList.toggle('active', idx === currentIndex);
-                    });
-                }, 800); // Cambia de imagen cada 800ms
-            }
-        });
-
-        productCard.addEventListener('mouseleave', () => {
-            clearInterval(intervalId);
-            image.src = product.images[0]; // Vuelve a la imagen principal
-            currentIndex = 0;
-            indicatorsContainer.querySelectorAll('.indicator-dot').forEach((dot, idx) => {
-                dot.classList.toggle('active', idx === 0);
-            });
-        });
-        // --- FIN: Lógica de carrusel ---
-    }
-    // --- FIN: NUEVA LÓGICA PARA INDICADORES DE IMAGEN ---
-    productCard.appendChild(imageContainer);
-
-    // Info
-    const infoContainer = document.createElement('div');
-    infoContainer.className = 'product-info';
-
-    const name = document.createElement('h3');
-    name.className = 'product-name';
-    name.textContent = product.name;
-    infoContainer.appendChild(name);
-
-    const description = document.createElement('p');
-    description.className = 'product-details-short';
-    description.textContent = product.description || '';
-    infoContainer.appendChild(description);
-
-    const priceContainer = document.createElement('div');
-    priceContainer.className = 'product-price';
+    let priceHTML = '';
     if (product.promoPrice && product.promoPrice < product.price) {
-        priceContainer.innerHTML = `<span class="old-price">${formatColones(product.price)}</span> <span class="new-price">${formatColones(product.promoPrice)}</span>`;
+        priceHTML = `
+            <span class="old-price">${formatColones(product.price)}</span>
+            <span class="new-price">${formatColones(product.promoPrice)}</span>
+        `;
     } else {
-        priceContainer.innerHTML = `<span class="new-price">${formatColones(product.price)}</span>`;
+        priceHTML = `<span class="new-price">${formatColones(product.price)}</span>`;
     }
-    infoContainer.appendChild(priceContainer);
 
-    const addButton = document.createElement('button');
-    addButton.className = 'add-to-cart-button';
-    addButton.dataset.productId = product.id;
-    addButton.textContent = 'Añadir';
-    infoContainer.appendChild(addButton);
+    const tagsHTML = (product.tags || []).map(tag => `<i class="${tag.icon}" title="${tag.name}"></i>`).join('');
 
-    productCard.appendChild(infoContainer);
+    productCard.innerHTML = `
+        <div class="product-tags">${tagsHTML}</div>
+        <div class="price-tag">${priceHTML}</div>
+        <div class="product-image-container">
+            <img src="${product.image}" alt="${product.name}" loading="lazy">
+            <div class="product-name-overlay">
+                <h3>${product.name}</h3>
+            </div>
+        </div>
+        <p class="product-details-short">${product.shortDescription || ''}</p>
+        <button class="add-to-cart-button" data-product-id="${product.id}">Añadir</button>
+    `;
     return productCard;
 }
 
@@ -540,21 +444,21 @@ const handleSearchInput = () => {
     renderProducts();
 };
 
-const addToCart = (productId, quantity = 1) => {
+const addToCart = (productId) => {
     const product = products.find(p => p.id === productId);
     if (product) {
         const existingItem = cart.find(item => item.id === productId);
         const price = (product.promoPrice && product.promoPrice < product.price) ? product.promoPrice : product.price;
 
         if (existingItem) {
-            existingItem.quantity += quantity;
+            existingItem.quantity++;
         } else {
             cart.push({
                 id: product.id,
                 name: product.name,
                 price: price,
-                quantity: quantity,
-                imageUrl: (product.images && product.images.length > 0) ? product.images[0] : PLACEHOLDER_IMAGE_URL
+                quantity: 1,
+                imageUrl: product.image
             });
         }
         saveCartToLocalStorage();
@@ -608,10 +512,10 @@ const updateCartDisplay = () => {
     // --- FIN DE LA CORRECCIÓN ---
 
     const fragment = document.createDocumentFragment();
-    
+
     cart.forEach(item => {
         itemCount += item.quantity;
-        total += Number(item.price) * item.quantity;
+        total += item.price * item.quantity;
 
         const li = document.createElement('li');
         // CAMBIO AQUÍ: Agrupamos los controles en un div "cart-item-actions"
@@ -634,12 +538,12 @@ const updateCartDisplay = () => {
 
 
     // --- INICIO DE LA CORRECCIÓN ---
-    // Actualizar elementos solo si existen y el carrito no está abierto
-    if (DOMElements.cartIconContainer) {
+    // Actualizar elementos solo si existen
+    if (DOMElements.topCartIconContainer) {
         if (cart.length === 0) {
-            DOMElements.cartIconContainer.classList.remove('cart-active');
+            DOMElements.topCartIconContainer.classList.remove('cart-active');
         } else {
-            DOMElements.cartIconContainer.classList.add('cart-active');
+            DOMElements.topCartIconContainer.classList.add('cart-active');
         }
     }
 
@@ -734,65 +638,25 @@ const renderStoreInfo = () => {
 // --- FIN: RENDERIZADO DE PANTALLA DE INFORMACIÓN ---
 
 // --- INICIO: NUEVO SISTEMA DE NAVEGACIÓN DE PANTALLAS ---
-const updateUIForScreen = (screen) => {
-    // Reset all active states
-    [DOMElements.footerHome, DOMElements.footerCart, DOMElements.footerInfo].forEach(btn => btn?.classList.remove('active'));
+const allScreens = [DOMElements.cartScreen, DOMElements.infoScreen]; // AÑADIDO: infoScreen
 
-    switch (screen) {
-        case AppState.STORE_LIST:
-            document.title = 'Encuentra - Comercios';
-            DOMElements.storeListScreen.classList.remove('hidden');
-            DOMElements.mainScreen.style.display = 'none';
-            DOMElements.topBar.style.display = 'none';
-            DOMElements.footerHome.parentElement.style.display = 'none';
-            break;
-        case AppState.CART:
-            document.title = `${storeInfo.name || 'Tienda'} - Carrito`;
-            DOMElements.cartScreen.classList.remove('hidden');
-            DOMElements.mainScreen.style.display = 'none';
-            DOMElements.topBar.style.display = 'none';
-            DOMElements.footerCart.classList.add('active');
-            break;
-        case AppState.INFO:
-            document.title = `${storeInfo.name || 'Tienda'} - Información`;
-            DOMElements.infoScreen.classList.remove('hidden');
-            DOMElements.mainScreen.style.display = 'none';
-            DOMElements.topBar.style.display = 'none';
-            DOMElements.footerInfo.classList.add('active');
-            break;
-        case AppState.SHOP:
-        default:
-            document.title = storeInfo.name || 'Tienda';
-            DOMElements.mainScreen.style.display = 'block';
-            DOMElements.topBar.style.display = 'flex';
-            DOMElements.footerHome.classList.add('active');
-            break;
-    }
-};
-
-function showScreen(screen, replaceHistory = false) {
-    currentScreen = screen;
-
-    // Hide all screens first
-    [DOMElements.cartScreen, DOMElements.infoScreen, DOMElements.storeListScreen].forEach(s => s?.classList.add('hidden'));
+function showScreen(screenToShow) {
+    // Ocultar la pantalla principal (tienda)
     DOMElements.mainScreen.style.display = 'none';
     DOMElements.topBar.style.display = 'none';
-    DOMElements.footerHome.parentElement.style.display = 'flex'; // Ensure footer is visible unless it's store list
 
-    updateUIForScreen(screen);
+    // Ocultar todas las demás pantallas
+    allScreens.forEach(screen => {
+        if (screen) screen.classList.add('hidden');
+    });
 
-    // Update URL history
-    const url = new URL(window.location);
-    if (screen === AppState.INFO) {
-        url.searchParams.set('view', 'info');
+    // Mostrar la pantalla solicitada
+    if (screenToShow) {
+        screenToShow.classList.remove('hidden');
     } else {
-        url.searchParams.delete('view');
-    }
-
-    if (replaceHistory) {
-        window.history.replaceState({ screen }, '', url.toString());
-    } else {
-        window.history.pushState({ screen }, '', url.toString());
+        // Si no se especifica pantalla, mostrar la principal (tienda)
+        DOMElements.mainScreen.style.display = 'block';
+        DOMElements.topBar.style.display = 'flex';
     }
 }
 // --- FIN: NUEVO SISTEMA DE NAVEGACIÓN ---
@@ -800,14 +664,11 @@ function showScreen(screen, replaceHistory = false) {
 const openProductDetailModal = (productId) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
-    DOMElements.detailQuantityInput.value = 1; // Resetea la cantidad
 
     // --- Poblar la información básica ---
-    DOMElements.detailImage.src = (product.images && product.images.length > 0) ? product.images[0] : PLACEHOLDER_IMAGE_URL;
+    DOMElements.detailImage.src = product.image;
     DOMElements.detailName.textContent = product.name;
     DOMElements.detailDescription.textContent = product.description;
-    DOMElements.detailName.textContent = product.name; // El nombre sigue siendo texto plano
-    DOMElements.detailDescription.innerHTML = product.description || ''; // Ahora permite HTML
 
     // --- Lógica de Precios (CORREGIDO) ---
     // Limpiar el contenedor de precios y construir el HTML dinámicamente
@@ -879,23 +740,6 @@ const openProductDetailModal = (productId) => {
     // --- Botón de Agregar al Carrito ---
     DOMElements.detailAddToCartButton.dataset.productId = product.id;
 
-    // --- Lógica de Galería de Imágenes (NUEVO) ---
-    DOMElements.detailImageGallery.innerHTML = '';
-    if (product.images && product.images.length > 1) {
-        DOMElements.detailImageGallery.style.display = 'flex';
-        product.images.forEach((imgUrl, index) => {
-            const thumb = document.createElement('img');
-            thumb.src = imgUrl;
-            thumb.alt = `${product.name} - imagen ${index + 1}`;
-            thumb.dataset.imageUrl = imgUrl;
-            if (index === 0) {
-                thumb.classList.add('active');
-            }
-            DOMElements.detailImageGallery.appendChild(thumb);
-        });
-    } else {
-        DOMElements.detailImageGallery.style.display = 'none';
-    }
 
     // --- Mostrar el modal ---
     DOMElements.productDetailModal.style.display = 'block';
@@ -906,10 +750,6 @@ const closeProductDetailModal = () => {
     if (DOMElements.productDetailModal) {
         DOMElements.productDetailModal.style.display = "none";
     }
-};
-
-const closeCartScreen = () => {
-    showScreen(AppState.SHOP);
 };
 
 const sendWhatsAppOrder = () => {
@@ -949,7 +789,7 @@ const sendWhatsAppOrder = () => {
     const encodedText = encodeURIComponent(orderText);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedText}`;
     window.open(whatsappUrl, '_blank');
-    closeCartScreen();
+    hideCartScreen(); // CORREGIDO: Usar la nueva función para ocultar la pantalla
 };
 
 const toggleDarkMode = () => {
@@ -1000,21 +840,19 @@ document.addEventListener('click', (event) => {
 
     // Add to Cart from detail modal (CORREGIDO)
     if (event.target.id === 'add-to-cart-from-detail') {
-        const quantity = parseInt(DOMElements.detailQuantityInput.value, 10);
-        addToCart(event.target.dataset.productId, quantity);
-        event.target.classList.add('added');
-        setTimeout(() => event.target.classList.remove('added'), 1200); // Duración de la animación
+        addToCart(event.target.dataset.productId);
         return;
     }
 
     // --- INICIO: SECCIÓN CORREGIDA ---
     // Controles de cantidad y eliminación en la pantalla del carrito
-    if (event.target.closest('#cart-items-container')) {
-        if (event.target.matches('.quantity-increase')) {
+    const cartScreen = event.target.closest('#cart-screen');
+    if (cartScreen) {
+        if (event.target.classList.contains('quantity-increase')) {
             updateQuantity(event.target.dataset.productId, 1);
-        } else if (event.target.matches('.quantity-decrease')) {
+        } else if (event.target.classList.contains('quantity-decrease')) {
             updateQuantity(event.target.dataset.productId, -1);
-        } else if (event.target.matches('.remove-item-button')) {
+        } else if (event.target.classList.contains('remove-item-button')) {
             removeFromCart(event.target.dataset.productId);
         }
         return;
@@ -1022,94 +860,19 @@ document.addEventListener('click', (event) => {
     // --- FIN: SECCIÓN CORREGIDA ---
 
     // Close buttons for modals
-    if (event.target.id === 'closeProductDetailModal' || event.target === DOMElements.productDetailModal) {
+    if (event.target === DOMElements.closeProductDetailModalButton) { // ELIMINADO EL DE CART
         closeProductDetailModal();
-        return;
-    }
-
-    // --- INICIO: DELEGACIÓN DE EVENTOS PARA EL MODAL DE DETALLE ---
-    const detailModal = event.target.closest('#productDetailModal');
-    if (detailModal) {
-        // Clic en la galería de imágenes
-        if (event.target.matches('#detail-image-gallery img')) {
-            const newImageUrl = event.target.dataset.imageUrl;
-            DOMElements.detailImage.src = newImageUrl;
-            detailModal.querySelectorAll('#detail-image-gallery img').forEach(img => img.classList.remove('active'));
-            event.target.classList.add('active');
-            return;
-        }
-
-        // Clic en botones de cantidad
-        if (event.target.matches('.quantity-btn')) {
-            const action = event.target.dataset.action;
-            let currentValue = parseInt(DOMElements.detailQuantityInput.value, 10);
-            if (action === 'increase') {
-                DOMElements.detailQuantityInput.value = currentValue + 1;
-            } else if (action === 'decrease' && currentValue > 1) {
-                DOMElements.detailQuantityInput.value = currentValue - 1;
-            }
-        }
+    } else if (event.target === DOMElements.productDetailModal) { // Click outside product detail modal
+        closeProductDetailModal();
     }
 });
 
 // Event listener for quantity input changes in cart modal
-document.addEventListener('input', (event) => {
+document.addEventListener('change', (event) => {
     if (event.target.classList.contains('quantity-input')) {
         updateQuantityInput(event.target.dataset.productId, event.target.value);
     }
 });
-
-// --- INICIO: NUEVA FUNCIÓN PARA CARGAR LISTA DE COMERCIOS ---
-const loadAndRenderStoreList = async () => {
-    showLoading();
-    // Ocultar los elementos de una tienda específica
-    showScreen(AppState.STORE_LIST, true);
-
-    try {
-        const q = query(collection(db, 'comercios'), where("showInSite", "==", true));
-        const querySnapshot = await getDocs(q); // CORREGIDO: Usar getDocs para una consulta de múltiples documentos
-
-        if (querySnapshot.empty) {
-            DOMElements.storeListContainer.innerHTML = '<p>No hay comercios disponibles en este momento.</p>';
-            return;
-        }
-
-        const fragment = document.createDocumentFragment();
-        querySnapshot.forEach((doc) => {
-            const store = { id: doc.id, ...doc.data() };
-            const storeCard = createStoreCard(store);
-            fragment.appendChild(storeCard);
-        });
-
-        DOMElements.storeListContainer.innerHTML = ''; // Limpiar antes de añadir
-        DOMElements.storeListContainer.appendChild(fragment);
-
-    } catch (error) {
-        console.error("Error al cargar la lista de comercios:", error);
-        DOMElements.storeListContainer.innerHTML = '<p>Ocurrió un error al cargar los comercios. Por favor, intenta de nuevo más tarde.</p>';
-    } finally {
-        hideLoading();
-    }
-};
-
-const createStoreCard = (store) => {
-    const card = document.createElement('a');
-    card.className = 'store-card';
-    card.href = `?id=${store.id}`; // Enlace a la tienda
-
-    const imageUrl = store.mainImage || store.logoUrl || PLACEHOLDER_IMAGE_URL;
-    const slogan = store.slogan || 'Descubre nuestros productos';
-
-    card.innerHTML = `
-        <img src="${imageUrl}" alt="Logo de ${store.name}" class="store-card-image" loading="lazy">
-        <div class="store-card-content">
-            <h3>${store.name}</h3>
-            <p>${slogan}</p>
-        </div>
-    `;
-    return card;
-};
-// --- FIN: NUEVA FUNCIÓN PARA CARGAR LISTA DE COMERCIOS ---
 
 // --- INICIO DE LA CORRECCIÓN ---
 
@@ -1118,15 +881,20 @@ async function initializeAppLogic() {
     const urlParams = new URLSearchParams(window.location.search);
     storeId = urlParams.get('id');
 
+    if (!storeId) {
+        document.body.innerHTML = "<h1>Error: ID de la tienda no especificado.</h1>";
+        return;
+    }
+
     // La configuración de Firebase ya no es necesaria aquí, se hace al inicio del script.
 
     showLoading();
 
     // Autenticación
     try {
-        const customAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        if (customAuthToken) {
-            await signInWithCustomToken(auth, customAuthToken);
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        if (initialAuthToken) {
+            await signInWithCustomToken(auth, initialAuthToken);
         } else {
             await signInAnonymously(auth);
         }
@@ -1140,13 +908,6 @@ async function initializeAppLogic() {
     // Esperar a que el estado de autenticación esté confirmado
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // --- LÓGICA DE BIFURCACIÓN (NUEVO) ---
-            if (!storeId) {
-                // Si no hay ID de tienda, muestra la lista de comercios
-                await loadAndRenderStoreList();
-                return; // Detiene la ejecución para no cargar una tienda específica
-            }
-
             userId = user.uid;
 
             try {
@@ -1160,17 +921,7 @@ async function initializeAppLogic() {
 
                 // Inicializar tema y listeners
                 initializeTheme();
-                adjustBodyPadding(); // Ajustar padding inicial
-                initializeResizeObserver(); // Observar cambios de tamaño del header
                 setupEventListeners();
-                
-                // Check URL for initial screen
-                const view = urlParams.get('view');
-                if (view === 'info') {
-                    showScreen(AppState.INFO, true);
-                } else {
-                    showScreen(AppState.SHOP, true);
-                }
 
             } catch (error) {
                 console.error("Error durante la inicialización:", error);
@@ -1191,27 +942,23 @@ function setupEventListeners() {
         DOMElements.settingsIcon.addEventListener('click', toggleDarkMode);
     }
     if (DOMElements.homeIcon) {
-        DOMElements.homeIcon.addEventListener('click', () => showScreen(AppState.SHOP));
+        DOMElements.homeIcon.addEventListener('click', () => showScreen(null));
     }
     if (DOMElements.footerHome) {
-        DOMElements.footerHome.addEventListener('click', () => showScreen(AppState.SHOP));
+        DOMElements.footerHome.addEventListener('click', () => showScreen(null));
     }
     if (DOMElements.sendOrderButton) {
         DOMElements.sendOrderButton.addEventListener('click', sendWhatsAppOrder);
     }
+    // Añade aquí otros listeners que necesiten configuración inicial
 
     // --- Listeners para la pantalla de información ---
     if (DOMElements.footerInfo) {
-        DOMElements.footerInfo.addEventListener('click', () => showScreen(AppState.INFO));
+        DOMElements.footerInfo.addEventListener('click', () => showScreen(DOMElements.infoScreen));
     }
     if (DOMElements.infoBackButton) {
-        DOMElements.infoBackButton.addEventListener('click', () => showScreen(AppState.SHOP));
+        DOMElements.infoBackButton.addEventListener('click', () => showScreen(null));
     }
-
-    // Handle browser back/forward buttons
-    window.addEventListener('popstate', (event) => {
-        showScreen(event.state?.screen || AppState.SHOP, true);
-    });
 }
 
 

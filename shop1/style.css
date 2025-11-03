@@ -44,10 +44,10 @@
     --promo-button-hover-bg: #FF6347;
     --promo-button-color: white;
     --search-border-color: #ccc;
-    /* Colores del botón "Añadir" alineados con el tema */
-    --add-to-cart-bg: var(--category-button-active-bg); /* #36454F */
-    --add-to-cart-color: var(--category-button-active-color); /* white */
-    --add-to-cart-hover: #5a6a7a; /* Un gris un poco más claro para el hover */
+    --add-to-cart-bg: #6B8E23;
+    /* Dark green for consistency */
+    --add-to-cart-color: white;
+    --add-to-cart-hover: #556B2F;
 }
 
 /* Dark Mode Variables */
@@ -98,37 +98,22 @@ body.dark-mode {
     --promo-button-hover-bg: #b35239;
     /* Slightly darker tomato */
     --search-border-color: #666;
-    --add-to-cart-bg: var(--category-button-active-bg); /* #e0e0e0 */
-    --add-to-cart-color: var(--category-button-active-color); /* #282c34 */
-    --add-to-cart-hover: #f5f5f5; /* Un blanco más brillante para el hover */
+    --add-to-cart-bg: #90ee90;
+    --add-to-cart-color: #282c34;
+    --add-to-cart-hover: #76c876;
 }
 
-
-/* Aplicación global de box-sizing para un modelo de caja más predecible */
-*, *::before, *::after {
-    box-sizing: border-box;
-}
 
 /* Estilos Generales */
 body {
     font-family: 'Montserrat', Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: var(--bg-general);
+    background-color: #f4f4f4;
     color: #333;
-    padding-bottom: 70px; /* Espacio para el footer */
-    /* padding-top es ahora manejado por JS para ser dinámico */
+    padding-bottom: 50px; /* MANTENIDO: Para coincidir con la altura del footer */
+    padding-top: 135px; /* MODIFICADO: Espacio para top-bar (60px) + categories (aprox 75px) */
     /* Se eliminan las propiedades de flexbox y height: 100vh */
-}
-
-/* Nuevo contenedor para el header fijo */
-.header-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 100;
-    background-color: var(--bg-general); /* Fondo para que no se vea contenido detrás */
 }
 
 .top-bar {
@@ -136,6 +121,7 @@ body {
     color: var(--text-color);
     position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
     z-index: 100;
     display: flex;
@@ -144,9 +130,8 @@ body {
     padding: 10px 15px;
     gap: 10px;
     transition: background-color 0.3s ease, color 0.3s ease;
-    justify-content: space-between;
-    position: static; /* Ya no es fijo, su padre .header-container lo es */
-    z-index: auto;
+    box-sizing: border-box;
+    justify-content: space-between; /* Alinear elementos a los extremos */
 }
 
 .top-bar-right-icons {
@@ -245,6 +230,7 @@ body.dark-mode .cart-icon {
     background-color: var(--textarea-bg);
     color: var(--text-color);
     transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    box-sizing: border-box;
     /* AÑADE ESTA LÍNEA */
 }
 
@@ -300,9 +286,14 @@ h2 {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Oculta la barra de scroll en Firefox */
     
-    /* Ya no es fijo, fluye debajo del top-bar dentro del header-container */
-    position: static;
-    z-index: auto;
+    /* --- Bloque de Posicionamiento Corregido --- */
+    position: fixed;
+    top: 50px; /* MODIFICADO: Ajustado para la altura de la top-bar en móvil */
+    left: 0;
+    right: 0;
+    z-index: 99;
+    
+    box-sizing: border-box;
 }
 
 /* Estilos para la barra de desplazamiento en navegadores Webkit (Chrome, Safari) */
@@ -310,20 +301,27 @@ h2 {
     display: none; /* Oculta la barra de scroll */
 }
 
-/* Estilos para la barra de desplazamiento en navegadores Webkit (Chrome, Safari) */
-@media (pointer: fine) { /* Aplica solo para dispositivos con puntero preciso (como un mouse) */
-    .categories::-webkit-scrollbar {
-        height: 8px;
-    }
-    .categories::-webkit-scrollbar-thumb {
-        background-color: var(--category-button-active-bg);
-        border-radius: 10px;
-        border: 2px solid var(--card-border);
-    }
-    .categories::-webkit-scrollbar-thumb:hover {
-        background-color: var(--category-button-hover-bg);
+/* Media Query para alinear en pantallas grandes */
+@media (max-width: 412px) {
+    .categories {
+        top: 150px;
     }
 }
+
+/* Estilos para la barra de desplazamiento en navegadores Webkit (Chrome, Safari) */
+.categories::-webkit-scrollbar {
+    height: 8px;
+    /* Altura de la barra de desplazamiento horizontal */
+}
+
+.categories::-webkit-scrollbar-thumb {
+    background-color: var(--category-button-active-bg);
+    /* Color del "pulgar" de la barra de desplazamiento */
+    border-radius: 10px;
+    border: 2px solid var(--card-border);
+    /* Borde alrededor del pulgar */
+}
+
 .categories::-webkit-scrollbar-track {
     background-color: var(--card-border);
     /* Color del "rielo" de la barra de desplazamiento */
@@ -399,8 +397,9 @@ body.dark-mode .category-button.active {
     grid-template-columns: repeat(2, 1fr);
     /* Default: 2 columns for all mobile screens */
     gap: 15px;
-    padding: 15px; /* Añadido para que no pegue a los bordes */
+    /* Un poco más de espacio */
     margin-bottom: 30px;
+    margin-top: 65px;
     /* Se eliminan las propiedades de overflow y flex-grow */
 }
 
@@ -417,20 +416,22 @@ body.dark-mode .category-button.active {
 .product-card {
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    /* padding: 15px; <-- Eliminado */
-    text-align: left; /* Cambiado a izquierda */
+    padding: 15px;
+    /* Add padding to the card itself */
+    text-align: center;
     background-color: var(--card-bg);
     display: flex;
     flex-direction: column;
-    /* justify-content: space-between; <-- Eliminado */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); /* Sombra más sutil */
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .product-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
     transition: all 0.3s ease;
 }
@@ -439,95 +440,81 @@ body.dark-mode .product-card:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+.product-card button {
+    cursor: pointer;
+    background-color: var(--button-bg);
+    color: var(--button-color);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-top: 15px;
+}
+
+.product-card button:hover {
+    background-color: var(--button-hover-bg);
+}
+
 /* Container for the image, now with relative position for overlay */
 .product-image-container {
     position: relative;
     width: 100%;
     /* height: 100px;  <-- ELIMINAMOS ESTA LÍNEA */
-    aspect-ratio: 4 / 3; /* Imagen más rectangular, como en Amazon */
+    aspect-ratio: 1 / 1;
+    /* AÑADIMOS ESTA LÍNEA para hacerlo cuadrado */
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    /* margin-bottom: 10px; <-- Eliminado */
+    margin-bottom: 10px;
+    /* Space between image and text */
 }
 
 .product-card img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Cambiado de 'cover' a 'contain' para mostrar la imagen completa */
-    /* border-radius: 4px; <-- Eliminado, la tarjeta ya tiene borde redondeado */
+    object-fit: cover;
+    border-radius: 4px;
 }
 
-/* Nuevo contenedor para toda la información de texto */
-.product-info {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* Asegura que este contenedor crezca para empujar el botón hacia abajo */
+/* New class for the product name overlay */
+.product-name-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent background */
+    color: white;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    /* Include padding in width calculation */
+    text-align: left;
+    transition: background-color 0.3s ease;
 }
 
-.product-name {
+.product-name-overlay h3 {
     margin: 0;
-    font-size: 1rem; /* Tamaño de fuente base */
-    font-weight: 500; /* Un poco menos grueso que bold */
-    color: var(--text-color);
-    line-height: 1.3;
-    height: 2.6em; /* Altura para 2 líneas */
+    font-size: 1em;
+    color: white;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limita a 2 líneas */
-    -webkit-box-orient: vertical;
-}
-
-.product-card:hover .product-name {
-    color: var(--top-bar-bg); /* Cambia de color al hacer hover en la tarjeta */
 }
 
 /* New class for the product details with ellipsis */
 .product-details-short {
-    font-size: 0.85em;
+    font-size: 0.9em;
     color: var(--text-color);
-    opacity: 0.8;
-    margin: 8px 0;
-    flex-grow: 1; /* Ocupa el espacio disponible para alinear precios y botones */
-    min-height: 2.5em; /* Espacio para al menos dos líneas de descripción */
+    margin: 0;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    text-align: center;
+    /* Aligned to center as requested */
 }
-
-/* --- INICIO: NUEVOS ESTILOS PARA INDICADORES DE IMAGEN EN TARJETA DE PRODUCTO --- */
-.product-image-indicators {
-    position: absolute; /* Se superpone sobre la imagen */
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex; /* Usa flexbox para distribuir los indicadores */
-    gap: 6px; /* Espacio entre los puntos */
-    z-index: 5; /* Asegura que esté por encima de la imagen */
-    padding: 4px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    pointer-events: none; /* Evita que los indicadores interfieran con el hover de la tarjeta */
-}
-
-.indicator-dot {
-    width: 6px;
-    height: 6px;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.indicator-dot.active {
-    background-color: #ffffff;
-    transform: scale(1.2);
-}
-/* --- FIN: NUEVOS ESTILOS PARA INDICADORES DE IMAGEN --- */
 
 /* Estilos para los tags de productos */
 .product-tags {
@@ -559,48 +546,46 @@ body.dark-mode .product-tags i {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-/* Nuevo contenedor para el precio dentro de .product-info */
-.product-price {
+/* Nuevo estilo para el precio como tag, ahora en la esquina superior derecha de la tarjeta */
+.product-card .price-tag {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    margin: 0;
+    background-color: var(--price-tag-bg);
+    color: var(--price-tag-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     display: flex;
-    align-items: baseline; /* Alinea los precios por su base */
-    gap: 8px;
-    margin: 10px 0;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .product-card .price-tag {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Estilo para el precio anterior (tachado) */
-.old-price {
+.product-card .old-price {
     text-decoration: line-through;
     color: var(--old-price-color);
-    font-size: 0.9em;
+    font-size: 0.75em;
     font-weight: normal;
     transition: color 0.3s ease;
 }
 
 /* Estilo para el nuevo precio (llamativo) */
-.new-price {
+.product-card .new-price {
     color: var(--new-price-color);
-    font-size: 1.4em;
+    font-size: 1.1em;
     font-weight: bold;
     transition: color 0.3s ease;
-}
-
-/* Botón de añadir al carrito rediseñado */
-.add-to-cart-button {
-    cursor: pointer;
-    background-color: var(--add-to-cart-bg);
-    color: var(--add-to-cart-color);
-    border: none;
-    padding: 12px 15px;
-    border-radius: 5px;
-    font-size: 0.95em;
-    font-weight: bold;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    margin-top: auto; /* Empuja el botón al final del contenedor flex */
-    width: 100%; /* Ocupa todo el ancho de .product-info */
-}
-
-.add-to-cart-button:hover {
-    background-color: var(--add-to-cart-hover);
 }
 
 /* Modal Styles (compartidos para ambos modales) */
@@ -843,34 +828,11 @@ body.dark-mode .modal-content {
 
 #productDetailModal img {
     width: 100%;
+    height: 250px; /* Altura fija para la imagen */
     object-fit: cover;
-    aspect-ratio: 4 / 3; /* Más adaptable que una altura fija */
     border-radius: 8px 8px 0 0; /* Redondeo solo en la parte superior */
 }
 
-/* --- INICIO: NUEVOS ESTILOS PARA GALERÍA DE IMÁGENES DEL PRODUCTO --- */
-.detail-image-gallery {
-    display: flex;
-    gap: 10px;
-    padding: 10px 20px;
-    overflow-x: auto;
-    background-color: var(--card-bg);
-    border-bottom: 1px solid var(--card-border);
-}
-
-.detail-image-gallery img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: border-color 0.2s ease;
-}
-
-.detail-image-gallery img:hover, .detail-image-gallery img.active {
-    border-color: var(--top-bar-bg);
-}
 .detail-text-content {
     padding: 20px;
     display: flex;
@@ -922,23 +884,10 @@ body.dark-mode .modal-content {
     font-size: 1em;
     line-height: 1.6;
     text-align: left;
-    margin: 0 0 15px 0; /* Añadir margen inferior para separar del siguiente elemento */
+    margin: 0;
     color: var(--text-color);
-    max-height: 120px; /* Altura máxima antes de mostrar scroll */
-    overflow-y: auto; /* Habilitar scroll vertical si el contenido excede la altura */
-    padding-right: 10px; /* Espacio para que la barra de scroll no tape el texto */
-    scrollbar-width: thin; /* Para Firefox */
-    scrollbar-color: var(--category-button-hover-bg) var(--card-bg); /* Para Firefox */
 }
 
-/* Estilos para la barra de scroll en navegadores Webkit (Chrome, Safari) */
-#productDetailModal #detail-description::-webkit-scrollbar {
-    width: 6px;
-}
-#productDetailModal #detail-description::-webkit-scrollbar-thumb {
-    background-color: var(--category-button-hover-bg);
-    border-radius: 3px;
-}
 #detail-tags {
     display: flex;
     justify-content: flex-start;
@@ -977,67 +926,10 @@ body.dark-mode .modal-content {
     border-radius: 0 0 8px 8px;
 }
 
-.modal-footer {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-/* --- INICIO: NUEVOS ESTILOS PARA CONTROLES DE CANTIDAD --- */
-.detail-quantity-selector {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-}
-
-.detail-quantity-selector .quantity-btn {
-    background-color: transparent;
-    border: none;
-    color: var(--text-color);
-    font-size: 1.5em;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0 15px;
-    height: 50px;
-}
-
-.detail-quantity-selector .quantity-btn:hover {
-    background-color: var(--card-border);
-}
-
-.detail-quantity-selector input {
-    width: 50px;
-    height: 50px;
-    text-align: center;
-    border: none;
-    border-left: 1px solid var(--card-border);
-    border-right: 1px solid var(--card-border);
-    font-size: 1.2em;
-    font-weight: bold;
-    background-color: transparent;
-    color: var(--text-color);
-    -moz-appearance: textfield;
-}
-
-.detail-quantity-selector input::-webkit-outer-spin-button,
-.detail-quantity-selector input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-#add-to-cart-from-detail {
-    flex-grow: 1; /* Ocupa el espacio restante */
+#productDetailModal .add-to-cart-button {
     width: 100%;
     padding: 15px;
     font-size: 1.1em;
-    position: relative;
-}
-
-/* --- FIN: NUEVOS ESTILOS PARA CONTROLES DE CANTIDAD --- */
-
-#productDetailModal .add-to-cart-button {
-    width: 100%;
 }
 
 /* Media Query para pantallas más grandes */
@@ -1048,10 +940,6 @@ body.dark-mode .modal-content {
     #productDetailModal img {
         width: 50%;
         height: auto; /* Altura automática para mantener el aspect ratio */
-        border-radius: 8px 0 0 0; /* Redondeo solo arriba a la izquierda */
-    }
-    .detail-image-gallery {
-        flex-direction: column; /* Apilado vertical en desktop */
         min-height: 350px;
         border-radius: 8px 0 0 8px; /* Redondeo a la izquierda */
     }
@@ -1059,30 +947,6 @@ body.dark-mode .modal-content {
         width: 50%;
         justify-content: center;
     }
-    #productDetailModal .modal-footer {
-        flex-direction: column;
-        align-items: stretch;
-    }
-}
-
-/* --- INICIO: ANIMACIÓN PARA BOTÓN "AÑADIDO" --- */
-@keyframes added-to-cart-animation {
-    0% { content: 'Añadir al carrito'; background-color: var(--add-to-cart-bg); }
-    20% { content: '¡Añadido!'; background-color: var(--top-bar-bg); transform: scale(1.05); }
-    80% { content: '¡Añadido!'; background-color: var(--top-bar-bg); transform: scale(1.05); }
-    100% { content: 'Añadir al carrito'; background-color: var(--add-to-cart-bg); }
-}
-
-#add-to-cart-from-detail.added::before {
-    content: '¡Añadido!';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* =================================================================== */
@@ -1319,9 +1183,9 @@ body.dark-mode .modal-content {
     border-top: 1px solid var(--card-border);
     padding: 20px 15px;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
-    border-radius: 16px 16px 0 0;
+    border-radius: 12px 12px 0 0;
     z-index: 2;
-    margin: 15px; /* <-- AÑADE ESTA LÍNEA: Márgenes laterales para un efecto "flotante" */
+    margin: 30px 15px; /* <-- AÑADE ESTA LÍNEA: Márgenes laterales para un efecto "flotante" */
 }
 
 /* =================================================================== */
@@ -1350,7 +1214,6 @@ body.dark-mode .modal-content {
 @media (min-width: 768px) {
     .products {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         /* Columnas flexibles para 768px y más */
         gap: 20px;
         /* Espacio mayor */
@@ -1417,6 +1280,7 @@ body.dark-mode .modal-content {
     z-index: 1200; /* AUMENTADO: Para estar siempre encima de todo */
     border-top: 1px solid #eee;
     height: 50px; /* AÑADIDO: Altura fija para cálculos */
+    box-sizing: border-box;
 }
 
 /* ... (estilos de .footer-item se mantienen igual) ... */
@@ -1676,94 +1540,4 @@ body.dark-mode .modal-content {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-/* =================================================================== */
-/* INICIO: Estilos para la Pantalla de Lista de Comercios (NUEVO)      */
-/* =================================================================== */
-
-.store-list-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    display: block; /* Por defecto es visible, JS lo oculta si es necesario */
-}
-
-.store-list-container.hidden {
-    display: none;
-}
-
-.store-list-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.store-list-logo {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 15px;
-}
-
-.store-list-header h2 {
-    font-size: 2em;
-    color: var(--text-color);
-    margin-bottom: 10px;
-}
-
-.store-list-header p {
-    font-size: 1.1em;
-    color: var(--text-color);
-    opacity: 0.8;
-}
-
-.stores {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
-}
-
-.store-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    text-decoration: none;
-    color: var(--text-color);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.store-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.store-card-image {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    background-color: var(--card-border);
-}
-
-.store-card-content {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    flex-grow: 1;
-}
-
-.store-card-content h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.3em;
-}
-
-.store-card-content p {
-    margin: 0;
-    font-size: 0.95em;
-    opacity: 0.8;
-    flex-grow: 1;
 }

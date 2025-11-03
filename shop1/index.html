@@ -12,50 +12,39 @@
     <noscript>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     </noscript>
-    <link rel="stylesheet" href="style.css?v=1.0.1">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-spinner"></div>
     </div>
-    <header class="header-container">
-        <div class="top-bar">
-            <div class="store-info-header">
-                <img id="store-logo-header" src="" alt="Logo del comercio">
-                <h1 id="store-name-header"></h1>
-            </div>
-            <div class="top-bar-right-icons">
-                <i class="fas fa-sun settings-icon" id="settings-icon" title="Toggle Dark/Light Mode"></i>
-                <div class="cart-icon-container" id="top-cart-icon-container">
-                    <div class="cart-icon"></div>
-                    <span class="cart-count" id="cart-count">0</span>
-                    <span class="cart-total" id="cart-total">₡0.00</span>
-                </div>
-            </div>
-            <div class="search-bar">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="search-input" placeholder="Buscar productos...">
+    <div class="top-bar">
+        <div class="store-info-header">
+            <img id="store-logo-header" src="" alt="Logo del comercio">
+            <h1 id="store-name-header"></h1>
+        </div>
+        <div class="top-bar-right-icons">
+            <i class="fas fa-sun settings-icon" id="settings-icon" title="Toggle Dark/Light Mode"></i>
+            <div class="cart-icon-container" id="top-cart-icon-container">
+                <div class="cart-icon"></div>
+                <span class="cart-count" id="cart-count">0</span>
+                <span class="cart-total" id="cart-total">₡0.00</span>
             </div>
         </div>
-        <nav class="categories" id="categories-menu" aria-label="Filtros de categoría"></nav>
-    </header>
-
-    <!-- PANTALLA DE LISTA DE COMERCIOS (NUEVO) -->
-    <div id="store-list-screen" class="store-list-container hidden">
-        <div class="store-list-header">
-            <img src="./images/icons/icon-192x192.png" alt="Encuentra CR Logo" class="store-list-logo">
-            <h2>Bienvenido a Encuentra</h2>
-            <p>Selecciona un comercio para ver sus productos</p>
-        </div>
-        <div id="store-list" class="stores">
-            <!-- Las tarjetas de los comercios se insertarán aquí -->
+        <div class="search-bar">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="search-input" placeholder="Buscar productos...">
         </div>
     </div>
-    <main class="container">
+
+    <div class="container">
+        <div class="categories" id="categories-menu">
+        </div>
+
         <div class="products" id="product-list">
         </div>
-    </main>
+    </div>
 
     <!-- Pantalla del Carrito (reemplaza el modal anterior) -->
     <div id="cart-screen" class="cart-screen hidden">
@@ -96,7 +85,9 @@
             <p id="info-short-description"></p>
             
             <div class="info-actions">
-                <!-- Action buttons are dynamically inserted here by app.js -->
+                <a id="info-website-link" href="#" target="_blank" class="info-button" style="display: none;"><i class="fas fa-globe"></i><span>Sitio Web</span></a>
+                <a id="info-maps-link" href="#" target="_blank" class="info-button" style="display: none;"><i class="fas fa-map-marker-alt"></i><span>Mapa</span></a>
+                <a id="info-phone-link" href="#" class="info-button" style="display: none;"><i class="fas fa-phone"></i><span>Contactar</span></a>
             </div>
 
             <div id="info-schedule-container" class="info-section" style="display: none;">
@@ -120,14 +111,9 @@
 
     <div id="productDetailModal" class="modal">
         <div class="modal-content detail-modal-content">
-            <button class="close-button" id="closeProductDetailModal" aria-label="Cerrar">&times;</button>
             
             <div class="detail-main-info">
                 <img id="detail-image" src="" alt="Imagen del producto">
-                <div id="detail-image-gallery" class="detail-image-gallery">
-                    <!-- Las imágenes adicionales del producto se insertarán aquí -->
-                </div>
-
                 <div class="detail-text-content">
                     <div id="detail-categories" class="detail-categories">
                         <!-- Categorías se insertarán aquí -->
@@ -150,11 +136,6 @@
             </div>
 
             <div class="modal-footer">
-                <div class="detail-quantity-selector">
-                    <button class="quantity-btn" data-action="decrease" aria-label="Disminuir cantidad">-</button>
-                    <input type="number" id="detail-quantity-input" value="1" min="1" aria-label="Cantidad">
-                    <button class="quantity-btn" data-action="increase" aria-label="Aumentar cantidad">+</button>
-                </div>
                 <button id="add-to-cart-from-detail" class="add-to-cart-button">Añadir al carrito</button>
             </div>
         </div>
@@ -176,12 +157,12 @@
         </button> -->
     </footer>
 
-    <script src="./app.js?v=1.0.1" type="module"></script>
+    <script src="./app.js" type="module"></script>
 
     <!-- AÑADIR ESTE NUEVO MODAL AQUÍ -->
     <div id="emptyCartModal" class="modal">
         <div class="modal-content small-modal">
-            <button class="close-button" id="closeEmptyCartModal" aria-label="Cerrar">&times;</button>
+            <span class="close-button" id="closeEmptyCartModal">&times;</span>
             <i class="fas fa-shopping-cart modal-main-icon"></i>
             <h2>Carrito Vacío</h2>
             <p>Parece que aún no has añadido productos a tu carrito.</p>
